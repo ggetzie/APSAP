@@ -3,6 +3,8 @@
 The file contains functions that produce front and back images of a ceramic sherd based on an existing 3d model (ply file).
 It has three functions for 3 levels of batch operation: context level, batch level, or individual level
 """
+
+#opengl not supported by remote server. Use the Mesa version of opengl, for cpu based software rendering
 import ctypes
 ctypes.cdll.LoadLibrary('C:\\Users\\bzichen\\.conda\\envs\\piecereg\\Lib\\site-packages\\open3d\\cpu\\opengl32.dll')
 
@@ -93,5 +95,5 @@ context_number = '43'
 
 #process_one_context(trench_path, context_number)
 
-path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
-proccess_one_model(path)
+#path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
+#proccess_one_model(path)

@@ -322,6 +322,8 @@ class Main_Widget(QWidget):
                 self.scroll_area_layout.addRow(self.candidate_card_layout)
             
             self.groupBox.setLayout(self.scroll_area_layout)
+            self.scroll.setWidget(self.groupBox)
+            self.prediction_area_layout.addWidget(self.scroll)
 
 
 def main():

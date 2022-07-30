@@ -89,11 +89,14 @@ def process_one_context(trench_path, context_number):
         for one_batch in batch_list:
             process_one_batch(one_batch)
 
+
+
 ##Using 478130/4419430/43 as a test, change as needed
-trench_path = r'D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\'
-context_number = '43'
+def testing():
+    trench_path = r'D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\'
+    context_number = '43'
 
-#process_one_context(trench_path, context_number)
+    process_one_context(trench_path, context_number)
 
-#path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
-#proccess_one_model(path)
+    #path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
+    #proccess_one_model(path)

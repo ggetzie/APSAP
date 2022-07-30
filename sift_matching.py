@@ -21,28 +21,24 @@ def img_compare(query_img, match_img):
     #SIFT_matches = cv2.drawMatchesKnn(query_img, keypoints1, match_img, keypoints2, good_matches, None, flags=2)
     return len(good_matches)
 
-
-query_img_front 
-query_img_back
-
-potential_match_space = []
-
-potential_match_front_list = []
-potential_match_back_list = []
-
-front_match_num = []
-for potential_match_front in potential_match_front_list:
-    match_points_num = img_compare(query_img_front, potential_match_front)
-    front_match_num.append(match_points_num)
-
+'''
 back_match_num = []
 for potential_match_back in potential_match_back_list:
     match_points_num = img_compare(query_img_back, potential_match_back)
     back_match_num.append(match_points_num)
 
 total_match_num = np.array(front_match_num) + np.array(back_match_num)
+'''
 
 potential_match_space = np.array(potential_match_space)
+
+def comparing_one_group(current_context, query_image_number, query_image_path_front, query_image_path_back, potential_match_image_paths):
+    
+    query_img_front 
+    query_img_back
+
+    query_image_number 
+
 
 
 

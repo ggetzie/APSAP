@@ -231,17 +231,63 @@ class Main_Widget(QWidget):
             self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
             self.set_images()
             self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
-    
-
-    #call predicting model 
-    def activate_model(self):
-        pass
 
     #open image in default program
     def open_image(self, image_to_open):
         os.startfile(image_to_open) 
         
+
+    #call predicting model 
+    def activate_model(self):
         
+        #if the 2d target images have been created in the context
+        batch_list = [batch for batch in self.curr_context_path.iterdir() if (batch.is_dir() and ('batch' in batch.stem) and ('einscan' not in batch.stem)) ] #read in all the files 
+        proceed = True
+
+        for one_batch in batch_list:
+            target_images_folder = one_batch.joinpath('registration_reso1_maskthres242','final_output','individual_images')
+
+            if not target_images_folder.exists():
+                    print("Batch has not finished building all the 3d models") #TODO
+                    proceed = False
+                    break
+                else:
+                    piece_model_list = [file for file in models_folder.iterdir() if file.suffix == '.ply'] #read in all the files 
+                    piece_model_pcd_list = [ file for file in piece_model_list if file.stem[-1] == 'd']  #keep only the first pointclouds, modify as needed
+
+                    #check having read in the correct number of ply file
+                    if (len(piece_model_pcd_list) == 0) or (len(piece_model_list) % 3 != 0):
+                        print("number of ply file is not correct") #TODO
+                        proceed = False
+                        break
+                    else:                    
+                        target_images_list = [file for file in target_images_folder.rglob('*') if file.suffix == '.png']
+
+                        if (len(target_images_list) != 2*len(piece_model_pcd_list)):
+                            print("number of target images is not correct") #TODO
+                            proceed = False
+                            break 
+
+
+            all_targets_for_context_list = read_context_targets(self.curr_context_path)
+
+            
+
+    #read in all target match files in one list of tuples in (front_path, back_path) format         
+    def read_context_targets(target_context_path):    
+        context_front_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
+        context_back_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
+        
+        master_context_targets_space = []
+
+        if len(context_front_list) != len(context_back_list):
+            print("the number of front and back target images is not consistent")
+        else:
+            
+            for i in len(context_front_list)
+                master_context_targets_space.append((context_front_list[i],context_back_list[1]))
+
+        return master_context_targets_space
 
 
 

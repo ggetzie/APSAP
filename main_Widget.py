@@ -4,6 +4,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import os
 import glob
+import cv2
+from sift_matching import *
 
 # Create a subclass of QMainWindow to setup the calculator's GUI
 class Main_Widget(QWidget):
@@ -13,7 +15,7 @@ class Main_Widget(QWidget):
         super(Main_Widget,self).__init__()
         self.setWindowTitle('Sherd Match Assistance')
         self.resize(1000, 600)
-        self.default_context = 38
+        self.default_context = 43
         self.default_img = 1
         self.curr_context = self.default_context
         self.curr_img = self.default_img
@@ -57,8 +59,8 @@ class Main_Widget(QWidget):
 
         ###################### Widgets for query image ##################################
 
-        self.query_image_frt = QLabel(self)
-        self.query_image_back = QLabel(self)
+        self.query_img_frt_label = QLabel(self)
+        self.query_img_back_label = QLabel(self)
         
         self.set_images()
 
@@ -91,54 +93,10 @@ class Main_Widget(QWidget):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll.setWidgetResizable(True)
         
-        ############## Populate temporarily the scrollable for testing purpose######################
-        self.scroll_area_layout = QFormLayout()
         self.groupBox = QGroupBox()
-        self.my_path = os.path.dirname(os.path.abspath(__file__))
-        self.data_folder =  os.path.dirname(self.my_path) + '\\context 41\\batch_000\\data_set'
-
-        self.files = glob.glob(self.data_folder + '/**/*.jpg', recursive=True)
-
-        for file in self.files:
-
-            self.candidate_image = QLabel(self)
-            self.myimage = QImage(file)
-            self.candidate_image.setPixmap(QPixmap.fromImage(self.myimage))
-            self.candidate_image.setFixedSize(300, 200)
-            self.candidate_image.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-
-            self.candidate_card_layout = QHBoxLayout()
-            self.candidate_card_labels_layout = QVBoxLayout()
-
-            self.candidate_batch_label = QLabel(self)
-            self.candidate_batch_label.setText("Batch Number:")
-            self.candidate_batch_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-            self.candidate_batch_label.setFixedHeight(30)
-
-            self.candidate_piece_label = QLabel(self)
-            self.candidate_piece_label.setText("Piece number:")
-            self.candidate_piece_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-            self.candidate_piece_label.setFixedHeight(30)
-
-
-            self.candidate_prob_label = QLabel(self)
-            self.candidate_prob_label.setText("Probability:")
-            self.candidate_prob_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-            self.candidate_prob_label.setFixedHeight(30)
-
-
-            self.candidate_card_layout.addWidget(self.candidate_image)
-            self.candidate_card_layout.addLayout(self.candidate_card_labels_layout)
-            self.candidate_card_labels_layout.addWidget(self.candidate_batch_label)
-            self.candidate_card_labels_layout.addWidget(self.candidate_piece_label)
-            self.candidate_card_labels_layout.addWidget(self.candidate_prob_label)
-            
-            self.scroll_area_layout.addRow(self.candidate_card_layout)
-    
-
+        self.scroll_area_layout = QFormLayout()
         self.groupBox.setLayout(self.scroll_area_layout)
         self.scroll.setWidget(self.groupBox)
-
 
         #add elements
         self.root_layout.addLayout(self.query_area_main_layout)
@@ -151,8 +109,8 @@ class Main_Widget(QWidget):
         self.context_info_layout.addWidget(self.button_context_next)
 
         self.query_area_main_layout.addWidget(self.image_label)
-        self.query_area_main_layout.addWidget(self.query_image_frt)
-        self.query_area_main_layout.addWidget(self.query_image_back)
+        self.query_area_main_layout.addWidget(self.query_img_frt_label)
+        self.query_area_main_layout.addWidget(self.query_img_back_label)
 
         self.query_area_main_layout.addLayout(self.sherd_info_layout)
         self.sherd_info_layout.addWidget(self.sherd_label)
@@ -176,21 +134,28 @@ class Main_Widget(QWidget):
                     QMessageBox.information(self, "Image Viewer",
                             "Cannot load %s." % self.path_img_frt)
                     return
-                self.query_image_frt.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
-                self.query_image_frt.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\1.tif"))
+                self.query_img_frt_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
+                self.query_img_frt_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\1.tif"))
 
                 self.myimage = QImage(self.path_img_back)
                 if self.myimage.isNull():
                     QMessageBox.information(self, "Image Viewer",
                             "Cannot load %s." % self.path_img_back)
                     return
-                self.query_image_back.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
-                self.query_image_back.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\2.tif"))
+                self.query_img_back_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
+                self.query_img_back_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\2.tif"))
 
     def next_context(self):
         if (self.curr_context == self.total_context_num):
             pass
         else:
+            for i in reversed(range(scroll_area_layout.count())): 
+                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+                # remove it from the layout list
+                scroll_area_layout.removeWidget(widgetToRemove)
+                # remove it from the gui
+                widgetToRemove.setParent(None)
+
             self.curr_context +=1
             self.context_label.setText("Context number: {}".format(self.curr_context))
             self.curr_img = 1
@@ -204,6 +169,13 @@ class Main_Widget(QWidget):
         if (self.curr_context == 1):
             pass
         else:
+            for i in reversed(range(scroll_area_layout.count())): 
+                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+                # remove it from the layout list
+                scroll_area_layout.removeWidget(widgetToRemove)
+                # remove it from the gui
+                widgetToRemove.setParent(None)
+            
             self.curr_context -=1
             self.context_label.setText("Context number: {}".format(self.curr_context))
             self.curr_img = 1
@@ -217,6 +189,13 @@ class Main_Widget(QWidget):
         if (self.curr_img == self.total_img_num):
             pass
         else:
+            for i in reversed(range(scroll_area_layout.count())): 
+                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+                # remove it from the layout list
+                scroll_area_layout.removeWidget(widgetToRemove)
+                # remove it from the gui
+                widgetToRemove.setParent(None)
+
             self.curr_img +=1
             self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
             self.set_images()
@@ -227,6 +206,13 @@ class Main_Widget(QWidget):
         if (self.curr_img == 1):
             pass
         else:
+            for i in reversed(range(scroll_area_layout.count())): 
+                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+                # remove it from the layout list
+                scroll_area_layout.removeWidget(widgetToRemove)
+                # remove it from the gui
+                widgetToRemove.setParent(None)
+
             self.curr_img -=1
             self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
             self.set_images()
@@ -235,7 +221,22 @@ class Main_Widget(QWidget):
     #open image in default program
     def open_image(self, image_to_open):
         os.startfile(image_to_open) 
+    
+    #read in all target match files in one list of tuples in (front_path, back_path) format         
+    def read_context_targets(target_context_path):    
+        context_front_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
+        context_back_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
         
+        master_context_targets_space = []
+
+        if len(context_front_list) != len(context_back_list):
+            print("the number of front and back target images is not consistent")
+        else:
+            
+            for i in range(0, len(context_front_list)):
+                master_context_targets_space.append((context_front_list[i],context_back_list[1]))
+
+        return master_context_targets_space 
 
     #call predicting model 
     def activate_model(self):
@@ -251,44 +252,87 @@ class Main_Widget(QWidget):
                     print("Batch has not finished building all the 3d models") #TODO
                     proceed = False
                     break
-                else:
-                    piece_model_list = [file for file in models_folder.iterdir() if file.suffix == '.ply'] #read in all the files 
-                    piece_model_pcd_list = [ file for file in piece_model_list if file.stem[-1] == 'd']  #keep only the first pointclouds, modify as needed
+            else:
+                piece_model_list = [file for file in target_images_folder.parent.iterdir() if file.suffix == '.ply'] #read in all the files 
+                piece_model_pcd_list = [ file for file in piece_model_list if file.stem[-1] == 'd']  #keep only the first pointclouds, modify as needed
 
-                    #check having read in the correct number of ply file
-                    if (len(piece_model_pcd_list) == 0) or (len(piece_model_list) % 3 != 0):
-                        print("number of ply file is not correct") #TODO
+                #check having read in the correct number of ply file
+                if (len(piece_model_pcd_list) == 0) or (len(piece_model_list) % 3 != 0):
+                    print("number of ply file is not correct") #TODO
+                    proceed = False
+                    break
+                else:                    
+                    target_images_list = [file for file in target_images_folder.rglob('*') if file.suffix == '.png']
+
+                    if (len(target_images_list) != 2*len(piece_model_pcd_list)):
+                        print("number of target images is not correct") #TODO
                         proceed = False
-                        break
-                    else:                    
-                        target_images_list = [file for file in target_images_folder.rglob('*') if file.suffix == '.png']
+                        break 
 
-                        if (len(target_images_list) != 2*len(piece_model_pcd_list)):
-                            print("number of target images is not correct") #TODO
-                            proceed = False
-                            break 
-
+        if proceed:
 
             all_targets_for_context_list = read_context_targets(self.curr_context_path)
 
-            
+            query_img_frt = cv2.imread(self.path_img_frt)
+            query_img_back = cv2.imread(self.path_img_back)
 
-    #read in all target match files in one list of tuples in (front_path, back_path) format         
-    def read_context_targets(target_context_path):    
-        context_front_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
-        context_back_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
-        
-        master_context_targets_space = []
+            sorted_target_list = []
 
-        if len(context_front_list) != len(context_back_list):
-            print("the number of front and back target images is not consistent")
-        else:
-            
-            for i in len(context_front_list)
-                master_context_targets_space.append((context_front_list[i],context_back_list[1]))
+            for one_target in all_targets_for_context_list:
 
-        return master_context_targets_space
+                target_img_front = cv2.imread(one_target[1])
+                target_img_back = cv2.imread(one_target[2])
 
+                good_match_num = img_compare(query_img_frt, target_img_front) + img_compare(target_img_front, target_img_back)
+
+                target_img_batch_num = int(((one_target[1]).parts[-6])[-3::])
+                
+                target_img_num = int((one_target[1]).parts[-2])
+
+                sorted_target_list.append((good_match_num, target_img_num, target_img_batch_num, one_target[1], one_target[2]))
+
+            sorted_target_list.sort(key=lambda x: x[0],reverse=True)
+
+            for sorted_target in sorted_target_list:
+
+                self.candidate_img_frt = QLabel(self)
+                self.candidate_img_frt.setPixmap(QPixmap(sorted_target[-2]).scaledToHeight(150))
+                #self.candidate_img_frt.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+
+                self.candidate_img_back = QLabel(self)
+                self.candidate_img_back.setPixmap(QPixmap(sorted_target[-1]).scaledToHeight(150))
+                #self.candidate_img_back.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+                
+                self.candidate_card_layout = QVBoxLayout()
+                self.candidate_card_images_layout = QHBoxLayout()
+                self.candidate_card_labels_layout = QHBoxLayout()
+                
+                self.candidate_batch_label = QLabel(self)
+                self.candidate_batch_label.setText("Batch Number:")
+                #self.candidate_batch_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+                self.candidate_batch_label.setFixedHeight(30)
+
+                self.candidate_piece_label = QLabel(self)
+                self.candidate_piece_label.setText("Piece number:")
+                #self.candidate_piece_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+                self.candidate_piece_label.setFixedHeight(30)
+
+
+                self.match_points_label = QLabel(self)
+                self.match_points_label.setText("match points:")
+                #self.match_points_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+                self.match_points_label.setFixedHeight(30)
+
+                self.candidate_card_images_layout.addWidget(self.candidate_img_frt)
+                self.candidate_card_images_layout.addWidget(self.candidate_img_back)
+                self.candidate_card_labels_layout.addWidget(self.candidate_batch_label)
+                self.candidate_card_labels_layout.addWidget(self.candidate_piece_label)
+                self.candidate_card_labels_layout.addWidget(self.match_points_label)
+
+                self.candidate_card_layout.addLayout(self.candidate_card_images_layout)
+                self.candidate_card_layout.addLayout(self.candidate_card_labels_layout)
+                
+                self.scroll_area_layout.addRow(self.candidate_card_layout)
 
 
 def main():

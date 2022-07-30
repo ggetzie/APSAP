@@ -6,6 +6,7 @@ import os
 import glob
 import cv2
 from sift_matching import *
+from pathlib import *
 
 # Create a subclass of QMainWindow to setup the calculator's GUI
 class Main_Widget(QWidget):
@@ -149,10 +150,10 @@ class Main_Widget(QWidget):
         if (self.curr_context == self.total_context_num):
             pass
         else:
-            for i in reversed(range(scroll_area_layout.count())): 
-                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+            for i in reversed(range(self.scroll_area_layout.count())): 
+                widgetToRemove = self.scroll_area_layout.itemAt(i).widget()
                 # remove it from the layout list
-                scroll_area_layout.removeWidget(widgetToRemove)
+                self.scroll_area_layout.removeWidget(widgetToRemove)
                 # remove it from the gui
                 widgetToRemove.setParent(None)
 
@@ -169,10 +170,10 @@ class Main_Widget(QWidget):
         if (self.curr_context == 1):
             pass
         else:
-            for i in reversed(range(scroll_area_layout.count())): 
-                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+            for i in reversed(range(self.scroll_area_layout.count())): 
+                widgetToRemove = self.scroll_area_layout.itemAt(i).widget()
                 # remove it from the layout list
-                scroll_area_layout.removeWidget(widgetToRemove)
+                self.scroll_area_layout.removeWidget(widgetToRemove)
                 # remove it from the gui
                 widgetToRemove.setParent(None)
             
@@ -189,10 +190,10 @@ class Main_Widget(QWidget):
         if (self.curr_img == self.total_img_num):
             pass
         else:
-            for i in reversed(range(scroll_area_layout.count())): 
-                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+            for i in reversed(range(self.scroll_area_layout.count())): 
+                widgetToRemove = self.scroll_area_layout.itemAt(i).widget()
                 # remove it from the layout list
-                scroll_area_layout.removeWidget(widgetToRemove)
+                self.scroll_area_layout.removeWidget(widgetToRemove)
                 # remove it from the gui
                 widgetToRemove.setParent(None)
 
@@ -206,10 +207,10 @@ class Main_Widget(QWidget):
         if (self.curr_img == 1):
             pass
         else:
-            for i in reversed(range(scroll_area_layout.count())): 
-                widgetToRemove = scroll_area_layout.itemAt(i).widget()
+            for i in reversed(range(self.scroll_area_layout.count())): 
+                widgetToRemove = self.scroll_area_layout.itemAt(i).widget()
                 # remove it from the layout list
-                scroll_area_layout.removeWidget(widgetToRemove)
+                self.scroll_area_layout.removeWidget(widgetToRemove)
                 # remove it from the gui
                 widgetToRemove.setParent(None)
 
@@ -222,27 +223,13 @@ class Main_Widget(QWidget):
     def open_image(self, image_to_open):
         os.startfile(image_to_open) 
     
-    #read in all target match files in one list of tuples in (front_path, back_path) format         
-    def read_context_targets(target_context_path):    
-        context_front_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
-        context_back_list =  [file for file in target_context_path.rglob('*') if file.name == '2d_image_front.png']
-        
-        master_context_targets_space = []
 
-        if len(context_front_list) != len(context_back_list):
-            print("the number of front and back target images is not consistent")
-        else:
-            
-            for i in range(0, len(context_front_list)):
-                master_context_targets_space.append((context_front_list[i],context_back_list[1]))
-
-        return master_context_targets_space 
 
     #call predicting model 
     def activate_model(self):
         
         #if the 2d target images have been created in the context
-        batch_list = [batch for batch in self.curr_context_path.iterdir() if (batch.is_dir() and ('batch' in batch.stem) and ('einscan' not in batch.stem)) ] #read in all the files 
+        batch_list = [batch for batch in Path(self.curr_context_path).iterdir() if (batch.is_dir() and ('batch' in batch.stem) and ('einscan' not in batch.stem)) ] #read in all the files 
         proceed = True
 
         for one_batch in batch_list:
@@ -271,7 +258,7 @@ class Main_Widget(QWidget):
 
         if proceed:
 
-            all_targets_for_context_list = read_context_targets(self.curr_context_path)
+            all_targets_for_context_list = read_context_targets(Path(self.curr_context_path))
 
             query_img_frt = cv2.imread(self.path_img_frt)
             query_img_back = cv2.imread(self.path_img_back)
@@ -283,7 +270,7 @@ class Main_Widget(QWidget):
                 target_img_front = cv2.imread(one_target[1])
                 target_img_back = cv2.imread(one_target[2])
 
-                good_match_num = img_compare(query_img_frt, target_img_front) + img_compare(target_img_front, target_img_back)
+                good_match_num = img_compare(query_img_frt, target_img_front) + img_compare(query_img_back, target_img_back)
 
                 target_img_batch_num = int(((one_target[1]).parts[-6])[-3::])
                 
@@ -333,6 +320,8 @@ class Main_Widget(QWidget):
                 self.candidate_card_layout.addLayout(self.candidate_card_labels_layout)
                 
                 self.scroll_area_layout.addRow(self.candidate_card_layout)
+            
+            self.groupBox.setLayout(self.scroll_area_layout)
 
 
 def main():

@@ -24,13 +24,18 @@ class Main_Widget(QWidget):
         self.initUI()
 
     def initUI(self):       
-    
+        
+        #set variables for context and piece informations 
         self.root_path = "D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\"
         self.total_context_num = len([x for x in os.listdir(self.root_path) if x.isdigit()])
         
         self.curr_context_path = self.root_path + "{}\\finds\\individual\\".format(self.curr_context)
-        self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
-        self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
+        if not os.path.isdir('curr_context_path'):
+            individual_folder_exists = False
+        else:
+            self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
+            self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
+       
        
         # Root Layer
         self.root_layout = QHBoxLayout()
@@ -64,7 +69,8 @@ class Main_Widget(QWidget):
         self.query_img_frt_label = QLabel(self)
         self.query_img_back_label = QLabel(self)
         
-        self.set_images()
+        if individual_folder_exists:
+            self.set_images()
 
         ########################## Widgets for sherd info ################################
         self.sherd_label = QLabel(self)
@@ -194,10 +200,11 @@ class Main_Widget(QWidget):
     
     #call predicting model 
     def activate_model(self):
-        
+        proceed = True
+        """       
         #if the 2d target images have been created in the context
         batch_list = [batch for batch in Path(self.curr_context_path).iterdir() if (batch.is_dir() and ('batch' in batch.stem) and ('einscan' not in batch.stem)) ] #read in all the files 
-        proceed = True
+        
 
         with alive_bar(len(batch_list), force_tty = True) as bar:
             for one_batch in batch_list:
@@ -225,7 +232,7 @@ class Main_Widget(QWidget):
                             break 
                 
                 bar()
-            
+        """           
         #print(Path(self.curr_context_path).parents[1])
         if proceed:
 

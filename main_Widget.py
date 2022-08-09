@@ -17,21 +17,22 @@ class Main_Widget(QWidget):
         super(Main_Widget,self).__init__()
         self.setWindowTitle('Sherd Match Assistance')
         self.resize(1100, 600)
-        self.default_context = 43
+        self.default_context = 6
         self.default_img = 1
         self.curr_context = self.default_context
         self.curr_img = self.default_img
+        self.total_img_num = 0
         self.initUI()
 
     def initUI(self):       
-        
+        self.individual_folder_exists = True
         #set variables for context and piece informations 
         self.root_path = "D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\"
         self.total_context_num = len([x for x in os.listdir(self.root_path) if x.isdigit()])
         
         self.curr_context_path = self.root_path + "{}\\finds\\individual\\".format(self.curr_context)
-        if not os.path.isdir('curr_context_path'):
-            individual_folder_exists = False
+        if not os.path.isdir(self.curr_context_path):
+            self.individual_folder_exists = False
         else:
             self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
             self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
@@ -59,19 +60,23 @@ class Main_Widget(QWidget):
         self.button_context_next.setText('next context')
         self.button_context_next.clicked.connect(self.next_context)
 
+        self.button_open_file_explorer = QPushButton(self)
+        self.button_open_file_explorer.setText('open_context_folder')
+        self.button_open_file_explorer.clicked.connect(self.open_file_explorer)
+
         self.image_label = QLabel(self)
         self.image_label.setText("Which sherd is this?")
         self.image_label.setAlignment(Qt.AlignTop)
-        self.image_label.setFixedHeight(20)
+        self.image_label.setFixedHeight(40)
 
         ###################### Widgets for query image ##################################
 
         self.query_img_frt_label = QLabel(self)
         self.query_img_back_label = QLabel(self)
-        
-        if individual_folder_exists:
-            self.set_images()
 
+        self.query_img_frt_label.setVisible(False)
+        self.query_img_back_label.setVisible(False)
+        
         ########################## Widgets for sherd info ################################
         self.sherd_label = QLabel(self)
         self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
@@ -89,7 +94,7 @@ class Main_Widget(QWidget):
         self.button_find.setText('find')
         self.button_find.clicked.connect(self.activate_model)
 
-        ################### Build a Scrollable Area to display candidates ##########################
+        ################### Build a Scrollable Area to display candidates #######################
         self.scroll = QScrollArea()
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -100,7 +105,17 @@ class Main_Widget(QWidget):
         self.groupBox.setLayout(self.scroll_area_layout)
         self.scroll.setWidget(self.groupBox)
 
-        #add elements
+        ######### Build a Tab area for switching between manual and automatic matching ########## 
+        self.label2 = QLabel("temporary label for manual matching area")
+
+        self.tabwidget = QTabWidget()
+        self.tabwidget.addTab(scroll, "Auto matching")
+        self.tabwidget.addTab(label2, "manual matching")
+
+        ############################ add elements ######################################
+        if self.individual_folder_exists:
+            self.set_images()
+
         self.root_layout.addLayout(self.query_area_main_layout)
         #root_layout.addStretch()
         #self.root_layout.addLayout(self.prediction_area_layout)
@@ -111,6 +126,8 @@ class Main_Widget(QWidget):
         self.context_info_layout.addWidget(self.button_context_next)
 
         self.query_area_main_layout.addWidget(self.image_label)
+        self.query_area_main_layout.addWidget(self.button_open_file_explorer)
+        self.button_open_file_explorer.setVisible(False)
         self.query_area_main_layout.addWidget(self.query_img_frt_label)
         self.query_area_main_layout.addWidget(self.query_img_back_label)
 
@@ -123,42 +140,78 @@ class Main_Widget(QWidget):
         self.query_area_main_layout.addStretch()
 
         #self.prediction_area_layout.addWidget(self.scroll)
-        self.root_layout.addWidget(self.scroll)
+        self.root_layout.addWidget(self.tabwidget)
         self.setLayout(self.root_layout)
+        
+    #mode==1 indicats folder missing, mode == 2 indicates image missing
+    def clear_qury_area(self, mode):
+        if mode == 1:
+            self.image_label.setText("Current context does not contain the folder for indvidual.\nCheck in the File Explorer and contact admin for more information")
+            self.query_img_frt_label.setVisible(False)
+            self.query_img_back_label.setVisible(False)
+            self.sherd_label.setVisible(False)
+            self.button_sherd_last.setVisible(False)
+            self.button_sherd_next.setVisible(False)
+            self.button_find.setVisible(False)
+            self.button_open_file_explorer.setVisible(True)
+        if mode == 2:
+            self.image_label.setText("Current context does not contain the front and back individual photos\nCheck in the File Explorer and contact admin for more information")
+            self.query_img_frt_label.setVisible(False)
+            self.query_img_back_label.setVisible(False)
+            self.button_find.setVisible(False)
+            self.button_open_file_explorer.setVisible(True)
+        
+
+    #mode==1 indicats folder missing, mode == 2 indicates image missing   
+    def repopulate_qury_area(self):
+        self.image_label.setText("Which sherd is this?")
+        self.query_img_frt_label.setVisible(True)
+        self.query_img_back_label.setVisible(True)
+        self.sherd_label.setVisible(True)
+        self.button_sherd_last.setVisible(True)
+        self.button_sherd_next.setVisible(True)
+        self.button_find.setVisible(True)
+        self.button_open_file_explorer.setVisible(False)
+ 
 
     def set_images(self):
-                self.path_img_frt = self.path_curr_img + '\\1.jpg'
-                self.path_img_back = self.path_curr_img + '\\2.jpg'
-                
-                self.myimage = QImage(self.path_img_frt)
-                if self.myimage.isNull():
-                    QMessageBox.information(self, "Image Viewer",
-                            "Cannot load %s." % self.path_img_frt)
-                    return
-                self.query_img_frt_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
-                self.query_img_frt_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\1.tif"))
+        
+        self.path_img_frt = self.path_curr_img + '\\1.jpg'
+        self.path_img_back = self.path_curr_img + '\\2.jpg'
+        self.myimage = QImage(self.path_img_frt)
+        if self.myimage.isNull():
+            self.clear_qury_area(mode=2)
+            #QMessageBox.information(self, "Image Viewer", "Cannot load %s." % self.path_img_frt)
+            return
+        self.query_img_frt_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
+        self.query_img_frt_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\1.tif"))
 
-                self.myimage = QImage(self.path_img_back)
-                if self.myimage.isNull():
-                    QMessageBox.information(self, "Image Viewer",
-                            "Cannot load %s." % self.path_img_back)
-                    return
-                self.query_img_back_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
-                self.query_img_back_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\2.tif"))
+        self.myimage = QImage(self.path_img_back)
+        if self.myimage.isNull():
+            self.clear_qury_area(mode=2)
+            #QMessageBox.information(self, "Image Viewer","Cannot load %s." % self.path_img_back)
+            return
+        self.query_img_back_label.setPixmap(QPixmap.fromImage(self.myimage).scaledToHeight(300))
+        self.query_img_back_label.mousePressEvent = (lambda x: self.open_image(self.path_curr_img + "\\2.tif"))
+        self.repopulate_qury_area()
 
     def next_context(self):
         if (self.curr_context == self.total_context_num):
             pass
         else:
-
             self.curr_context +=1
             self.context_label.setText("Context number: {}".format(self.curr_context))
             self.curr_img = 1
             self.curr_context_path = self.root_path + "{}\\finds\\individual\\".format(self.curr_context)
-            self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
-            self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
-            self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
-            self.set_images()
+
+            if not os.path.isdir(self.curr_context_path):
+                self.clear_qury_area(mode=1)
+            else:
+                self.image_label.setText("Which sherd is this?")
+                self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
+                self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
+                self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
+                self.set_images()
 
     def last_context(self):
         if (self.curr_context == 1):
@@ -169,10 +222,15 @@ class Main_Widget(QWidget):
             self.context_label.setText("Context number: {}".format(self.curr_context))
             self.curr_img = 1
             self.curr_context_path = self.root_path + "{}\\finds\\individual\\".format(self.curr_context)
-            self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
-            self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
-            self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
-            self.set_images()
+            
+            if not os.path.isdir(self.curr_context_path):
+                self.clear_qury_area(mode=1)
+            else:
+                self.image_label.setText("Which sherd is this?")
+                self.total_img_num = len([x for x in os.listdir(self.curr_context_path) if x.isdigit()])
+                self.path_curr_img = self.curr_context_path + "{}\\photos".format(self.curr_img)
+                self.sherd_label.setText("Sherd number: {} out of {}".format(self.curr_img, self.total_img_num))
+                self.set_images()
 
     def next_sherd(self):
         if (self.curr_img == self.total_img_num):
@@ -197,7 +255,10 @@ class Main_Widget(QWidget):
     def open_image(self, image_to_open):
         print(image_to_open)
         os.startfile(image_to_open) 
-    
+
+    def open_file_explorer(self):
+        os.startfile(self.root_path + str(self.curr_context))
+
     #call predicting model 
     def activate_model(self):
         proceed = True
@@ -320,7 +381,6 @@ class Main_Widget(QWidget):
             self.scroll.setWidget(self.groupBox)
             self.root_layout.addWidget(self.scroll)
             
-
 def main():
     """Main function."""
     # Create an instance of QApplication

@@ -15,6 +15,18 @@ import copy
 import pathlib
 import re
 
+def open_interactive_model(model_path):    
+    #read the point cloud
+    pcd = o3d.io.read_point_cloud(str(model_path))
+
+    #visualize and screenshot the front side
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(visible=False)
+    vis.add_geometry(pcd)
+    vis.poll_events()
+    vis.update_renderer()
+    
+
 # create front and back images from one finished 3d ply file of a single piece in a file
 # model path should be a path file of the full path of the ply file
 def proccess_one_model(model_path):
@@ -90,13 +102,15 @@ def process_one_context(trench_path, context_number):
             process_one_batch(one_batch)
 
 
-
 ##Using 478130/4419430/43 as a test, change as needed
 def testing():
-    trench_path = r'D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\'
-    context_number = '43'
+    #trench_path = r'D:\\ararat\\data\\files\\N\\38\\478130\\4419430\\'
+    #context_number = '43'
 
-    process_one_context(trench_path, context_number)
+    #process_one_context(trench_path, context_number)
 
-    #path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
+    path = pathlib.Path(r'D:\ararat\data\files\N\38\478130\4419430\43\finds\3dbatch\2022\batch_000\registration_reso1_maskthres242\final_output\piece_0_world.ply')
     #proccess_one_model(path)
+    open_interactive_model(path)
+
+testing()

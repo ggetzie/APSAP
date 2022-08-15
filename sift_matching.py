@@ -1,3 +1,8 @@
+"""
+sift_matching.py
+The core function of image matching that compares the target image and match image using SIFT algorithm in opencv
+"""
+
 import cv2
 
 def img_compare(query_img, match_img):

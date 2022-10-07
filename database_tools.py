@@ -1,7 +1,7 @@
 import psycopg2
 
 
-def list_all_tabels():
+def list_all_tables():
     try:
         conn = psycopg2.connect(
             database="archaeology",

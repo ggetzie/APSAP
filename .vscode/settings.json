@@ -1,4 +1,14 @@
 {
   "python.linting.banditEnabled": true,
-  "python.linting.enabled": true
+  "python.linting.enabled": true,
+  "cSpell.ignoreWords": [
+    "CUBLAS",
+    "CUDA",
+    "CUDNN",
+    "CUFFT",
+    "DWITH",
+    "dbro",
+    "psycopg2"
+  ],
+  "cSpell.words": ["threed"]
 }

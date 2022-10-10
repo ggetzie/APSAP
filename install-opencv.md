@@ -38,6 +38,8 @@ numpy-1.23.3-cp310-cp310-win_amd64.whl
 opencv_contrib_python-4.6.0.3725898-cp310-cp310-win_amd64.whl
 ```
 
+Pre-compiled wheel files for Windows 10 can be downloaded [here](https://hkuhk-my.sharepoint.com/:f:/g/personal/ggetzie_hku_hk/EpVz4AOOzGVIsW45aydShVcBBHScH8dG0gC_51w5Q09Zhg?e=baipX7)
+
 These can be installed directly in the virtual environment with pip
 
 ```

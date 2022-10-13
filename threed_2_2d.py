@@ -1,12 +1,19 @@
 """
 3d_2_2d.py
-The file contains functions that produce front and back images of a ceramic sherd based on an existing 3d model (ply file).
-It has three functions for 3 levels of batch operation: context level, batch level, or individual level
+The file contains functions that produce front and back images of a ceramic 
+sherd based on an existing 3d model (ply file).
+
+It has three functions for 3 levels of batch operation: 
+context level, batch level, or individual level
 """
 
-# opengl not supported by remote server. Use the Mesa version of opengl, for cpu based software rendering
+# opengl not supported by remote server. Use the Mesa version of opengl,
+# for cpu based software rendering
+# opengl_path = 'C:\\Users\\bzichen\\.conda\\envs\\piecereg\\Lib\\site-packages\\open3d\\cpu\\opengl32.dll'
+# opengl_path = "C:\\Windows\\System32\\opengl32.dll"
 # import ctypes
-# ctypes.cdll.LoadLibrary('C:\\Users\\bzichen\\.conda\\envs\\piecereg\\Lib\\site-packages\\open3d\\cpu\\opengl32.dll')
+
+# ctypes.cdll.LoadLibrary(opengl_path)
 
 import open3d as o3d
 import numpy as np
@@ -31,7 +38,7 @@ def proccess_one_model(model_path):
     if model_number:
         model_number = model_number.group(0).replace("_", "")
     else:
-        print("read wrong 3d mdoel file")
+        print("read wrong 3d model file")
 
     # create folders for image outputs under the folder with ply files
     output_folder = model_path.parent.joinpath("individual_images", model_number)

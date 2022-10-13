@@ -2,13 +2,15 @@
   "python.linting.banditEnabled": true,
   "python.linting.enabled": true,
   "cSpell.ignoreWords": [
+    "BLAS",
     "CUBLAS",
     "CUDA",
     "CUDNN",
     "CUFFT",
     "DWITH",
+    "dbatch",
     "dbro",
     "psycopg2"
   ],
-  "cSpell.words": ["threed"]
+  "cSpell.words": ["keypoints", "threed"]
 }

@@ -16,15 +16,22 @@ In order to enable CUDA support we must build the package from source per the Ma
 A full list of the build options for opencv can be found [here](https://docs.opencv.org/4.x/db/d05/tutorial_config_reference.html)
 
 We need to set the following options:
-`OPENCV_EXTRA_MODULES_PATH=./opencv_contrib/modules` - CUDA modules stored in opencv_contrib
-`ENABLE_CONTRIB`
-`WITH_CUDA`   - Include NVidia Cuda Runtime support
-`WITH_CUFFT`  - Include NVidia Cuda Fast Fourier Transform (FFT) library support
-`WITH_CUBLAS` - Include NVidia Cuda Basic Linear Algebra Subprograms (BLAS) library support
-`WITH_CUDNN`    - Include NVIDIA CUDA Deep Neural Network (cuDNN) library support
 
-To enable these options and compile on Windows Powershell:
-First activate any venv you might want to use
+
+
+- `OPENCV_EXTRA_MODULES_PATH=./opencv_contrib/modules` - CUDA modules stored in opencv_contrib  use `ENABLE_CONTRIB`  
+
+- `WITH_CUDA`   - Include NVidia Cuda Runtime support  
+- `WITH_CUFFT`  - Include NVidia Cuda Fast Fourier Transform (FFT) library support  
+- `WITH_CUBLAS` - Include NVidia Cuda Basic Linear Algebra Subprograms (BLAS) library support 
+- `WITH_CUDNN`    - Include NVIDIA CUDA Deep Neural Network (cuDNN) library support
+Make sure cuDNN is installed: [Download cuDNN](https://developer.nvidia.com/cudnn)
+
+CUFFT and CUBLAS are included with the [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)  
+
+First activate the venv or conda environment so the packages compile for the correct version of python t hat you're using.
+
+Then, to enable these options and compile on Windows Powershell:
 
 ```
 $Env:CMAKE_ARGS="-DWITH_CUDA=ON -DWITH_CUFFT=ON -DWITH_CUBLAS=ON -DWITH_CUDNN=ON"

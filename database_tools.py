@@ -117,7 +117,7 @@ def update_match_info(
             # print("PostgreSQL connection is closed")
 
 
-# list_all_tabels()
+# list_all_tables()
 # get_pottery_sherd_info(478130,4419430,43,1)
 # update_match_info(478130, 4419430, 43, 1, 0, 0)
 # get_pottery_sherd_info(478130,4419430,43,1)

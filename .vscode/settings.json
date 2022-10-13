@@ -10,6 +10,7 @@
     "DWITH",
     "dbatch",
     "dbro",
+    "dbrw",
     "psycopg2"
   ],
   "cSpell.words": ["keypoints", "threed"]

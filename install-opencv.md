@@ -41,17 +41,19 @@ pip wheel . --verbose
 This should generate two custom-built wheel files in the directory. One for numpy and one for opencv named like:
 
 ```
-numpy-1.23.3-cp310-cp310-win_amd64.whl
-opencv_contrib_python-4.6.0.3725898-cp310-cp310-win_amd64.whl
+numpy-1.23.4-cp39-cp39-win_amd64.whl
+opencv_contrib_python-4.6.0.3725898-cp39-cp39-win_amd64.whl
 ```
+Note these are compiled for python 3.9 as the open3d package is not working with python 3.10.
+
 
 Pre-compiled wheel files for Windows 10 can be downloaded [here](https://hkuhk-my.sharepoint.com/:f:/g/personal/ggetzie_hku_hk/EpVz4AOOzGVIsW45aydShVcBBHScH8dG0gC_51w5Q09Zhg?e=baipX7)
 
-These can be installed directly in the virtual environment with pip
+These can be installed downloaded to a wheels directory in the repository and installed with pip
 
 ```
-pip install path/to/numpy-1.23.3-cp310-cp310-win_amd64.whl
-pip install path/to/opencv_contrib_python-4.6.0.3725898-cp310-cp310-win_amd64.whl
+pip install path/to/numpy-1.23.4-cp39-cp39-win_amd64.whl
+pip install path/to/opencv_contrib_python-4.6.0.3725898-cp39-cp39-win_amd64.whl
 ```
 
 

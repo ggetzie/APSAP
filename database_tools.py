@@ -1,16 +1,36 @@
 import psycopg2
+import environ
+import pathlib
+
+SRC_DIR = pathlib.Path(__file__).resolve(strict=True)
+env = environ.Env()
+
+# Store sensitive data and configuration in a file .env
+# outside source control
+environ.Env.read_env(str(SRC_DIR / ".env"))
+
+READ_SETTINGS = {
+    "database": env("DB_NAME"),
+    "host": env("DB_HOST"),
+    "user": env("DB_READ_USER"),
+    "password": env("DB_READ_PW"),
+    "port": env("DB_PORT"),
+    "sslmode": env("DB_SSL_MODE"),
+}
+
+WRITE_SETTINGS = {
+    "database": env("DB_NAME"),
+    "host": env("DB_HOST"),
+    "user": env("DB_WRITE_USER"),
+    "password": env("DB_WRITE_PW"),
+    "port": env("DB_PORT"),
+    "sslmode": env("DB_SSL_MODE"),
+}
 
 
 def list_all_tables():
     try:
-        conn = psycopg2.connect(
-            database="archaeology",
-            host="localhost",
-            user="dbro",
-            password="dbro",
-            port="5432",
-            sslmode="disable",
-        )
+        conn = psycopg2.connect(**READ_SETTINGS)
 
         cursor = conn.cursor()
 
@@ -31,21 +51,19 @@ def list_all_tables():
 
 def get_pottery_sherd_info(utm_easting, utm_northing, context_num, find_num):
     try:
-        conn = psycopg2.connect(
-            database="archaeology",
-            host="localhost",
-            user="dbro",
-            password="dbro",
-            port="5432",
-            sslmode="disable",
-        )
+        conn = psycopg2.connect(**READ_SETTINGS)
 
         cursor = conn.cursor()
-
-        query = 'SELECT "3d_batch_number", "3d_batch_piece" FROM object.finds WHERE finds.area_utm_easting_meters = {} and finds.area_utm_northing_meters = {} and finds.context_number = {} and finds.find_number = {};'.format(
-            utm_easting, utm_northing, context_num, find_num
-        )
-        cursor.execute(query)
+        query = """
+        SELECT "3d_batch_number", "3d_batch_piece" 
+        FROM object.finds
+        WHERE
+        finds.area_utm_easting_meters=%s  AND
+        finds.area_utm_northing_meters=%s AND
+        finds.context_number=%s           AND
+        finds.find_number=%s;
+        """
+        cursor.execute(query, (utm_easting, utm_northing, context_num, find_num))
         # Fetch result
         record = cursor.fetchall()
         if len(record) > 1:
@@ -67,30 +85,27 @@ def update_match_info(
     utm_easting, utm_northing, context_num, find_num, new_batch_num, new_sherd_num
 ):
     try:
-        conn = psycopg2.connect(
-            database="archaeology",
-            host="localhost",
-            user="dbrw",
-            password="dbrw",
-            port="5432",
-            sslmode="disable",
-        )
+        conn = psycopg2.connect(**WRITE_SETTINGS)
 
         cursor = conn.cursor()
 
-        query_select = 'SELECT "3d_batch_number", "3d_batch_piece" FROM object.finds WHERE finds.area_utm_easting_meters = {} and finds.area_utm_northing_meters = {} and finds.context_number = {} and finds.find_number = {};'.format(
-            utm_easting, utm_northing, context_num, find_num
-        )
-        query_update = 'UPDATE object.finds SET "3d_batch_number" = {}, "3d_batch_piece" = {} WHERE finds.area_utm_easting_meters = {} and finds.area_utm_northing_meters = {} and finds.context_number = {} and finds.find_number = {};'.format(
-            new_batch_num,
-            new_sherd_num,
-            utm_easting,
-            utm_northing,
-            context_num,
-            find_num,
-        )
+        query_select = """
+        SELECT "3d_batch_number", "3d_batch_piece" 
+        FROM object.finds
+        WHERE
+        finds.area_utm_easting_meters=%s  AND
+        finds.area_utm_northing_meters=%s AND
+        finds.context_number=%s           AND
+        finds.find_number=%s;
+        """
 
-        cursor.execute(query_select)
+        query_update = """
+        UPDATE object.finds 
+        SET "3d_batch_number" = %s, "3d_batch_piece" = %s
+        WHERE finds.area_utm_easting_meters = %s and finds.area_utm_northing_meters = %s and finds.context_number = %s and finds.find_number = %s;
+        """
+
+        cursor.execute(query_select, (utm_easting, utm_northing, context_num, find_num))
         # Fetch result
         record = cursor.fetchall()
         if len(record) > 1:
@@ -102,7 +117,17 @@ def update_match_info(
             else:
                 # print("updating...")
                 # print(batch_number, batch_number)
-                cursor.execute(query_update)
+                cursor.execute(
+                    query_update,
+                    (
+                        new_batch_num,
+                        new_sherd_num,
+                        utm_easting,
+                        utm_northing,
+                        context_num,
+                        find_num,
+                    ),
+                )
                 updated_rows = cursor.rowcount
                 # print(updated_rows)
                 if updated_rows <= 1:

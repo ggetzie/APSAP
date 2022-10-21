@@ -20,10 +20,8 @@ from auto_match_widget import *
 from database_tools import get_pottery_sherd_info, update_match_info
 
 basedir = os.path.dirname(os.path.realpath(__file__))
-# FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
-FILE_ROOT = pathlib.Path(
-    "C:\\Users\\gabe\\OneDrive - The University Of Hong Kong\\HKU\\02-Projects\\P22007-Cobb_ArchaeologyData\\Ceramics Matching\\sample"
-)
+FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
+
 HEMISPHERES = ("N", "S")
 # Create a subclass of QMainWindow to setup the calculator's GUI
 class Main_Widget(QWidget):

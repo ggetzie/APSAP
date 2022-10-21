@@ -14,11 +14,17 @@ from PyQt5.QtWidgets import (
     QTextEdit,
 )
 import os
+import pathlib
 from manual_match_widget import *
 from auto_match_widget import *
 from database_tools import get_pottery_sherd_info, update_match_info
 
 basedir = os.path.dirname(os.path.realpath(__file__))
+# FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
+FILE_ROOT = pathlib.Path(
+    "C:\\Users\\gabe\\OneDrive - The University Of Hong Kong\\HKU\\02-Projects\\P22007-Cobb_ArchaeologyData\\Ceramics Matching\\sample"
+)
+HEMISPHERES = ("N", "S")
 # Create a subclass of QMainWindow to setup the calculator's GUI
 class Main_Widget(QWidget):
     """View (GUI)."""
@@ -29,8 +35,12 @@ class Main_Widget(QWidget):
         self.setWindowTitle("Sherd Match Assistance")
         self.setWindowIcon(QIcon(os.path.join(basedir, "assets", "icon.png")))
         self.resize(1100, 600)
-        self.default_context = 42
-        self.default_trench = (478130, 4419430)
+        self.default_hemisphere = "N"
+        self.default_zone = 38
+        # self.default_trench = (478130, 4419430)  # (utm_easting, utm_northing)
+        self.default_trench = (478020, 4419550)  # (utm_easting, utm_northing)
+        # self.default_context = 42
+        self.default_context = 11
         self.default_img = 1
         self.curr_trench = self.default_trench
         self.curr_context = self.default_context
@@ -40,25 +50,34 @@ class Main_Widget(QWidget):
 
     def initUI(self):
         self.individual_folder_exists = True
-        # set variables for context and piece informations
-        self.root_path = "D:\\ararat\\data\\files\\N\\38\\{}\\{}\\".format(
-            self.curr_trench[0], self.curr_trench[1]
+        # set variables for context and piece information
+        # self.root_path = "D:\\ararat\\data\\files\\N\\38\\{}\\{}\\".format(
+        #     self.curr_trench[0], self.curr_trench[1]
+        # )
+        self.root_path = (
+            FILE_ROOT
+            / self.default_hemisphere
+            / str(self.default_zone)
+            / str(self.curr_trench[0])
+            / str(self.curr_trench[1])
         )
         self.total_context_list = [
             int(x) for x in os.listdir(self.root_path) if x.isdigit()
         ]
+
         self.total_context_list.sort()
         self.total_context_list = [str(x) for x in self.total_context_list]
         self.total_context_num = len(self.total_context_list)
 
         self.cur_context_individual_path = (
-            self.root_path + "{}\\finds\\individual\\".format(self.curr_context)
+            self.root_path / str(self.curr_context) / "finds/individual"
         )
         self.cur_context_3dbatch_path = (
-            self.root_path + "{}\\finds\\3dbatch\\2022\\".format(self.curr_context)
+            self.root_path / str(self.curr_context) / "finds/3dbatch/2022"
         )
-        if not os.path.isdir(self.cur_context_individual_path):
+        if not self.cur_context_individual_path.is_dir():
             self.individual_folder_exists = False
+            print(f"{self.cur_context_individual_path} does not exist")
         else:
             self.total_img_list = [
                 int(x)
@@ -68,8 +87,8 @@ class Main_Widget(QWidget):
             self.total_img_list.sort()
             self.total_img_list = [str(x) for x in self.total_img_list]
             self.total_img_num = len(self.total_img_list)
-            self.path_curr_img = self.cur_context_individual_path + "{}\\photos".format(
-                self.curr_img
+            self.path_curr_img = (
+                self.cur_context_individual_path / str(self.curr_img) / "photos"
             )
 
         # Root Layer
@@ -81,7 +100,7 @@ class Main_Widget(QWidget):
         self.context_info_layout = QHBoxLayout()
         self.sherd_info_layout = QHBoxLayout()
 
-        ###################### Widgetss for Context info #################################
+        ###################### Widgets for Context info #################################
         self.context_label = QLabel(self)
         self.context_label.setText("Context number: {}".format(self.curr_context))
 
@@ -151,7 +170,7 @@ class Main_Widget(QWidget):
         self.batch_input = QTextEdit()
         self.batch_input.setFixedHeight(30)
         self.piece_label = QLabel()
-        self.piece_label.setText("Sherd Numeber")
+        self.piece_label.setText("Sherd Number")
         self.sherd_input = QTextEdit()
         self.sherd_input.setFixedHeight(30)
 
@@ -233,7 +252,7 @@ class Main_Widget(QWidget):
         self.sherd_combobox.addItems(self.total_img_list)
         self.sherd_combobox.setCurrentIndex(self.curr_img - 1)
 
-    # mode==1 indicats folder missing, mode == 2 indicates image missing
+    # mode==1 indicates folder missing, mode == 2 indicates image missing
     def clear_qury_area(self, mode):
         self.query_img_frt_label.setVisible(False)
         self.query_img_back_label.setVisible(False)
@@ -241,7 +260,7 @@ class Main_Widget(QWidget):
         self.match_input.setVisible(False)
         if mode == 1:
             self.image_label.setText(
-                "Current context does not contain the folder for indvidual.\nCheck in the File Explorer and contact admin for more information"
+                "Current context does not contain the folder for individual.\nCheck in the File Explorer and contact admin for more information"
             )
             self.sherd_label.setVisible(False)
             self.button_sherd_last.setVisible(False)
@@ -251,8 +270,8 @@ class Main_Widget(QWidget):
                 "Current context does not contain the front and back individual photos\nCheck in the File Explorer and contact admin for more information"
             )
 
-    # mode==1 indicats folder missing, mode == 2 indicates image missing
-    def repopulate_qury_area(self):
+    # mode==1 indicates folder missing, mode == 2 indicates image missing
+    def repopulate_query_area(self):
         self.image_label.setText("Which sherd is this?")
         self.query_img_frt_label.setVisible(True)
         self.query_img_back_label.setVisible(True)
@@ -263,9 +282,9 @@ class Main_Widget(QWidget):
         self.match_input.setVisible(True)
 
     def set_images(self):
-        self.path_img_frt = self.path_curr_img + "\\1.jpg"
-        self.path_img_back = self.path_curr_img + "\\2.jpg"
-        self.myimage = QImage(self.path_img_frt)
+        self.path_img_frt = self.path_curr_img / "1.jpg"
+        self.path_img_back = self.path_curr_img / "2.jpg"
+        self.myimage = QImage(str(self.path_img_frt))
         if self.myimage.isNull():
             self.clear_qury_area(mode=2)
             return
@@ -273,10 +292,10 @@ class Main_Widget(QWidget):
             QPixmap.fromImage(self.myimage).scaledToHeight(300)
         )
         self.query_img_frt_label.mousePressEvent = lambda x: self.open_image(
-            self.path_curr_img + "\\1.tif"
+            self.path_curr_img / "1.tif"
         )
 
-        self.myimage = QImage(self.path_img_back)
+        self.myimage = QImage(str(self.path_img_back))
         if self.myimage.isNull():
             self.clear_qury_area(mode=2)
             return
@@ -284,9 +303,9 @@ class Main_Widget(QWidget):
             QPixmap.fromImage(self.myimage).scaledToHeight(300)
         )
         self.query_img_back_label.mousePressEvent = lambda x: self.open_image(
-            self.path_curr_img + "\\2.tif"
+            self.path_curr_img / "2.tif"
         )
-        self.repopulate_qury_area()
+        self.repopulate_query_area()
 
     def change_context(self, new_context):
         new_context = int(new_context)
@@ -351,8 +370,8 @@ class Main_Widget(QWidget):
         else:
             self.sherd_combobox.setCurrentIndex(new_sherd - 1)
             self.curr_img = new_sherd
-            self.path_curr_img = self.cur_context_individual_path + "{}\\photos".format(
-                self.curr_img
+            self.path_curr_img = (
+                self.cur_context_individual_path / "photos" / self.curr_img
             )
             self.set_images()
             self.sherd_label.setText(

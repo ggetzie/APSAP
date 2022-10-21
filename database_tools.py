@@ -2,12 +2,13 @@ import psycopg2
 import environ
 import pathlib
 
-SRC_DIR = pathlib.Path(__file__).resolve(strict=True)
+SRC_DIR = pathlib.Path(__file__).resolve(strict=True).parent
+print(SRC_DIR)
 env = environ.Env()
 
 # Store sensitive data and configuration in a file .env
 # outside source control
-environ.Env.read_env(str(SRC_DIR / ".env"))
+env.read_env(str(SRC_DIR / ".env"))
 
 READ_SETTINGS = {
     "database": env("DB_NAME"),
@@ -52,6 +53,9 @@ def list_all_tables():
 def get_pottery_sherd_info(utm_easting, utm_northing, context_num, find_num):
     try:
         conn = psycopg2.connect(**READ_SETTINGS)
+        print(
+            f"Fetching sherd from database: {utm_easting=}, {utm_northing=}, {context_num=}, {find_num=}"
+        )
 
         cursor = conn.cursor()
         query = """
@@ -69,6 +73,8 @@ def get_pottery_sherd_info(utm_easting, utm_northing, context_num, find_num):
         if len(record) > 1:
             print("Error, detected duplicate entry!")
             return None
+        elif len(record) == 0:
+            return None, None
         else:
             # print(record, "\n")
             return record[0]

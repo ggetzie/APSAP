@@ -9,16 +9,20 @@ basedir = Path(__file__).resolve().parent
 def identify_range_of_batches(
     trench_northing, trench_easting, current_context, current_piece
 ):
-    trench_northing = trench_northing
-    trench_easting = trench_easting
-    current_context = current_context
-    current_piece = current_piece
+    # trench_northing = trench_northing
+    # trench_easting = trench_easting
+    # current_context = current_context
+    # current_piece = current_piece
 
     print(trench_northing, trench_easting, current_context, current_piece)
-    path = basedir.joinpath(
-        "data" "\{}_{}_reference.csv".format(trench_northing, trench_easting)
-    )
-    print(path)
+    path = basedir / "data" / str(trench_northing) / str(trench_easting)
+    if not path.exists():
+        return []
+
+    # path = basedir.joinpath(
+    #     "data" "\\{}_{}_reference.csv".format(trench_northing, trench_easting)
+    # )
+    print(str(path))
     df = pd.read_csv(path)
     context_lines = pd.DataFrame(df["context_num"].dropna())
     context_lines.insert(loc=0, column="row_num", value=np.arange(len(context_lines)))

@@ -11,7 +11,9 @@
     "dbatch",
     "dbro",
     "dbrw",
-    "psycopg2"
+    "hzenc",
+    "psycopg2",
+    "qtcreator"
   ],
   "cSpell.words": ["keypoints", "threed"]
 }

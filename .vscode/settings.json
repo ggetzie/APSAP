@@ -8,6 +8,7 @@
     "CUDNN",
     "CUFFT",
     "DWITH",
+    "Pixmap",
     "dbatch",
     "dbro",
     "dbrw",

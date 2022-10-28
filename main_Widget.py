@@ -251,7 +251,7 @@ class Main_Widget(QWidget):
         self.sherd_combobox.setCurrentIndex(self.curr_img - 1)
 
     # mode==1 indicates folder missing, mode == 2 indicates image missing
-    def clear_qury_area(self, mode):
+    def clear_query_area(self, mode):
         self.query_img_frt_label.setVisible(False)
         self.query_img_back_label.setVisible(False)
         self.button_open_file_explorer.setVisible(True)
@@ -284,7 +284,7 @@ class Main_Widget(QWidget):
         self.path_img_back = self.path_curr_img / "2.jpg"
         self.myimage = QImage(str(self.path_img_frt))
         if self.myimage.isNull():
-            self.clear_qury_area(mode=2)
+            self.clear_query_area(mode=2)
             return
         self.query_img_frt_label.setPixmap(
             QPixmap.fromImage(self.myimage).scaledToHeight(300)
@@ -295,7 +295,7 @@ class Main_Widget(QWidget):
 
         self.myimage = QImage(str(self.path_img_back))
         if self.myimage.isNull():
-            self.clear_qury_area(mode=2)
+            self.clear_query_area(mode=2)
             return
         self.query_img_back_label.setPixmap(
             QPixmap.fromImage(self.myimage).scaledToHeight(300)
@@ -322,7 +322,7 @@ class Main_Widget(QWidget):
             )
 
             if not os.path.isdir(self.cur_context_individual_path):
-                self.clear_qury_area(mode=1)
+                self.clear_query_area(mode=1)
             else:
                 self.image_label.setText("Which sherd is this?")
                 self.total_img_list = [

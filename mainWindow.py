@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap, QImage
 from PyQt5.QtWidgets import QMainWindow, QApplication
 import os
 import pathlib
@@ -15,11 +15,7 @@ FILE_ROOT = pathlib.Path(
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
-
-
-class DirectoryError(Exception):
-    pass
-
+FINDS_PHOTO_DIR = "photos"
 
 HEMISPHERES = ("N", "S")
 
@@ -39,6 +35,7 @@ class MainWindow(QMainWindow):
         self.northing_cb.currentIndexChanged.connect(self.populate_contexts)
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
+        self.findsList.currentItemChanged.connect(self.load_find_images)
 
     def empty_cb(self, combobox):
         combobox.addItems([])
@@ -169,6 +166,23 @@ class MainWindow(QMainWindow):
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         finds.sort(key=lambda f: int(f))
         self.findsList.addItems(finds)
+
+    def load_find_images(self):
+        try:
+            find_num = self.findsList.currentItem().text()
+        except AttributeError:
+            self.findFrontPhoto_l.clear()
+            self.findBackPhoto_l.clear()
+            return
+        photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
+        front_photo = QImage(str(photos_dir / "1.jpg"))
+        back_photo = QImage(str(photos_dir / "2.jpg"))
+        self.findFrontPhoto_l.setPixmap(
+            QPixmap.fromImage(front_photo).scaledToWidth(self.findFrontPhoto_l.width())
+        )
+        self.findBackPhoto_l.setPixmap(
+            QPixmap.fromImage(back_photo).scaledToWidth(self.findBackPhoto_l.width())
+        )
 
 
 def main():

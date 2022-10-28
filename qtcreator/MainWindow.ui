@@ -258,6 +258,12 @@
       <height>30</height>
      </size>
     </property>
+    <property name="sizeIncrement">
+     <size>
+      <width>10</width>
+      <height>10</height>
+     </size>
+    </property>
     <property name="font">
      <font>
       <pointsize>12</pointsize>
@@ -275,6 +281,12 @@
       <width>71</width>
       <height>411</height>
      </rect>
+    </property>
+    <property name="sizeIncrement">
+     <size>
+      <width>10</width>
+      <height>10</height>
+     </size>
     </property>
    </widget>
    <widget class="QLabel" name="statusLabel">
@@ -296,28 +308,31 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QScrollArea" name="findsPhotosScroll">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>100</x>
       <y>120</y>
-      <width>261</width>
+      <width>258</width>
       <height>411</height>
      </rect>
     </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>259</width>
-       <height>409</height>
-      </rect>
-     </property>
-    </widget>
+    <layout class="QVBoxLayout" name="findPhotosLayout">
+     <item>
+      <widget class="QLabel" name="findFrontPhoto_l">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="findBackPhoto_l">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

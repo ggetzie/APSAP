@@ -334,6 +334,26 @@
      </item>
     </layout>
    </widget>
+   <widget class="QTreeView" name="batchTree">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>120</y>
+      <width>141</width>
+      <height>411</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QOpenGLWidget" name="batch3dViewer">
+    <property name="geometry">
+     <rect>
+      <x>549</x>
+      <y>120</y>
+      <width>241</width>
+      <height>411</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

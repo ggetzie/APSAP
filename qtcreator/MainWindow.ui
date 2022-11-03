@@ -35,8 +35,8 @@
      <rect>
       <x>20</x>
       <y>0</y>
-      <width>648</width>
-      <height>66</height>
+      <width>656</width>
+      <height>68</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="selectContextLayout">
@@ -308,7 +308,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -334,24 +334,17 @@
      </item>
     </layout>
    </widget>
-   <widget class="QTreeView" name="batchTree">
+   <widget class="QLabel" name="model">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>470</x>
       <y>120</y>
-      <width>141</width>
-      <height>411</height>
+      <width>550</width>
+      <height>400</height>
      </rect>
     </property>
-   </widget>
-   <widget class="QOpenGLWidget" name="batch3dViewer">
-    <property name="geometry">
-     <rect>
-      <x>549</x>
-      <y>120</y>
-      <width>241</width>
-      <height>411</height>
-     </rect>
+    <property name="text">
+     <string>3dmodel</string>
     </property>
    </widget>
   </widget>
@@ -361,7 +354,7 @@
      <x>0</x>
      <y>0</y>
      <width>1100</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -1,17 +1,21 @@
 import sys
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QPixmap, QImage
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtCore import Qt,QTimer
+from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget
 import os
 import pathlib
-
+import open3d as o3d
 from database_tools import get_pottery_sherd_info, update_match_info
+import win32gui
 
 basedir = os.path.dirname(os.path.realpath(__file__))
 FILE_ROOT = pathlib.Path(
-    "C:\\Users\\gabe\\OneDrive - The University Of Hong Kong\\HKU\\02-Projects\\P22007-Cobb_ArchaeologyData\\Ceramics Matching\\sample"
+    #"C:\\Users\\gabe\\OneDrive - The University Of Hong Kong\\HKU\\02-Projects\\P22007-Cobb_ArchaeologyData\\Ceramics Matching\\sample" Bert: need to use my own path lol
+    r"C:\Users\Bert\OneDrive - The University Of Hong Kong\02-Projects\P22007-Cobb_ArchaeologyData\Ceramics Matching\sample"
 )
+#sample_3d_image
+model_path =  os.path.join(FILE_ROOT,  r"N\38\478020\4419550\11\finds\3dbatch\2022\batch_001\registration_reso1_maskthres242\final_output\piece_0_world.ply")
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
@@ -22,6 +26,7 @@ HEMISPHERES = ("N", "S")
 
 class MainWindow(QMainWindow):
     """View (GUI)."""
+
 
     def __init__(self):
         """View initializer."""
@@ -36,7 +41,36 @@ class MainWindow(QMainWindow):
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
+        self.set_up_3d_window()
+        pcd_load = o3d.io.read_point_cloud(model_path)
+        print(pcd_load)
+        self.change_model( pcd_load, None)
+    def set_up_3d_window(self):
+            widget = self.model
 
+            self.vis = o3d.visualization.Visualizer()
+            self.vis.create_window()
+            #self.vis.add_geometry(pcd)
+
+            hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
+            self.window = QWindow.fromWinId(hwnd)
+            self.windowcontainer = QWidget.createWindowContainer(self.window, widget)
+            self.windowcontainer.setMinimumSize(550, 400)
+
+            timer = QTimer(self)
+            timer.timeout.connect(self.update_vis)
+            timer.start(1)
+    def update_vis(self):
+
+                self.vis.poll_events()
+                self.vis.update_renderer()
+
+    def change_model(self,current_pcd, previous_pcd):
+
+        if previous_pcd :
+            self.vis.remove_geometry(previous_pcd)
+        self.vis.add_geometry(current_pcd)
+        self.vis.update_geometry(current_pcd)
     def empty_cb(self, combobox):
         combobox.addItems([])
         combobox.setCurrentIndex(-1)

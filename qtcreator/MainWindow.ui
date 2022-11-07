@@ -337,14 +337,24 @@
    <widget class="QLabel" name="model">
     <property name="geometry">
      <rect>
-      <x>470</x>
+      <x>630</x>
       <y>120</y>
-      <width>550</width>
-      <height>400</height>
+      <width>430</width>
+      <height>390</height>
      </rect>
     </property>
     <property name="text">
      <string>3dmodel</string>
+    </property>
+   </widget>
+   <widget class="QTreeView" name="modelList">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>120</y>
+      <width>221</width>
+      <height>401</height>
+     </rect>
     </property>
    </widget>
   </widget>

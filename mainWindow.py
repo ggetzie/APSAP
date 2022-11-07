@@ -1,12 +1,13 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
-from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QDialog, QInputDialog 
+from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QInputDialog 
 import os
 import pathlib
 import open3d as o3d
 from database_tools import get_pottery_sherd_info, update_match_info
+from glob import glob as glob
 import win32gui
 import json
 basedir = os.path.dirname(os.path.realpath(__file__))
@@ -18,7 +19,7 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
-
+MODELS_FILES_DIR = "finds/3dbatch/2022/batch*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 HEMISPHERES = ("N", "S")
  
 
@@ -34,10 +35,9 @@ class MainWindow(QMainWindow):
             self.ask_for_prompt()
         setting = json.load(open("settings.json"))
         self.FILE_ROOT = pathlib.Path( setting["FILE_ROOT"] )
- 
         self.file_root = self.FILE_ROOT
         self.model_path =  os.path.join(self.file_root,  r"38\478020\4419550\11\finds\3dbatch\2022\batch_001\registration_reso1_maskthres242\final_output\piece_0_world.ply")
-
+        
         self.populate_hemispheres()
         self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
         self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
@@ -46,9 +46,10 @@ class MainWindow(QMainWindow):
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
+        
         self.set_up_3d_window()
         pcd_load = o3d.io.read_point_cloud(self.model_path)
-        print(pcd_load)
+        
         self.change_model( pcd_load, None)
         
     def check_has_path_in_setting(self):
@@ -114,7 +115,7 @@ class MainWindow(QMainWindow):
             hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
             self.window = QWindow.fromWinId(hwnd)
             self.windowcontainer = QWidget.createWindowContainer(self.window, widget)
-            self.windowcontainer.setMinimumSize(550, 400)
+            self.windowcontainer.setMinimumSize(430, 390)
 
             timer = QTimer(self)
             timer.timeout.connect(self.update_vis)
@@ -128,6 +129,7 @@ class MainWindow(QMainWindow):
 
         if previous_pcd :
             self.vis.remove_geometry(previous_pcd)
+        self.current_pcd = current_pcd
         self.vis.add_geometry(current_pcd)
         self.vis.update_geometry(current_pcd)
     def empty_cb(self, combobox):
@@ -248,10 +250,46 @@ class MainWindow(QMainWindow):
             return pathlib.Path()
         return res
 
+    def populate_models(self):
+        #Getting the paths of all 3d model
+        path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
+        all_model_paths = (glob(path))
+         
+        #Setting up the model
+        model = QStandardItemModel(self)
+        model.setHorizontalHeaderLabels(["Models"])
+        #Getting a dict for all the batc
+        batches_dict = dict()
+        for  path in (all_model_paths):
+            path_list = os.path.normpath(path).split(os.sep)
+            batch_num = path_list[12].replace("batch_", "")
+            piece_num = path_list[15].replace("piece_","").replace("_world.ply", "")
+            if batch_num not in batches_dict:
+                batches_dict[batch_num] = [[int(piece_num), path]]
+            else:
+                batches_dict[batch_num].append([int(piece_num), path])
+        #Sort the items
+        for key in batches_dict:
+            batches_dict[key] = sorted(batches_dict[key])
+        #Add all items onto the QTree
+        for batch in batches_dict:
+            items =  batches_dict[batch]
+            batch = QStandardItem(f"{batch}")
+            for item in items:
+                index = item[0]
+                path = item[1]
+                ply = QStandardItem(f"{index}")
+                ply.setData(f"{path}", Qt.UserRole) 
+                batch.appendRow(ply)
+            model.appendRow(batch)
+
+        self.modelList.setModel(model)
+        self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
+    
     def contextChanged(self):
         self.contextDisplay.setText(self.get_context_string())
         self.populate_finds()
-
+        self.populate_models()
     def populate_finds(self):
         self.findsList.clear()
         context_dir = self.get_context_dir()
@@ -259,7 +297,14 @@ class MainWindow(QMainWindow):
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         finds.sort(key=lambda f: int(f))
         self.findsList.addItems(finds)
-
+    def change_3d_model(self, current, previous):
+        current_model_path = (current.data( Qt.UserRole))
+   
+        if current_model_path:
+            current_pcd_load = o3d.io.read_point_cloud(current_model_path)
+    
+            self.change_model( current_pcd_load, self.current_pcd)
+            self.current_pcd = current_pcd_load
     def load_find_images(self):
         try:
             find_num = self.findsList.currentItem().text()

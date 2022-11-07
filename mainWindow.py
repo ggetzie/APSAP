@@ -2,27 +2,25 @@ import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QDialog, QInputDialog 
 import os
 import pathlib
 import open3d as o3d
 from database_tools import get_pottery_sherd_info, update_match_info
 import win32gui
-
+import json
 basedir = os.path.dirname(os.path.realpath(__file__))
-FILE_ROOT = pathlib.Path(
-    #"C:\\Users\\gabe\\OneDrive - The University Of Hong Kong\\HKU\\02-Projects\\P22007-Cobb_ArchaeologyData\\Ceramics Matching\\sample" Bert: need to use my own path lol
-    r"C:\Users\Bert\OneDrive - The University Of Hong Kong\02-Projects\P22007-Cobb_ArchaeologyData\Ceramics Matching\sample"
-)
+
+ 
+
 #sample_3d_image
-model_path =  os.path.join(FILE_ROOT,  r"N\38\478020\4419550\11\finds\3dbatch\2022\batch_001\registration_reso1_maskthres242\final_output\piece_0_world.ply")
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
 
 HEMISPHERES = ("N", "S")
-
+ 
 
 class MainWindow(QMainWindow):
     """View (GUI)."""
@@ -32,7 +30,14 @@ class MainWindow(QMainWindow):
         """View initializer."""
         super(MainWindow, self).__init__()
         uic.loadUi("qtcreator/MainWindow.ui", self)
-        self.file_root = FILE_ROOT
+        if not self.check_has_path_in_setting():        
+            self.ask_for_prompt()
+        setting = json.load(open("settings.json"))
+        self.FILE_ROOT = pathlib.Path( setting["FILE_ROOT"] )
+ 
+        self.file_root = self.FILE_ROOT
+        self.model_path =  os.path.join(self.file_root,  r"38\478020\4419550\11\finds\3dbatch\2022\batch_001\registration_reso1_maskthres242\final_output\piece_0_world.ply")
+
         self.populate_hemispheres()
         self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
         self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
@@ -42,9 +47,63 @@ class MainWindow(QMainWindow):
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
         self.set_up_3d_window()
-        pcd_load = o3d.io.read_point_cloud(model_path)
+        pcd_load = o3d.io.read_point_cloud(self.model_path)
         print(pcd_load)
         self.change_model( pcd_load, None)
+        
+    def check_has_path_in_setting(self):
+        setting_found = os.path.isfile("./settings.json")
+        if not setting_found:
+            return False
+        else:
+            setting_dict = json.load(open("settings.json")) if setting_found else {}  
+            key_exist = "FILE_ROOT" in setting_dict
+            if key_exist:
+                path_exist = os.path.isdir(setting_dict["FILE_ROOT"])
+                if path_exist: #Only case when we don't have to ask for a path
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
+    def ask_for_prompt(self):
+        Title = "Please enter the file path!"
+        while True:
+
+            dlg = QInputDialog(self)
+            dlg.resize(600,100)    
+            dlg.setLabelText("File path:")                   
+            dlg.setWindowTitle(Title)
+            dlg.exec()
+            text = dlg.textValue()
+            if (os.path.isdir(text)):
+                path = os.path.normpath(text)
+                path_list = (path.split(os.sep))
+                if "N" in path_list or "S" in path_list:
+                    #This is when the path is actually nice enough that we can save it
+                    true_path = text
+                    if not os.path.isfile("./settings.json"):
+                        #In this case, we can make a settings from scratch
+                        file_dict = {"FILE_ROOT": f"{true_path}"}
+
+                    else:
+                        f = open('settings.json')
+                        #Whether if the key is not there  or the path doesn't exist, we are sure we can save it in the dict now
+                        file_dict = json.load(f)                        
+                        file_dict["FILE_ROOT"] = true_path
+                        f.close()
+                    with open('settings.json', 'w') as fp:
+                            json.dump(file_dict, fp)
+                            fp.close()
+                    break    
+                else:
+                    Title = "Valid paths must contain a directory named N or S!"
+            else:
+                Title = "Path doesn't exist"
+    
+    
+    
     def set_up_3d_window(self):
             widget = self.model
 
@@ -177,7 +236,7 @@ class MainWindow(QMainWindow):
 
     def get_context_dir(self):
         res = (
-            FILE_ROOT
+            self.FILE_ROOT
             / self.hemisphere_cb.currentText()
             / self.zone_cb.currentText()
             / self.easting_cb.currentText()

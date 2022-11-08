@@ -2,7 +2,7 @@ import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QInputDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QFileDialog, QMessageBox
 import os
 import pathlib
 import open3d as o3d
@@ -63,13 +63,15 @@ class MainWindow(QMainWindow):
     def ask_for_prompt(self):
         Title = "Please enter the file path!"
         while True:
-
-            dlg = QInputDialog(self)
-            dlg.resize(600,100)    
-            dlg.setLabelText("File path:")                   
+            
+            QMessageBox(self,text="Please select a path to the files").exec()
+            dlg = QFileDialog(self)
+            dlg.setFileMode(QFileDialog.Directory)
+            dlg.resize(600,100)                    
             dlg.setWindowTitle(Title)
             dlg.exec()
-            text = dlg.textValue()
+            text = dlg.selectedFiles()[0]
+             
             if (pathlib.Path(text).is_dir()):
                 path_list = pathlib.Path(text).resolve().parts
                 if "N" in path_list or "S" in path_list:

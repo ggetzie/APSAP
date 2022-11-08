@@ -46,12 +46,10 @@ class MainWindow(QMainWindow):
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
-        
         self.set_up_3d_window()
         pcd_load = o3d.io.read_point_cloud(self.model_path)
-        
         self.change_model( pcd_load, None)
-        
+        self.populate_models()
     def check_has_path_in_setting(self):
         setting_found = os.path.isfile("./settings.json")
         if not setting_found:
@@ -290,6 +288,7 @@ class MainWindow(QMainWindow):
         self.contextDisplay.setText(self.get_context_string())
         self.populate_finds()
         self.populate_models()
+        
     def populate_finds(self):
         self.findsList.clear()
         context_dir = self.get_context_dir()
@@ -297,6 +296,7 @@ class MainWindow(QMainWindow):
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         finds.sort(key=lambda f: int(f))
         self.findsList.addItems(finds)
+        
     def change_3d_model(self, current, previous):
         current_model_path = (current.data( Qt.UserRole))
    
@@ -305,6 +305,7 @@ class MainWindow(QMainWindow):
     
             self.change_model( current_pcd_load, self.current_pcd)
             self.current_pcd = current_pcd_load
+            
     def load_find_images(self):
         try:
             find_num = self.findsList.currentItem().text()

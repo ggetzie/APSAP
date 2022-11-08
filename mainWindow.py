@@ -248,7 +248,8 @@ class MainWindow(QMainWindow):
         #Getting the paths of all 3d model
         path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
         all_model_paths = (glob(path))
- 
+        if not all_model_paths:
+            self.statusLabel.setText(f"No models were found")
         #Setting up the model
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Models"])
@@ -282,7 +283,12 @@ class MainWindow(QMainWindow):
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
     def contextChanged(self):
+        self.statusLabel.setText(f"")
         self.contextDisplay.setText(self.get_context_string())
+        if hasattr(self, "current_pcd"):
+            self.vis.remove_geometry(self.current_pcd)
+            self.current_pcd = None
+            
         self.populate_finds()
         self.populate_models()
         

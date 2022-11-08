@@ -32,8 +32,7 @@ class MainWindow(QMainWindow):
         if not self.check_has_path_in_setting():        
             self.ask_for_prompt()
         setting = json.load(open("settings.json"))
-        self.FILE_ROOT = pathlib.Path(setting["FILE_ROOT"] )
-        self.file_root = self.FILE_ROOT
+        self.file_root = pathlib.Path(setting["FILE_ROOT"] )
         self.populate_hemispheres()
         self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
         self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
@@ -71,10 +70,10 @@ class MainWindow(QMainWindow):
             dlg.setWindowTitle(Title)
             dlg.exec()
             text = dlg.selectedFiles()[0]
-             
+            
             if (pathlib.Path(text).is_dir()):
-                path_list = pathlib.Path(text).resolve().parts
-                if "N" in path_list or "S" in path_list:
+                has_N_S = (any([pathlib.Path(path).stem == "N" or pathlib.Path(path).stem == "S" for path in glob(f"{text}/*")]))
+                if has_N_S:
                     #This is when the path is actually nice enough that we can save it
                     true_path = text
                     if not pathlib.Path("./settings.json").is_file():
@@ -231,7 +230,7 @@ class MainWindow(QMainWindow):
 
     def get_context_dir(self):
         res = (
-            self.FILE_ROOT
+            self.file_root
             / self.hemisphere_cb.currentText()
             / self.zone_cb.currentText()
             / self.easting_cb.currentText()
@@ -256,7 +255,6 @@ class MainWindow(QMainWindow):
         for  path in (all_model_paths):
             path_list = pathlib.Path(path).parts
             #This error happens when the relative path is different
-            
             batch_num = path_list[12].replace("batch_", "")
             piece_num = path_list[15].replace("piece_","").replace("_world.ply", "")
             if batch_num not in batches_dict:

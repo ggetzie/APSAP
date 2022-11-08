@@ -10,10 +10,8 @@ from database_tools import get_pottery_sherd_info, update_match_info
 from glob import glob as glob
 import win32gui
 import json
-basedir = os.path.dirname(os.path.realpath(__file__))
-
+basedir = pathlib.Path().resolve() 
  
-
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
@@ -34,7 +32,7 @@ class MainWindow(QMainWindow):
         if not self.check_has_path_in_setting():        
             self.ask_for_prompt()
         setting = json.load(open("settings.json"))
-        self.FILE_ROOT = pathlib.Path( setting["FILE_ROOT"] )
+        self.FILE_ROOT = pathlib.Path(setting["FILE_ROOT"] )
         self.file_root = self.FILE_ROOT
         self.populate_hemispheres()
         self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
@@ -47,14 +45,14 @@ class MainWindow(QMainWindow):
         self.set_up_3d_window()
         self.populate_models()
     def check_has_path_in_setting(self):
-        setting_found = os.path.isfile("./settings.json")
+        setting_found = pathlib.Path("./settings.json").is_file()  
         if not setting_found:
             return False
         else:
             setting_dict = json.load(open("settings.json")) if setting_found else {}  
             key_exist = "FILE_ROOT" in setting_dict
             if key_exist:
-                path_exist = os.path.isdir(setting_dict["FILE_ROOT"])
+                path_exist =  pathlib.Path(setting_dict["FILE_ROOT"]).is_dir()
                 if path_exist: #Only case when we don't have to ask for a path
                     return True
                 else:
@@ -72,13 +70,12 @@ class MainWindow(QMainWindow):
             dlg.setWindowTitle(Title)
             dlg.exec()
             text = dlg.textValue()
-            if (os.path.isdir(text)):
-                path = os.path.normpath(text)
-                path_list = (path.split(os.sep))
+            if (pathlib.Path(text).is_dir()):
+                path_list = pathlib.Path(text).resolve().parts
                 if "N" in path_list or "S" in path_list:
                     #This is when the path is actually nice enough that we can save it
                     true_path = text
-                    if not os.path.isfile("./settings.json"):
+                    if not pathlib.Path("./settings.json").is_file():
                         #In this case, we can make a settings from scratch
                         file_dict = {"FILE_ROOT": f"{true_path}"}
 
@@ -255,8 +252,7 @@ class MainWindow(QMainWindow):
         #Getting a dict for all the batc
         batches_dict = dict()
         for  path in (all_model_paths):
-            path_list = os.path.normpath(path).split(os.sep)
-            print(path_list)
+            path_list = pathlib.Path(path).parts
             #This error happens when the relative path is different
             
             batch_num = path_list[12].replace("batch_", "")

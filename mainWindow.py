@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QFileDialog, QM
 import os
 import pathlib
 import open3d as o3d
+import re
 from database_tools import get_pottery_sherd_info, update_match_info
 from glob import glob as glob
 import win32gui
@@ -17,7 +18,8 @@ basedir = pathlib.Path().resolve()
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
-MODELS_FILES_DIR = "finds/3dbatch/2022/batch*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
+MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
+MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 HEMISPHERES = ("N", "S")
  
 
@@ -246,17 +248,17 @@ class MainWindow(QMainWindow):
         #Getting the paths of all 3d model
         path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
         all_model_paths = (glob(path))
-         
+ 
         #Setting up the model
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Models"])
-        #Getting a dict for all the batc
+        #Getting a dict for all the batches
         batches_dict = dict()
         for  path in (all_model_paths):
-            path_list = pathlib.Path(path).parts
+            m = re.search( MODELS_FILES_RE, path.replace("\\", "/"))
             #This error happens when the relative path is different
-            batch_num = path_list[12].replace("batch_", "")
-            piece_num = path_list[15].replace("piece_","").replace("_world.ply", "")
+            batch_num = m.group(1)
+            piece_num = m.group(2)
             if batch_num not in batches_dict:
                 batches_dict[batch_num] = [[int(piece_num), path]]
             else:

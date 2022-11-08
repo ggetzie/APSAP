@@ -2,7 +2,7 @@ import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QInputDialog 
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QInputDialog
 import os
 import pathlib
 import open3d as o3d
@@ -36,8 +36,6 @@ class MainWindow(QMainWindow):
         setting = json.load(open("settings.json"))
         self.FILE_ROOT = pathlib.Path( setting["FILE_ROOT"] )
         self.file_root = self.FILE_ROOT
-        self.model_path =  os.path.join(self.file_root,  r"38\478020\4419550\11\finds\3dbatch\2022\batch_001\registration_reso1_maskthres242\final_output\piece_0_world.ply")
-        
         self.populate_hemispheres()
         self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
         self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
@@ -47,8 +45,6 @@ class MainWindow(QMainWindow):
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
         self.set_up_3d_window()
-        pcd_load = o3d.io.read_point_cloud(self.model_path)
-        self.change_model( pcd_load, None)
         self.populate_models()
     def check_has_path_in_setting(self):
         setting_found = os.path.isfile("./settings.json")
@@ -260,6 +256,9 @@ class MainWindow(QMainWindow):
         batches_dict = dict()
         for  path in (all_model_paths):
             path_list = os.path.normpath(path).split(os.sep)
+            print(path_list)
+            #This error happens when the relative path is different
+            
             batch_num = path_list[12].replace("batch_", "")
             piece_num = path_list[15].replace("piece_","").replace("_world.ply", "")
             if batch_num not in batches_dict:
@@ -302,7 +301,8 @@ class MainWindow(QMainWindow):
    
         if current_model_path:
             current_pcd_load = o3d.io.read_point_cloud(current_model_path)
-    
+            if not hasattr(self, "current_pcd"):
+                self.current_pcd = None
             self.change_model( current_pcd_load, self.current_pcd)
             self.current_pcd = current_pcd_load
             

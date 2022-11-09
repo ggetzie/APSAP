@@ -1,8 +1,8 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
-from PyQt5.QtGui import QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,  QFileDialog, QMessageBox
+from PyQt5.QtGui import QColor, QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QListWidgetItem, QFileDialog, QMessageBox
 import os
 import pathlib
 import open3d as o3d
@@ -297,8 +297,18 @@ class MainWindow(QMainWindow):
         context_dir = self.get_context_dir()
         finds_dir = context_dir / FINDS_SUBDIR
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
+        #Getting easting, northing and context for getting doing the query
+        path_parts = (pathlib.Path(context_dir).parts[-3:])
+        easting =  int(path_parts[0])
+        northing = int(path_parts[1])
+        context = int(path_parts[2])
         finds.sort(key=lambda f: int(f))
-        self.findsList.addItems(finds)
+        for find in finds:
+            item = QListWidgetItem(find)
+            _3d_locations = get_pottery_sherd_info(easting, northing, context, int(find))
+            if _3d_locations[0] != None and _3d_locations[1] != None:
+                item.setForeground(QColor("red"))
+            self.findsList.addItem(item)
         
     def change_3d_model(self, current, previous):
         current_model_path = (current.data( Qt.UserRole))

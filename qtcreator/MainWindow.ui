@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1100</width>
-    <height>1000</height>
+    <height>910</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -293,7 +293,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>920</y>
+      <y>850</y>
       <width>671</width>
       <height>20</height>
      </rect>
@@ -368,7 +368,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="autoFillBackground">
@@ -378,7 +378,7 @@
      <string notr="true"/>
     </property>
     <property name="text">
-     <string>48</string>
+     <string/>
     </property>
    </widget>
    <widget class="QFrame" name="frame">
@@ -391,7 +391,7 @@
      </rect>
     </property>
     <property name="autoFillBackground">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="styleSheet">
      <string notr="true"> background-color : white</string>
@@ -448,9 +448,9 @@
     <widget class="QLabel" name="label_8">
      <property name="geometry">
       <rect>
-       <x>6</x>
+       <x>36</x>
        <y>3</y>
-       <width>71</width>
+       <width>41</width>
        <height>41</height>
       </rect>
      </property>
@@ -458,6 +458,9 @@
       <font>
        <pointsize>11</pointsize>
       </font>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
      </property>
      <property name="text">
       <string>=</string>
@@ -562,11 +565,11 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>13</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>99</string>
+     <string/>
     </property>
    </widget>
    <widget class="QFrame" name="frame_5">
@@ -654,11 +657,11 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>13</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>55</string>
+     <string/>
     </property>
    </widget>
    <widget class="QFrame" name="frame_7">
@@ -713,7 +716,7 @@
      </font>
     </property>
     <property name="text">
-     <string>95</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="new_piece">
@@ -727,11 +730,11 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>13</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>15</string>
+     <string/>
     </property>
    </widget>
    <widget class="QFrame" name="frame_8">
@@ -771,7 +774,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="update_button">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -810,7 +813,7 @@
    <zorder>new_batch</zorder>
    <zorder>new_piece</zorder>
    <zorder>frame_8</zorder>
-   <zorder>pushButton</zorder>
+   <zorder>update_button</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

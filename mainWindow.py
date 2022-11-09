@@ -43,8 +43,10 @@ class MainWindow(QMainWindow):
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
         self.findsList.currentItemChanged.connect(self.load_find_images)
+        self.update_button.clicked.connect(self.update_model_db)
         self.set_up_3d_window()
         self.populate_models()
+
     def check_has_path_in_setting(self):
         setting_found = pathlib.Path("./settings.json").is_file()  
         if not setting_found:
@@ -61,6 +63,42 @@ class MainWindow(QMainWindow):
             else:
                 return False
 
+    def update_button_click(self, e):
+        if e.text() == "OK":
+            eating_northing_context = (self.get_eating_northing_context())
+            easting = eating_northing_context[0]
+            northing = eating_northing_context[1]
+            context = eating_northing_context[2]
+            find_num = self.selected_find.text()
+            batch_num = self.new_batch.text()
+            piece_num = self.new_piece.text()
+            if easting and northing and context and find_num and batch_num and piece_num:
+                update_match_info(easting, northing,context, int(find_num),int(batch_num),int(piece_num))
+                #Here to avoid loading time, we manually update some data. We can
+                #reload the contexts but it would be way too slow
+                batch_num = self.new_batch.text()
+                piece_num = self.new_piece.text()
+                if hasattr(self,  "selected_find_widget"):
+                    self.selected_find_widget.setForeground(QColor("red"))
+                self.current_batch.setText(batch_num)
+                self.current_piece.setText(piece_num)
+            else:
+                QMessageBox(self,text="Please select both a find and a model").exec()
+    def update_model_db(self):
+
+            msg = QMessageBox()
+            msg.setText("Find (find number) will be updated to 3d Batch (batch number) 3d Piece (piece number). Proceed?")
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            msg.buttonClicked.connect(self.update_button_click)
+            msg.exec()
+            
+
+            
+
+            
+            
+        
+        #Remember to refresh
     def ask_for_prompt(self):
         Title = "Please enter the file path!"
         while True:
@@ -282,8 +320,20 @@ class MainWindow(QMainWindow):
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
+    def get_eating_northing_context(self):
+        context_dir = self.get_context_dir()
+        path_parts = (pathlib.Path(context_dir).parts[-3:])
+        easting =  int(path_parts[0])
+        northing = int(path_parts[1])
+        context = int(path_parts[2])
+        return (easting, northing, context)
     def contextChanged(self):
         self.statusLabel.setText(f"")
+        self.selected_find.setText(f"")
+        self.current_batch.setText(f"")
+        self.current_piece.setText(f"")
+        self.new_batch.setText(f"")
+        self.new_piece.setText(f"")
         self.contextDisplay.setText(self.get_context_string())
         if hasattr(self, "current_pcd"):
             self.vis.remove_geometry(self.current_pcd)
@@ -298,14 +348,11 @@ class MainWindow(QMainWindow):
         finds_dir = context_dir / FINDS_SUBDIR
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         #Getting easting, northing and context for getting doing the query
-        path_parts = (pathlib.Path(context_dir).parts[-3:])
-        easting =  int(path_parts[0])
-        northing = int(path_parts[1])
-        context = int(path_parts[2])
+        easting_northing_context = self.get_eating_northing_context()
         finds.sort(key=lambda f: int(f))
         for find in finds:
             item = QListWidgetItem(find)
-            _3d_locations = get_pottery_sherd_info(easting, northing, context, int(find))
+            _3d_locations = get_pottery_sherd_info(easting_northing_context[0], easting_northing_context[1], easting_northing_context[2], int(find))
             if _3d_locations[0] != None and _3d_locations[1] != None:
                 item.setForeground(QColor("red"))
             self.findsList.addItem(item)
@@ -320,7 +367,17 @@ class MainWindow(QMainWindow):
             self.change_model( current_pcd_load, self.current_pcd)
             self.current_pcd = current_pcd_load
             
-    def load_find_images(self):
+            m = re.search( MODELS_FILES_RE, current_model_path.replace("\\", "/"))
+                #This error happens when the relative path is different
+            if m:
+                    
+                batch_num = str(int(m.group(1))) # int("006") -> int(6). We remove leading 0
+                piece_num = m.group(2)
+                self.new_batch.setText(batch_num)
+                self.new_piece.setText(piece_num)
+              
+    def load_find_images(self, selected_item):
+        self.selected_find_widget = selected_item
         try:
             find_num = self.findsList.currentItem().text()
         except AttributeError:
@@ -336,8 +393,15 @@ class MainWindow(QMainWindow):
         self.findBackPhoto_l.setPixmap(
             QPixmap.fromImage(back_photo).scaledToWidth(self.findBackPhoto_l.width())
         )
-
-
+        self.selected_find.setText(find_num)
+        easting_northing_context = self.get_eating_northing_context()
+        _3d_locations = get_pottery_sherd_info(easting_northing_context[0], easting_northing_context[1], easting_northing_context[2], int(find_num))
+        if _3d_locations[0] != None and _3d_locations[1] != None:
+            self.current_batch.setText(str(_3d_locations[0]))
+            self.current_piece.setText(str(_3d_locations[1]))
+        else:
+            self.current_batch.setText("NS")
+            self.current_piece.setText("NS")
 def main():
     """Main function."""
     # Create an instance of QApplication

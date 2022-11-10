@@ -65,10 +65,7 @@ class MainWindow(QMainWindow):
 
     def update_button_click(self, e):
         if e.text() == "OK":
-            eating_northing_context = (self.get_eating_northing_context())
-            easting = eating_northing_context[0]
-            northing = eating_northing_context[1]
-            context = eating_northing_context[2]
+            easting, northing, context =  (self.get_easting_northing_context())
             find_num = self.selected_find.text()
             batch_num = self.new_batch.text()
             piece_num = self.new_piece.text()
@@ -85,9 +82,12 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox(self,text="Please select both a find and a model").exec()
     def update_model_db(self):
-
+ 
+            find_num = self.selected_find.text()
+            batch_num = self.new_batch.text()
+            piece_num = self.new_piece.text()
             msg = QMessageBox()
-            msg.setText("Find (find number) will be updated to 3d Batch (batch number) 3d Piece (piece number). Proceed?")
+            msg.setText(f"Find ({find_num}) will be updated to 3d Batch ({batch_num}) 3d Piece ({piece_num}). Proceed?")
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
             msg.buttonClicked.connect(self.update_button_click)
             msg.exec()
@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
-    def get_eating_northing_context(self):
+    def get_easting_northing_context(self):
         context_dir = self.get_context_dir()
         path_parts = (pathlib.Path(context_dir).parts[-3:])
         easting =  int(path_parts[0])
@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
         finds_dir = context_dir / FINDS_SUBDIR
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         #Getting easting, northing and context for getting doing the query
-        easting_northing_context = self.get_eating_northing_context()
+        easting_northing_context = self.get_easting_northing_context()
         finds.sort(key=lambda f: int(f))
         for find in finds:
             item = QListWidgetItem(find)
@@ -394,7 +394,7 @@ class MainWindow(QMainWindow):
             QPixmap.fromImage(back_photo).scaledToWidth(self.findBackPhoto_l.width())
         )
         self.selected_find.setText(find_num)
-        easting_northing_context = self.get_eating_northing_context()
+        easting_northing_context = self.get_easting_northing_context()
         _3d_locations = get_pottery_sherd_info(easting_northing_context[0], easting_northing_context[1], easting_northing_context[2], int(find_num))
         if _3d_locations[0] != None and _3d_locations[1] != None:
             self.current_batch.setText(str(_3d_locations[0]))

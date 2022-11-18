@@ -384,16 +384,6 @@
      <string>3dmodel</string>
     </property>
    </widget>
-   <widget class="QTreeView" name="modelList">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>120</y>
-      <width>221</width>
-      <height>401</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="selected_find">
     <property name="geometry">
      <rect>
@@ -829,6 +819,50 @@
      <string>Update</string>
     </property>
    </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>100</y>
+      <width>251</width>
+      <height>431</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Order by Batch #</string>
+     </attribute>
+     <widget class="QTreeView" name="modelList">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>251</width>
+        <height>431</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Order by Area Similarity</string>
+     </attribute>
+     <widget class="QTreeView" name="sortedModelList">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>251</width>
+        <height>431</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <zorder>tabWidget</zorder>
    <zorder>frame</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>contextDisplay</zorder>
@@ -836,7 +870,6 @@
    <zorder>statusLabel</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>model</zorder>
-   <zorder>modelList</zorder>
    <zorder>selected_find</zorder>
    <zorder>frame_2</zorder>
    <zorder>frame_3</zorder>

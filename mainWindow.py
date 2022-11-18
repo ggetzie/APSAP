@@ -311,6 +311,7 @@ class MainWindow(QMainWindow):
         actual_index = 0
         self.get_2d_areas()
         all_3d_areas  = []
+        all_3d_areas
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
@@ -318,9 +319,14 @@ class MainWindow(QMainWindow):
             for item in  items:
                 index = item[0]
                 path = item[1]
+                m = re.search( MODELS_FILES_RE, path.replace("\\", "/"))
+                #This error happens when the relative path is different
+                batch_num = m.group(1)
+                piece_num = m.group(2)
+      
                 area = self.area_comparator.get_3d_object_area(path)
                 print(f"index: {actual_index}: 3dArea: {area}")
-                all_3d_area.append(area)
+                all_3d_area.append([area, batch_num,piece_num ])
                 ply = QStandardItem(f"{index}")
                 ply.setData(f"{path}", Qt.UserRole) 
                 batch.appendRow(ply)
@@ -339,15 +345,15 @@ class MainWindow(QMainWindow):
         context = int(path_parts[2])
         return (easting, northing, context)
     def get_similaritiy_scores(self, index):
-        _2d_area = self.all_2d_areas[int(index)]
-        print(_2d_area)
-        area_np = (np.array([np.array(x) for x in self.all_3d_areas]))
-        x1_ = ( area_np/_2d_area )
-        x2_ = ( _2d_area/area_np )
-        for i in range(len(x1_)):
-            for j in range(len(x1_[i])):
-                print(f"{i} index i , {j} index j, area_score: {max(x1_[i][j], x2_[i][j] )}")
-        pass
+        _2d_area = self.all_2d_areas[int(index) - 1]
+        similarity_scores = []
+        for i in range(len(self.all_3d_areas)):
+            for j in range(len(self.all_3d_areas[i])):
+                _3d_area = self.all_3d_areas[i][j][0]
+                batch_num = self.all_3d_areas[i][j][1]
+                piece_num = self.all_3d_areas[i][j][2]
+                similarity_scores.append([max(_3d_area/_2d_area, _2d_area/_3d_area), batch_num, piece_num])
+        return similarity_scores
     def contextChanged(self):
         self.statusLabel.setText(f"")
         self.selected_find.setText(f"")
@@ -359,17 +365,18 @@ class MainWindow(QMainWindow):
         if hasattr(self, "current_pcd"):
             self.vis.remove_geometry(self.current_pcd)
             self.current_pcd = None
-            
+        import time
+        now = time.time()
         self.populate_finds()
         self.populate_models()
-    
+        print(f"{now - time.time()} seconds have passed.")
     def get_2d_areas(self):
 
         all_2d_areas = []
         for i in range(self.findsList.count() ):
             
             index = int(self.findsList.item(i).text())
-            dir = self.get_context_dir() / FINDS_SUBDIR / str(index) / FINDS_PHOTO_DIR/ "1.jpg"
+            dir = self.get_context_dir() / FINDS_SUBDIR / str(index) / FINDS_PHOTO_DIR/ "2.jpg"
             area = self.area_comparator.get_2d_picture_area(dir)
             print(f"index: {index}: 2dArea: {area}")
             all_2d_areas.append(area)
@@ -417,7 +424,7 @@ class MainWindow(QMainWindow):
             self.findBackPhoto_l.clear()
             return
         
-        self.get_similaritiy_scores(find_num)
+
         photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
         front_photo = QImage(str(photos_dir / "1.jpg"))
         back_photo = QImage(str(photos_dir / "2.jpg"))
@@ -436,6 +443,24 @@ class MainWindow(QMainWindow):
         else:
             self.current_batch.setText("NS")
             self.current_piece.setText("NS")
+            
+        #We have an image chosen, we can get the simlarity scores against all 3d model's images
+        flat_simllarity_list  = self.get_similaritiy_scores(find_num)
+ 
+        #python sort by first element of list by default
+     
+        model = QStandardItemModel(self)
+        model.setHorizontalHeaderLabels(["Sorted models"])
+        for score_i_j_tuple in sorted(flat_simllarity_list):
+            ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
+            path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
+            whole_path = (path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace("*", f"{int(score_i_j_tuple[2])}", 1)) 
+            ply.setData(f"{whole_path}", Qt.UserRole) 
+            model.appendRow(ply)
+        self.sortedModelList.setModel(model)
+        self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
+
+       
 def main():
     """Main function."""
     # Create an instance of QApplication

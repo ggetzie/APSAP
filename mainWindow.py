@@ -11,8 +11,9 @@ from database_tools import get_pottery_sherd_info, update_match_info
 from glob import glob as glob
 import win32gui
 import json
+import numpy as np
 basedir = pathlib.Path().resolve() 
- 
+from area_detect import AreaComparator
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """View initializer."""
         super(MainWindow, self).__init__()
+
         uic.loadUi("qtcreator/MainWindow.ui", self)
         if not self.check_has_path_in_setting():        
             self.ask_for_prompt()
@@ -103,9 +105,9 @@ class MainWindow(QMainWindow):
             widget = self.model
 
             self.vis = o3d.visualization.Visualizer()
-            self.vis.create_window()
+            self.vis.create_window(visible=False) #Visible false there wont be an extra window opened
             #self.vis.add_geometry(pcd)
-
+            self.area_comparator = AreaComparator(self.vis)
             hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
             self.window = QWindow.fromWinId(hwnd)
             self.windowcontainer = QWidget.createWindowContainer(self.window, widget)
@@ -267,25 +269,55 @@ class MainWindow(QMainWindow):
         for key in batches_dict:
             batches_dict[key] = sorted(batches_dict[key])
         #Add all items onto the QTree
+        actual_index = 0
+        self.get_2d_areas()
+        all_3d_areas  = []
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
-            for item in items:
+            all_3d_area = []
+            for item in  items:
                 index = item[0]
                 path = item[1]
+                area = self.area_comparator.get_3d_object_area(path)
+                print(f"index: {actual_index}: 3dArea: {area}")
+                all_3d_area.append(area)
                 ply = QStandardItem(f"{index}")
                 ply.setData(f"{path}", Qt.UserRole) 
                 batch.appendRow(ply)
+                actual_index += 1
+            all_3d_areas.append(all_3d_area)
             model.appendRow(batch)
-
+        self.all_3d_areas = (all_3d_areas)
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
+    def get_similaritiy_scores(self, index):
+        _2d_area = self.all_2d_areas[int(index)]
+        print(_2d_area)
+        area_np = (np.array([np.array(x) for x in self.all_3d_areas]))
+        x1_ = ( area_np/_2d_area )
+        x2_ = ( _2d_area/area_np )
+        for i in range(len(x1_)):
+            for j in range(len(x1_[i])):
+                print(f"{i} index i , {j} index j, area_score: {max(x1_[i][j], x2_[i][j] )}")
+        pass
     def contextChanged(self):
         self.contextDisplay.setText(self.get_context_string())
         self.populate_finds()
         self.populate_models()
-        
+    
+    def get_2d_areas(self):
+
+        all_2d_areas = []
+        for i in range(self.findsList.count() ):
+            
+            index = int(self.findsList.item(i).text())
+            dir = self.get_context_dir() / FINDS_SUBDIR / str(index) / FINDS_PHOTO_DIR/ "1.jpg"
+            area = self.area_comparator.get_2d_picture_area(dir)
+            print(f"index: {index}: 2dArea: {area}")
+            all_2d_areas.append(area)
+        self.all_2d_areas = all_2d_areas
     def populate_finds(self):
         self.findsList.clear()
         context_dir = self.get_context_dir()
@@ -296,7 +328,7 @@ class MainWindow(QMainWindow):
         
     def change_3d_model(self, current, previous):
         current_model_path = (current.data( Qt.UserRole))
-   
+        self.vis.get_render_option().point_size = 5#Generally we need this value to be larger only if we draw the jpgs
         if current_model_path:
             current_pcd_load = o3d.io.read_point_cloud(current_model_path)
             if not hasattr(self, "current_pcd"):
@@ -311,6 +343,8 @@ class MainWindow(QMainWindow):
             self.findFrontPhoto_l.clear()
             self.findBackPhoto_l.clear()
             return
+        
+        self.get_similaritiy_scores(find_num)
         photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
         front_photo = QImage(str(photos_dir / "1.jpg"))
         back_photo = QImage(str(photos_dir / "2.jpg"))

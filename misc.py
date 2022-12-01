@@ -1,8 +1,8 @@
 import numpy as np
 from PIL import Image, ImageStat
 import cv2
-
-from matplotlib import pyplot as plt
+from PyQt5.QtWidgets import QSplashScreen
+ 
 
 
 def get_mask_pixel_width(image):
@@ -78,3 +78,4 @@ def fig2img(fig):
     buf.seek(0)
     img = Image.open(buf)
     return img
+

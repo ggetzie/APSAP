@@ -15,6 +15,10 @@ import json
 import numpy as np
 basedir = pathlib.Path().resolve() 
 from area_detect import AreaComparator
+from components.vis import Visualized
+from components.pop_up import PopUp
+from ColorSummary import get_image_summary_from_2d, get_image_summary_from_3d
+
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
@@ -23,14 +27,10 @@ FINDS_PHOTO_DIR = "photos"
 MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 HEMISPHERES = ("N", "S")
+
  
- 
-class MySplash(QSplashScreen):
-    
-    def mousePressEvent(self, event):
-        # disable default "click-to-dismiss" behaviour
-        pass
-class MainWindow(QMainWindow):
+
+class MainWindow(QMainWindow, PopUp, Visualized):
     """View (GUI)."""
 
 
@@ -117,74 +117,7 @@ class MainWindow(QMainWindow):
             msg.exec()
             
         #Remember to refresh
-    def ask_for_prompt(self):
-        Title = "Please enter the file path!"
-        while True:
-            
-            QMessageBox(self,text="Please select a path to the files").exec()
-            dlg = QFileDialog(self)
-            dlg.setFileMode(QFileDialog.Directory)
-            dlg.resize(600,100)                    
-            dlg.setWindowTitle(Title)
-            dlg.exec()
-            text = dlg.selectedFiles()[0]
-            
-            if (pathlib.Path(text).is_dir()):
-                has_N_S = (any([pathlib.Path(path).stem == "N" or pathlib.Path(path).stem == "S" for path in glob(f"{text}/*")]))
-                if has_N_S:
-                    #This is when the path is actually nice enough that we can save it
-                    true_path = text
-                    if not pathlib.Path("./settings.json").is_file():
-                        #In this case, we can make a settings from scratch
-                        file_dict = {"FILE_ROOT": f"{true_path}"}
-
-                    else:
-                        f = open('settings.json')
-                        #Whether if the key is not there  or the path doesn't exist, we are sure we can save it in the dict now
-                        file_dict = json.load(f)                        
-                        file_dict["FILE_ROOT"] = true_path
-                        f.close()
-                    with open('settings.json', 'w') as fp:
-                            json.dump(file_dict, fp)
-                            fp.close()
-                    break    
-                else:
-                    Title = "Valid paths must contain a directory named N or S!"
-            else:
-                Title = "Path doesn't exist"
     
-    def set_up_3d_window(self):
-            widget = self.model
-
-            self.vis = o3d.visualization.Visualizer()
-            self.vis.create_window(visible=False) #Visible false there wont be an extra window opened
-            #self.vis.add_geometry(pcd)
-            self.area_comparator = AreaComparator(self.vis)
-            hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
-            self.window = QWindow.fromWinId(hwnd)
-            self.windowcontainer = QWidget.createWindowContainer(self.window, widget)
-            self.windowcontainer.setMinimumSize(430, 390)
-
-            timer = QTimer(self)
-            timer.timeout.connect(self.update_vis)
-            timer.start(1)
-            
-    def update_vis(self):
-
-                self.vis.poll_events()
-                self.vis.update_renderer()
-
-    def change_model(self,current_pcd, previous_pcd):
-        self.vis.get_render_option().point_size = 5#Generally we need this value to be larger only if we draw the jpgs
-        if previous_pcd :
-            self.vis.remove_geometry(previous_pcd)
-        self.current_pcd = current_pcd
-        self.vis.add_geometry(current_pcd)
-        self.vis.update_geometry(current_pcd)
-        
-    def empty_cb(self, combobox):
-        combobox.addItems([])
-        combobox.setCurrentIndex(-1)
 
     def populate_hemispheres(self):
         self.hemisphere_cb.clear()
@@ -265,18 +198,10 @@ class MainWindow(QMainWindow):
         self.context_cb.addItems(res)
         self.set_context(0 if len(res) > 0 else -1)
         self.context_cb.setEnabled(len(res) > 1)
-        splash = MySplash()
-        splash.show()
-        splash.showMessage("Loading finds. It might take a while")
         
-        self.populate_finds()
-        splash.showMessage("Loading models. It might take a while")
-
-        self.populate_models()
-        window = QMainWindow()
-        window.show()
-        splash.finish(window)
- 
+        funcs_to_run = [["Loading finds. It might take a while", self.populate_finds],["Loading models. It might take a while",self.populate_models]]
+        self.load_and_run(funcs_to_run) 
+    
     def set_context(self, index):
         self.context_cb.setCurrentIndex(index)
 
@@ -345,11 +270,12 @@ class MainWindow(QMainWindow):
         actual_index = 0
         self.get_2d_areas()
         all_3d_areas  = []
-        all_3d_areas
+        all_3d_color_summaries = []
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
             all_3d_area = []
+            all_3d_color_summary = []
             for item in  items:
                 index = item[0]
                 path = item[1]
@@ -360,8 +286,10 @@ class MainWindow(QMainWindow):
  
 
                 area = self.area_comparator.get_3d_object_area(path)
+                color_summary = (get_image_summary_from_3d(path,self.vis))
                 print(f"index: {actual_index}: 3dArea: {area}")
                 all_3d_area.append([area, batch_num,piece_num ])
+                all_3d_color_summary.append([color_summary, batch_num,piece_num ])
                 ply = QStandardItem(f"{index}")
                 ply.setData(f"{path}", Qt.UserRole) 
                 if (int(batch_num), int(piece_num)) in all_matched_3d_models:
@@ -369,8 +297,10 @@ class MainWindow(QMainWindow):
                 batch.appendRow(ply)
                 actual_index += 1
             all_3d_areas.append(all_3d_area)
+            all_3d_color_summaries.append(all_3d_color_summary)
             model.appendRow(batch)
         self.all_3d_areas = (all_3d_areas)
+        self.all_3d_color_summaries = all_3d_color_summaries
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
@@ -391,6 +321,7 @@ class MainWindow(QMainWindow):
                 piece_num = self.all_3d_areas[i][j][2]
                 similarity_scores.append([max(_3d_area/_2d_area, _2d_area/_3d_area), batch_num, piece_num])
         return similarity_scores
+ 
     def contextChanged(self):
         self.statusLabel.setText(f"")
         self.selected_find.setText(f"")
@@ -402,17 +333,9 @@ class MainWindow(QMainWindow):
         if hasattr(self, "current_pcd"):
             self.vis.remove_geometry(self.current_pcd)
             self.current_pcd = None
-        splash = MySplash()
-        splash.show()
-        splash.showMessage("Loading finds. It might take a while")
-        
-        self.populate_finds()
-        splash.showMessage("Loading models. It might take a while")
 
-        self.populate_models()
-        window = QMainWindow()
-        window.show()
-        splash.finish(window)
+        funcs_to_run = [["Loading finds. It might take a while", self.populate_finds],["Loading models. It might take a while",self.populate_models]]
+        self.load_and_run(funcs_to_run)
     def get_2d_areas(self):
         all_2d_areas = []
         for i in range(self.findsList.count() ):
@@ -446,23 +369,7 @@ class MainWindow(QMainWindow):
             self.findsList.addItem(item)
             self._3d_model_dict[f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find)}"] = _3d_locations
 
-    def change_3d_model(self, current, previous):
-        current_model_path = (current.data( Qt.UserRole))
-        if current_model_path:
-            current_pcd_load = o3d.io.read_point_cloud(current_model_path)
-            if not hasattr(self, "current_pcd"):
-                self.current_pcd = None
-            self.change_model( current_pcd_load, self.current_pcd)
-            self.current_pcd = current_pcd_load
-            
-            m = re.search( MODELS_FILES_RE, current_model_path.replace("\\", "/"))
-                #This error happens when the relative path is different
-            if m:
-                    
-                batch_num = str(int(m.group(1))) # int("006") -> int(6). We remove leading 0
-                piece_num = m.group(2)
-                self.new_batch.setText(batch_num)
-                self.new_piece.setText(piece_num)
+
               
     def load_find_images(self, selected_item):
         self.selected_find_widget = selected_item
@@ -475,8 +382,10 @@ class MainWindow(QMainWindow):
         
 
         photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
+ 
         front_photo = QImage(str(photos_dir / "1.jpg"))
         back_photo = QImage(str(photos_dir / "2.jpg"))
+
         self.findFrontPhoto_l.setPixmap(
             QPixmap.fromImage(front_photo).scaledToWidth(self.findFrontPhoto_l.width())
         )
@@ -525,10 +434,12 @@ class MainWindow(QMainWindow):
             if (int(score_i_j_tuple[1]), int(score_i_j_tuple[2])) in all_matched_3d_models:
                     ply.setForeground(QColor("red"))
             ply.setData(f"{whole_path}", Qt.UserRole) 
+            
             model.appendRow(ply)
         self.sortedModelList.setModel(model)
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
-
+    
+ 
        
 def main():
     """Main function."""

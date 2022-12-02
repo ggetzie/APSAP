@@ -93,19 +93,7 @@ class AreaComparator:
         _3d_area = self.get_3d_object_area(_3d_object_path)
         _2d_area = self.get_2d_picture_area(_2d_picture_path)
         return  (max(_3d_area/_2d_area, _2d_area/ _3d_area))
-        """
-                area_comparator = AreaComparator()
-        total = 0
-        import time
-        now = time.time()
-        for i in range(0, 100):
-            val = (area_comparator.compare_3d_with_2d(f"./image_ply_pairs/{i}.ply", f"./image_ply_pairs/{i}.tif"))
-            print(val)
-            total += val
-        print(total)
-        print(f"Total: {time.time() - now} seconds")
-        
-        """
+ 
 
 #Depreciated. Maybe useful but this approach is not accurate
 def red_box_get_pixel_difference(vis, bounding_box):

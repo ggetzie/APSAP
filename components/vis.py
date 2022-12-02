@@ -4,8 +4,11 @@ from area_detect import AreaComparator
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import   QWindow 
 from PyQt5.QtWidgets import  QWidget
+from PyQt5.QtCore import Qt,QTimer
 from ColorSummary import get_image_summary_from_2d, get_image_summary_from_3d
 import re
+MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
+MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 class Visualized:
  
     def set_up_3d_window(self):
@@ -57,3 +60,4 @@ class Visualized:
                 piece_num = m.group(2)
                 self.new_batch.setText(batch_num)
                 self.new_piece.setText(piece_num)
+    

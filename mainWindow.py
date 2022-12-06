@@ -17,7 +17,7 @@ basedir = pathlib.Path().resolve()
 from area_detect import AreaComparator
 from components.vis import Visualized
 from components.pop_up import PopUp
-from ColorSummary import get_image_summary_from_2d, get_image_summary_from_3d
+from ColorSummary import get_brightness_summary_from_2d, get_brightness_summary_from_3d, get_color_summary_from_3d, srgb_color_difference
 from components.load_qt_images_models import LoadImagesModels
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
@@ -199,8 +199,10 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
             self.current_pcd = None
 
         funcs_to_run = [["Loading finds. It might take a while", self.populate_finds],["Loading models. It might take a while",self.populate_models]]
+        import time
+        now = time.time()
         self.load_and_run(funcs_to_run)
-        
+        print(f"Timed passed: {time.time() - now} seconds")
 
         
 
@@ -257,19 +259,21 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
             if not (self._3d_model_dict[key][0] == None and self._3d_model_dict[key][1] == None):
                 all_matched_3d_models.add(self._3d_model_dict[key])
  
-        print(all_matched_3d_models)
+        
         #Add all items onto the QTree
  
         
         #Notice how the areas
         actual_index = 0
         all_3d_areas  = []
-        all_3d_color_summaries = []
+        all_3d_brightness_summaries = []
+        all_3d_colors_summaries = []
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
             all_3d_area = []
-            all_3d_color_summary = []
+            all_3d_brightness_summary = []
+            all_3d_colors_summary = []
             for item in  items:
                 index = item[0]
                 path = item[1]
@@ -282,10 +286,13 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 area = self.area_comparator.get_3d_object_area(path)
                 #Calculate the color summary of the current piece
              
-                color_summary = (get_image_summary_from_3d(path,self.vis))
+                brightness_summary = (get_brightness_summary_from_3d(path,self.vis))
+                colors_summary = get_color_summary_from_3d(path,self.vis)
+                all_3d_colors_summary.append(colors_summary)
                 print(f"index: {actual_index}: 3dArea: {area}")
                 all_3d_area.append([area, batch_num,piece_num ])
-                all_3d_color_summary.append([color_summary, batch_num,piece_num ])
+                all_3d_brightness_summary.append([brightness_summary, batch_num,piece_num ])
+                
                 ply = QStandardItem(f"{index}")
                 ply.setData(f"{path}", Qt.UserRole) 
                 if (int(batch_num), int(piece_num)) in all_matched_3d_models:
@@ -293,10 +300,12 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 batch.appendRow(ply)
                 actual_index += 1
             all_3d_areas.append(all_3d_area)
-            all_3d_color_summaries.append(all_3d_color_summary)
+            all_3d_brightness_summaries.append(all_3d_brightness_summary)
+            all_3d_colors_summaries.append(all_3d_colors_summary)
             model.appendRow(batch)
         self.all_3d_areas = (all_3d_areas)
-        self.all_3d_color_summaries = all_3d_color_summaries
+        self.all_3d_brightness_summaries = all_3d_brightness_summaries
+        self.all_3d_colors_summaries = all_3d_colors_summaries
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     

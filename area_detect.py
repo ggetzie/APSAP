@@ -83,11 +83,6 @@ class AreaComparator:
         tif_area =  get_ceremic_area(ceremic_mask, mm_per_pixel)
         return tif_area
     
-    def get_3d_model_color_summary():
-        pass
-    
-    def get_2d_picture_color_summary():
-        pass
  
     def compare_3d_with_2d(self,_3d_object_path, _2d_picture_path):
         _3d_area = self.get_3d_object_area(_3d_object_path)

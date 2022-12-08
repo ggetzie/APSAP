@@ -14,11 +14,11 @@ import win32gui
 import json
 import numpy as np
 basedir = pathlib.Path().resolve() 
-from area_detect import AreaComparator
 from components.vis import Visualized
 from components.pop_up import PopUp
-from ColorSummary import get_brightness_summary_from_2d, get_brightness_summary_from_3d, get_color_summary_from_3d, srgb_color_difference
+from components.ColorSummary import get_brightness_summary_from_2d, get_brightness_summary_from_3d, get_color_summary_from_3d, srgb_color_difference
 from components.load_qt_images_models import LoadImagesModels
+from components.boundingSimilarity import  get_3d_width_length
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
@@ -27,8 +27,12 @@ FINDS_PHOTO_DIR = "photos"
 MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 HEMISPHERES = ("N", "S")
+from sklearn import datasets, linear_model, metrics
 
  
+#Here let's do some simple machine learning to get
+
+
 
 class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
     """View (GUI)."""
@@ -44,6 +48,9 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         
         setting = json.load(open("settings.json"))
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
+#
+
+
         self.set_up_3d_window()
         self.populate_hemispheres()
  
@@ -58,8 +65,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         self.findsList.currentItemChanged.connect(self.load_find_images)
         
         self.update_button.clicked.connect(self.update_model_db)
-
-
+        easting_northing_context = self.get_easting_northing_context()
+ 
     def populate_hemispheres(self):
         self.hemisphere_cb.clear()
         res = [
@@ -268,12 +275,11 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         all_3d_areas  = []
         all_3d_brightness_summaries = []
         all_3d_colors_summaries = []
+        all_3d_width_length_summaries = []
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
-            all_3d_area = []
-            all_3d_brightness_summary = []
-            all_3d_colors_summary = []
+  
             for item in  items:
                 index = item[0]
                 path = item[1]
@@ -288,32 +294,29 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
              
                 brightness_summary = (get_brightness_summary_from_3d(path,self.vis))
                 colors_summary = get_color_summary_from_3d(path,self.vis)
-                all_3d_colors_summary.append(colors_summary)
-                print(f"index: {actual_index}: 3dArea: {area}")
-                all_3d_area.append([area, batch_num,piece_num ])
-                all_3d_brightness_summary.append([brightness_summary, batch_num,piece_num ])
                 
+                width_length_summary = (get_3d_width_length(path,self.vis))
+                all_3d_colors_summaries.append(colors_summary)
+                print(f"index: {actual_index}: 3dArea: {area}")
+                all_3d_areas.append([area, batch_num,piece_num ])
+                all_3d_brightness_summaries.append([brightness_summary, batch_num,piece_num ])
+                all_3d_width_length_summaries.append([width_length_summary, batch_num,piece_num ])
                 ply = QStandardItem(f"{index}")
                 ply.setData(f"{path}", Qt.UserRole) 
                 if (int(batch_num), int(piece_num)) in all_matched_3d_models:
                     ply.setForeground(QColor("red"))
                 batch.appendRow(ply)
                 actual_index += 1
-            all_3d_areas.append(all_3d_area)
-            all_3d_brightness_summaries.append(all_3d_brightness_summary)
-            all_3d_colors_summaries.append(all_3d_colors_summary)
             model.appendRow(batch)
         self.all_3d_areas = (all_3d_areas)
+        self.all_3d_width_length_summaries = all_3d_width_length_summaries
         self.all_3d_brightness_summaries = all_3d_brightness_summaries
         self.all_3d_colors_summaries = all_3d_colors_summaries
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)
     
           
-
-    def get_3d_areas(self):
-        pass
-       
+ 
 def main():
     """Main function."""
     # Create an instance of QApplication

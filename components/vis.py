@@ -5,7 +5,8 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import   QWindow 
 from PyQt5.QtWidgets import  QWidget
 from PyQt5.QtCore import Qt,QTimer
-from ColorSummary import get_color_difference
+from components.ColorSummary import get_color_difference
+from components.boundingSimilarity import get_3d_width_length
 import re
 MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"

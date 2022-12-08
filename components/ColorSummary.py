@@ -1,11 +1,9 @@
-
-
 import numpy as np
 from  model.nn_segmentation import MaskPredictor
 from PIL import Image
-from misc import open_image, get_mask_pixel_width, get_ceremic_area
+from misc import open_image 
 import open3d as o3d
-from skimage.color import rgb2lab, deltaE_cie76
+ 
 
 import math
 
@@ -92,7 +90,7 @@ def get_color_summary_from_3d (model_path, vis):
     pic =  np.multiply(np.array(object_image), 255) 
     
  
-    all_channels_not_255 =( pic[:, :, 0] != 255. ) &  (pic[:, :, 1 ] != 255. )  & (pic[:, :, 2] != 255. ) 
+    all_channels_not_255 =~ (( pic[:, :, 0] == 255. ) &  (pic[:, :, 1 ] == 255. )  & (pic[:, :, 2] == 255. ) )
     pixels_color =  pic[all_channels_not_255] 
  
    
@@ -129,6 +127,4 @@ def get_color_difference(front_color, back_color, model_color ):
  
     biggest_color_difference = srgb_color_difference([255,255,255],[0,0,0]) /2 #The color difference wouldn't be two drastic. Let's clamp the value a bit
     return   biggest_color_difference / (biggest_color_difference - min(color_diff_1, color_diff_2)) 
-    #The value approoach one when the similaritiy is exactly the same 
-    
-    return 0
+ 

@@ -2,15 +2,10 @@
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QColor, QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel, QMovie, QPainter
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QListWidgetItem, QFileDialog, QMessageBox, QSplashScreen
-from components.ColorSummary import get_brightness_summary_from_2d, get_color_difference, get_color_summary_from_2d
-from components.boundingSimilarity import get_2d_width_length
-from components.ColorSummary import get_brightness_summary_from_2d, get_brightness_summary_from_3d, get_color_summary_from_3d, srgb_color_difference
-from components.boundingSimilarity import get_3d_width_length
+ 
 import numpy as np
 import open3d as o3d
-import math
-from glob import glob
+ 
  
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
@@ -101,21 +96,22 @@ class LoadImagesModels:
         _2d_image_path_image_2 = image_path/ "2.jpg"
 
         #Area based similiarity
-        _2d_area_image_1 = self.area_comparator.get_2d_picture_area(_2d_image_path_image_1)
-        _2d_area_image_2 = self.area_comparator.get_2d_picture_area(_2d_image_path_image_2)    
+        _2d_area_image_1 = self.comparator.get_2d_picture_area(_2d_image_path_image_1)
+        _2d_area_image_2 = self.comparator.get_2d_picture_area(_2d_image_path_image_2)    
         #Brightness based simliarity
-        color_brightness_2d_image_2 = get_brightness_summary_from_2d(_2d_image_path_image_2)
-        color_brightness_2d_image_1 = get_brightness_summary_from_2d(_2d_image_path_image_1)
+        color_brightness_2d_image_2 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
+        color_brightness_2d_image_1 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)
         
 
         #Let's do the third one: color based similarity
         #Prepare the colors summaries for these two pictures
-        front_color = (get_color_summary_from_2d(_2d_image_path_image_1))
-        back_color = (get_color_summary_from_2d(_2d_image_path_image_2))  
+        #Not that useful we found out.
+        #front_color = (get_color_summary_from_2d(_2d_image_path_image_1))
+       # back_color = (get_color_summary_from_2d(_2d_image_path_image_2))  
         
         #Fourth one, width length
-        _2d_width_length_image_1 = (get_2d_width_length(_2d_image_path_image_1))
-        _2d_width_length_image_2 = (get_2d_width_length(_2d_image_path_image_2))
+        _2d_width_length_image_1 = (self.comparator.get_2d_width_length(_2d_image_path_image_1))
+        _2d_width_length_image_2 = (self.comparator.get_2d_width_length(_2d_image_path_image_2))
         #Getting the simlarity scores here 
         similarity_scores = []    
 
@@ -125,11 +121,6 @@ class LoadImagesModels:
                 batch_num = self.all_3d_areas[i][1]
                 piece_num = self.all_3d_areas[i][2]
  
- 
-  
- 
-      
-           
                 color_brightness_3d = (self.all_3d_brightness_summaries[i][0][3]) 
                  
                 area_similarity = min( max(_3d_area/_2d_area_image_2, _2d_area_image_2/_3d_area) , max(_3d_area/_2d_area_image_1, _2d_area_image_1/_3d_area))
@@ -138,7 +129,7 @@ class LoadImagesModels:
                 brightness_similarity = min( max((color_brightness_2d_image_2[3]/1.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[3]/1.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[3]/1.2), (color_brightness_2d_image_1[3]/1.2)/color_brightness_3d))
                 #
                 brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[-1]/2.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[-1]*2.2), (color_brightness_2d_image_1[-1]/2.2)/color_brightness_3d))
-                color_similarity = get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
+                #color_similarity = get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
                 #
                 width_length_3d = self.all_3d_width_length_summaries[i][0]
                
@@ -147,8 +138,8 @@ class LoadImagesModels:
                 width_length_simlarity = min (width_length_simlarity_with_image_1, width_length_simlarity_with_image_2)
                 
                 
-                all_similarities = np.array([area_similarity, width_length_simlarity, brightness_similarity, color_similarity, brightness_std_similarity, ])
-                multipliers = np.array([90, 25, 0, 0, 0])
+                all_similarities = np.array([area_similarity, width_length_simlarity, brightness_similarity,  brightness_std_similarity])
+                multipliers = np.array([90, 45, 85, 0.05])
                 
                 similarity_scores.append([np.dot(all_similarities, multipliers), batch_num, piece_num])
                 

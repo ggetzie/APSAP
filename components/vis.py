@@ -1,12 +1,10 @@
 import win32gui
 import open3d as o3d
-from area_detect import AreaComparator
+from comparator import Comparator
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import   QWindow 
 from PyQt5.QtWidgets import  QWidget
 from PyQt5.QtCore import Qt,QTimer
-from components.ColorSummary import get_color_difference
-from components.boundingSimilarity import get_3d_width_length
 import re
 MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
@@ -17,7 +15,7 @@ class Visualized:
 
             self.vis = o3d.visualization.Visualizer()
             self.vis.create_window(visible=False) #Visible false there wont be an extra window opened
-            self.area_comparator = AreaComparator(self.vis)
+            self.comparator = Comparator(self.vis)
             hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
 
 

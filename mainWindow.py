@@ -16,9 +16,7 @@ import numpy as np
 basedir = pathlib.Path().resolve() 
 from components.vis import Visualized
 from components.pop_up import PopUp
-from components.ColorSummary import get_brightness_summary_from_2d, get_brightness_summary_from_3d, get_color_summary_from_3d, srgb_color_difference
 from components.load_qt_images_models import LoadImagesModels
-from components.boundingSimilarity import  get_3d_width_length
 #sample_3d_image
 # FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
 FINDS_SUBDIR = "finds/individual"
@@ -65,8 +63,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         self.findsList.currentItemChanged.connect(self.load_find_images)
         
         self.update_button.clicked.connect(self.update_model_db)
-        easting_northing_context = self.get_easting_northing_context()
- 
+  
     def populate_hemispheres(self):
         self.hemisphere_cb.clear()
         res = [
@@ -268,14 +265,15 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
  
         
         #Add all items onto the QTree
- 
-        
-        #Notice how the areas
+
+        #We get all the information of all the 3d models, that we can use to rank them by similarity
         actual_index = 0
         all_3d_areas  = []
         all_3d_brightness_summaries = []
         all_3d_colors_summaries = []
         all_3d_width_length_summaries = []
+        import time
+        now = time.time()
         for batch in batches_dict:
             items =  batches_dict[batch]
             batch = QStandardItem(f"{batch}")
@@ -289,13 +287,15 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 piece_num = m.group(2)
  
                 #Calculate the area of the current piece
-                area = self.area_comparator.get_3d_object_area(path)
-                #Calculate the color summary of the current piece
-             
-                brightness_summary = (get_brightness_summary_from_3d(path,self.vis))
-                colors_summary = get_color_summary_from_3d(path,self.vis)
+                #area = self.comparator.get_3d_object_area(path)
+               
+                brightness_summary = (self.comparator.get_brightness_summary_from_3d(path,self.vis))
+                #Calculate the color summary of the current piece     
+                colors_summary = self.comparator.get_color_summary_from_3d(path,self.vis)
                 
-                width_length_summary = (get_3d_width_length(path,self.vis))
+                #width_length_summary = self.comparator.get_3d_width_length(path,self.vis)
+                area, width_length_summary = self.comparator.get_3d_object_area_and_width_length(path)
+            
                 all_3d_colors_summaries.append(colors_summary)
                 print(f"index: {actual_index}: 3dArea: {area}")
                 all_3d_areas.append([area, batch_num,piece_num ])
@@ -308,6 +308,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
+        print(f"{time.time() - now} seconds")
         self.all_3d_areas = (all_3d_areas)
         self.all_3d_width_length_summaries = all_3d_width_length_summaries
         self.all_3d_brightness_summaries = all_3d_brightness_summaries

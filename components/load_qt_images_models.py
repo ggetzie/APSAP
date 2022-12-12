@@ -95,7 +95,7 @@ class LoadImagesModels:
             ply.setData(f"{whole_path}", Qt.UserRole) 
             
             model.appendRow(ply)
-        print(self._3d_model_dict)
+ 
         self.sortedModelList.setModel(model)
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
  

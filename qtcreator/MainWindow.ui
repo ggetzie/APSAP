@@ -279,7 +279,7 @@
       <x>20</x>
       <y>120</y>
       <width>71</width>
-      <height>411</height>
+      <height>431</height>
      </rect>
     </property>
     <property name="sizeIncrement">
@@ -351,7 +351,7 @@
       <x>100</x>
       <y>120</y>
       <width>258</width>
-      <height>411</height>
+      <height>431</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="findPhotosLayout">
@@ -384,21 +384,11 @@
      <string>3dmodel</string>
     </property>
    </widget>
-   <widget class="QTreeView" name="modelList">
-    <property name="geometry">
-     <rect>
-      <x>370</x>
-      <y>120</y>
-      <width>221</width>
-      <height>401</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="selected_find">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>540</y>
+      <x>310</x>
+      <y>570</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -421,8 +411,8 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>540</y>
+      <x>180</x>
+      <y>570</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -467,8 +457,8 @@
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>540</y>
+      <x>410</x>
+      <y>570</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -507,8 +497,8 @@
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>540</y>
+      <x>550</x>
+      <y>570</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -557,8 +547,8 @@
    <widget class="QFrame" name="frame_4">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>540</y>
+      <x>730</x>
+      <y>570</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -594,8 +584,8 @@
    <widget class="QLabel" name="current_piece">
     <property name="geometry">
      <rect>
-      <x>870</x>
-      <y>540</y>
+      <x>860</x>
+      <y>570</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -612,8 +602,8 @@
    <widget class="QFrame" name="frame_5">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>540</y>
+      <x>920</x>
+      <y>570</y>
       <width>161</width>
       <height>51</height>
      </rect>
@@ -649,8 +639,8 @@
    <widget class="QFrame" name="frame_6">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>610</y>
+      <x>550</x>
+      <y>670</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -686,8 +676,8 @@
    <widget class="QLabel" name="current_batch">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>540</y>
+      <x>670</x>
+      <y>570</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -704,8 +694,8 @@
    <widget class="QFrame" name="frame_7">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>610</y>
+      <x>730</x>
+      <y>670</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -741,8 +731,8 @@
    <widget class="QLabel" name="new_batch">
     <property name="geometry">
      <rect>
-      <x>680</x>
-      <y>610</y>
+      <x>670</x>
+      <y>670</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -759,8 +749,8 @@
    <widget class="QLabel" name="new_piece">
     <property name="geometry">
      <rect>
-      <x>870</x>
-      <y>610</y>
+      <x>860</x>
+      <y>670</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -777,8 +767,8 @@
    <widget class="QFrame" name="frame_8">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>610</y>
+      <x>920</x>
+      <y>670</y>
       <width>161</width>
       <height>51</height>
      </rect>
@@ -814,8 +804,8 @@
    <widget class="QPushButton" name="update_button">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>680</y>
+      <x>840</x>
+      <y>770</y>
       <width>221</width>
       <height>51</height>
      </rect>
@@ -829,6 +819,68 @@
      <string>Update</string>
     </property>
    </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>100</y>
+      <width>251</width>
+      <height>451</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Order by Batch #</string>
+     </attribute>
+     <widget class="QTreeView" name="modelList">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>251</width>
+        <height>431</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Order by Area Similarity</string>
+     </attribute>
+     <widget class="QTreeView" name="sortedModelList">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>251</width>
+        <height>441</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="remove_button">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>770</y>
+      <width>211</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>13</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Remove match</string>
+    </property>
+   </widget>
+   <zorder>tabWidget</zorder>
    <zorder>frame</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>contextDisplay</zorder>
@@ -836,7 +888,6 @@
    <zorder>statusLabel</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>model</zorder>
-   <zorder>modelList</zorder>
    <zorder>selected_find</zorder>
    <zorder>frame_2</zorder>
    <zorder>frame_3</zorder>
@@ -851,6 +902,7 @@
    <zorder>new_piece</zorder>
    <zorder>frame_8</zorder>
    <zorder>update_button</zorder>
+   <zorder>remove_button</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

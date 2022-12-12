@@ -2,13 +2,12 @@
 from PyQt5 import uic
 from PyQt5.QtCore import Qt,QTimer
 from PyQt5.QtGui import QColor, QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel, QMovie, QPainter
- 
+from PIL.ImageQt import ImageQt
+
 import numpy as np
 import open3d as o3d
- 
- 
-#sample_3d_image
-# FILE_ROOT = pathlib.Path("D:\\ararat\\data\\files")
+from misc import open_image
+
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
@@ -31,9 +30,12 @@ class LoadImagesModels:
 
         photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
         self.path_2d_picture = photos_dir
-        front_photo = QImage(str(photos_dir / "1.jpg"))
-        back_photo = QImage(str(photos_dir / "2.jpg"))
-
+        import time
+        now = time.time()
+        front_photo = ImageQt(open_image(str(photos_dir / "1.jpg"), full_size=False))
+         
+        back_photo =  ImageQt(open_image(str(photos_dir / "2.jpg"), full_size=False))
+        print(f"time passed: {time.time() - now}")
         self.findFrontPhoto_l.setPixmap(
             QPixmap.fromImage(front_photo).scaledToWidth(self.findFrontPhoto_l.width())
         )
@@ -43,7 +45,8 @@ class LoadImagesModels:
         self.selected_find.setText(find_num)
         easting_northing_context = self.get_easting_northing_context()
         _3d_locations = self._3d_model_dict[f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"]    
-       
+
+        #If we already matched the 
         if _3d_locations[0] != None and _3d_locations[1] != None:
             self.current_batch.setText(str(_3d_locations[0]))
             self.current_piece.setText(str(_3d_locations[1]))
@@ -60,6 +63,11 @@ class LoadImagesModels:
         else:
             self.current_batch.setText("NS")
             self.current_piece.setText("NS")
+            if hasattr(self, "current_pcd"):
+                self.vis.remove_geometry(self.current_pcd)
+                self.current_pcd = None
+            #Here let's remove the 3d model
+            
             
         #We have an image chosen, we can get the simlarity scores against all 3d model's images
         _2d_image_path = photos_dir 
@@ -87,6 +95,7 @@ class LoadImagesModels:
             ply.setData(f"{whole_path}", Qt.UserRole) 
             
             model.appendRow(ply)
+        print(self._3d_model_dict)
         self.sortedModelList.setModel(model)
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
  
@@ -106,8 +115,8 @@ class LoadImagesModels:
         #Let's do the third one: color based similarity
         #Prepare the colors summaries for these two pictures
         #Not that useful we found out.
-        #front_color = (get_color_summary_from_2d(_2d_image_path_image_1))
-       # back_color = (get_color_summary_from_2d(_2d_image_path_image_2))  
+        front_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_1))
+        back_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_2))  
         
         #Fourth one, width length
         _2d_width_length_image_1 = (self.comparator.get_2d_width_length(_2d_image_path_image_1))
@@ -127,10 +136,10 @@ class LoadImagesModels:
                 
                 
                 brightness_similarity = min( max((color_brightness_2d_image_2[3]/1.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[3]/1.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[3]/1.2), (color_brightness_2d_image_1[3]/1.2)/color_brightness_3d))
-                #
+         
                 brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[-1]/2.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[-1]*2.2), (color_brightness_2d_image_1[-1]/2.2)/color_brightness_3d))
-                #color_similarity = get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
-                #
+                color_similarity = self.comparator.get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
+                 
                 width_length_3d = self.all_3d_width_length_summaries[i][0]
                
                 width_length_simlarity_with_image_1  = (max (width_length_3d[0]/_2d_width_length_image_1[0],_2d_width_length_image_1[0]/  width_length_3d[0]) +  max (width_length_3d[1]/_2d_width_length_image_1[1],_2d_width_length_image_1[1]/  width_length_3d[1]))/2
@@ -138,8 +147,8 @@ class LoadImagesModels:
                 width_length_simlarity = min (width_length_simlarity_with_image_1, width_length_simlarity_with_image_2)
                 
                 
-                all_similarities = np.array([area_similarity, width_length_simlarity, brightness_similarity,  brightness_std_similarity])
-                multipliers = np.array([90, 45, 85, 0.05])
+                all_similarities = np.array([area_similarity, brightness_similarity, width_length_simlarity,  brightness_std_similarity, color_similarity])
+                multipliers = np.array([90, 65, 40,5, 0.15])
                 
                 similarity_scores.append([np.dot(all_similarities, multipliers), batch_num, piece_num])
                 

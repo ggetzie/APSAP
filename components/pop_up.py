@@ -5,7 +5,7 @@ import pathlib
 import json
 from glob import glob as glob
 from database_tools import update_match_info
-from PyQt5.QtGui import QColor, QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel, QMovie, QPainter
+from PyQt5.QtGui import QColor 
 
 class LoadingSplash(QSplashScreen):
     
@@ -89,12 +89,14 @@ class PopUp():
             find_num = self.selected_find.text()
             batch_num = self.new_batch.text()
             piece_num = self.new_piece.text()
+            previous_current_batch_num = self.current_batch.text()
+            previous_current_piece_num = self.current_piece.text()
+
             if easting and northing and context and find_num and batch_num and piece_num:
                 update_match_info(easting, northing,context, int(find_num),int(batch_num),int(piece_num))
                 #Here to avoid loading time, we manually update some data. We can
                 #reload the contexts but it would be way too slow
-                batch_num = self.new_batch.text()
-                piece_num = self.new_piece.text()
+
                 if hasattr(self,  "selected_find_widget"):
                     self.selected_find_widget.setForeground(QColor("red"))
                 self.current_batch.setText(batch_num)
@@ -107,13 +109,31 @@ class PopUp():
 
                     for j in range(mod.item(i).rowCount()):
                         if int(batch_num) == int(mod.item(i).text()) and int(piece_num) == int(mod.item(i).child(j).text()):
+                            #Make the newly selected red
                             mod.item(i).child(j).setForeground(QColor("red"))
+                        if previous_current_batch_num != "NS" and previous_current_piece_num != "NS":
+                            if int(previous_current_batch_num) == int(mod.item(i).text()) and int(previous_current_piece_num) == int(mod.item(i).child(j).text()):
+                                #Make the old selected black
+                                mod.item(i).child(j).setForeground(QColor("black"))
+
+
+                
+                
                 #Make the item red in sortedModelList
                 sortedMod = self.sortedModelList.model()
                 for i in range(sortedMod.rowCount()):
-                    #f"{int(_3d_locations[0]):03}", 1).replace("*", f"{int(_3d_locations[1])}
+            
                     if sortedMod.item(i).text() == f"Batch {int(batch_num):03}, model: {int(piece_num)}":
-                        (sortedMod.item(i)).setForeground(QColor("red"))
+                        (sortedMod.item(i)).setForeground(QColor("red"))       
+                    if previous_current_batch_num != "NS" and previous_current_piece_num != "NS":        
+                        if sortedMod.item(i).text() == f"Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}":                      
+                            (sortedMod.item(i)).setForeground(QColor("black"))
+                #Also we need to unred the previous selected item in the sorted model list
+                
+                dict_key = f"{easting},{northing },{context},{int(find_num)}" 
+                self._3d_model_dict[dict_key] = (int(batch_num), int(piece_num))
+        
+                
             else:
                 QMessageBox(self,text="Please select both a find and a model").exec()
     def update_model_db(self):

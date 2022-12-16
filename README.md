@@ -1,6 +1,6 @@
-# Getting Started
+# Ceramic Sherd Matcher
 
-## Prerequisites
+## Getting Started
 
 Make sure [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local) 11.6 or 11.7 is installed
 
@@ -26,6 +26,10 @@ Install the rest of the requirements from the requirements.txt file.
 ```
 pip install -r requirements.txt
 ```
+
+Download the model and add the directory to the repository (this is excluded from git due to size)
+
+[model download](https://hkuhk-my.sharepoint.com/:f:/g/personal/ggetzie_hku_hk/EjFo29VjsmJHvQLH1pAD6kwBQaOKFCcut0XJSjTSBv6IAA?e=M5Ul8h)
 
 To start the program, run the mainWindow.py file with the virtual environment active.
 

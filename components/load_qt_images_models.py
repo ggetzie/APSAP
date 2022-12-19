@@ -84,26 +84,12 @@ class LoadImagesModels:
      
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Sorted models"])
-        #
   
-        easting, northing, context = self.get_easting_northing_context()
-        
-        _3d_coor = (get_pottery_sherd_info(easting, northing,context, find_num))
-        
+         
         
         for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):
             self.number_of_models += 1 
-            if  i ==0 and _3d_coor == (int(score_i_j_tuple[1]) , int(score_i_j_tuple[2])):
-                self.number_of_top_1 += 1
-            if  i < 3 and  _3d_coor == (int(score_i_j_tuple[1]) , int(score_i_j_tuple[2])):
-                self.number_of_top_3 += 1
             
-            if  i < 5 and _3d_coor == (int(score_i_j_tuple[1]) , int(score_i_j_tuple[2])):
-                self.number_of_top_5 += 1
-            
-            if i < 10 and _3d_coor == (int(score_i_j_tuple[1]) , int(score_i_j_tuple[2])):
-                self.number_of_top_10 += 1
-                        
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
             path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
             whole_path = (path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace("*", f"{int(score_i_j_tuple[2])}", 1)) 
@@ -112,16 +98,7 @@ class LoadImagesModels:
             ply.setData(f"{whole_path}", Qt.UserRole) 
             
             model.appendRow(ply)
-        print(self.number_of_models)
-        print(self.number_of_top_1)
-        print(self.number_of_top_3)
-        print(self.number_of_top_5)
-        print(self.number_of_top_10)
-        
-        print(self.number_of_top_1 / self.number_of_models)
-        print(self.number_of_top_3 / self.number_of_models)
-        print(self.number_of_top_5 / self.number_of_models)
-        print(self.number_of_top_10 / self.number_of_models)
+ 
         self.sortedModelList.setModel(model)
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
  

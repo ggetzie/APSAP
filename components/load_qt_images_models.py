@@ -88,7 +88,7 @@ class LoadImagesModels:
          
         
         for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):
-            self.number_of_models += 1 
+      
             
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
             path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))

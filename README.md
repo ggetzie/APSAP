@@ -36,3 +36,6 @@ To start the program, run the mainWindow.py file with the virtual environment ac
 ```
 python ./mainWindow.py
 ```
+## Explanations
+
+To understand how the application actually works, take a look at the pdf(s) in the folder "./docs/"

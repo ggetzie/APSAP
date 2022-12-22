@@ -44,8 +44,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         
         setting = json.load(open("settings.json"))
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
-#
-
+ 
 
         self.set_up_3d_window()
         self.populate_hemispheres()

@@ -1,5 +1,9 @@
 import sys
+opengl_path = 'E:\\Users\\bertliu\\Downloads\\opengl32.dll'
 
+import ctypes
+
+ctypes.cdll.LoadLibrary(opengl_path)
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import (

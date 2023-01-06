@@ -1,5 +1,8 @@
+#opengl_path = "C:\\Windows\\System32\\opengl32.dll"
+
 import win32gui
 import open3d as o3d
+
 from comparator import Comparator
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QWindow

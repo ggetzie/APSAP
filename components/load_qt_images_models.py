@@ -7,7 +7,7 @@ from PIL.ImageQt import ImageQt
 import numpy as np
 import open3d as o3d
 from misc import open_image
-
+from database_tools import get_pottery_sherd_info
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
@@ -84,8 +84,11 @@ class LoadImagesModels:
      
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Sorted models"])
+  
+         
         
-        for score_i_j_tuple in sorted(flat_simllarity_list):
+        for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):
+      
             
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
             path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
@@ -124,20 +127,25 @@ class LoadImagesModels:
         #Getting the simlarity scores here 
         similarity_scores = []    
 
+
         for i in range(len(self.all_3d_areas)):
            
                 _3d_area = self.all_3d_areas[i][0]
                 batch_num = self.all_3d_areas[i][1]
                 piece_num = self.all_3d_areas[i][2]
- 
+
+
+                    
                 color_brightness_3d = (self.all_3d_brightness_summaries[i][0][3]) 
-                 
+                color_brightness_std_3d = (self.all_3d_brightness_summaries[i][0][-1]) 
+ 
                 area_similarity = min( max(_3d_area/_2d_area_image_2, _2d_area_image_2/_3d_area) , max(_3d_area/_2d_area_image_1, _2d_area_image_1/_3d_area))
                 
                 
                 brightness_similarity = min( max((color_brightness_2d_image_2[3]/1.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[3]/1.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[3]/1.2), (color_brightness_2d_image_1[3]/1.2)/color_brightness_3d))
          
-                brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[-1]/2.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[-1]*2.2), (color_brightness_2d_image_1[-1]/2.2)/color_brightness_3d))
+                
+                brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.1)/color_brightness_std_3d, color_brightness_std_3d/(color_brightness_2d_image_2[-1]/2.1)) , max(color_brightness_std_3d/(color_brightness_2d_image_1[-1]/2.1), (color_brightness_2d_image_1[-1]/2.1)/color_brightness_std_3d))
                 color_similarity = self.comparator.get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
                  
                 width_length_3d = self.all_3d_width_length_summaries[i][0]

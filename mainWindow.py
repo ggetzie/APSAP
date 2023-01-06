@@ -58,10 +58,10 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         uic.loadUi("qtcreator/MainWindow.ui", self)
         if not self.check_has_path_in_setting():
             self.ask_for_prompt()
-
+        
         setting = json.load(open("settings.json"))
-        self.file_root = pathlib.Path(setting["FILE_ROOT"])
-        #
+        self.file_root = pathlib.Path(setting["FILE_ROOT"] )
+ 
 
         self.set_up_3d_window()
         self.populate_hemispheres()

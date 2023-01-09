@@ -140,7 +140,7 @@ class Comparator:
         upper_q = pixels_sorted[int(len(pixels_sorted)* (3/4))]
         lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
         std = np.std(pixels_sorted)
-        return (max_,min_,median, mean,upper_q, lower_q, std)
+        return (int(max_),int(min_),int(median), (mean),int(upper_q), int(lower_q), (std))
     
     def get_brightness_summary_from_3d (self, model_path):
         vis = self.vis
@@ -216,7 +216,7 @@ class Comparator:
     
         vis.remove_geometry(current_pcd_load)
         del ctr
-        return (r_mean, g_mean, b_mean)
+        return (float(r_mean), float(g_mean), float(b_mean))
         
     def srgb_color_difference(self, colors1, colors2):
         #https://en.wikipedia.org/wiki/Color_difference#sRGB

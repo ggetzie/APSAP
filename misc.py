@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image, ImageStat
 import cv2
 from PyQt5.QtWidgets import QSplashScreen
- 
+import json
 
 
 def get_mask_pixel_width(image):
@@ -79,3 +79,22 @@ def fig2img(fig):
     img = Image.open(buf)
     return img
 
+
+def simple_get_json(json_file):
+    f = open('data.json')
+    data = json.load(f)
+    return data
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+def simple_save_json(json_object, json_file):
+    with open(json_file, 'w') as f:
+        json.dump(json_object, f, cls=NpEncoder)

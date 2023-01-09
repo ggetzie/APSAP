@@ -40,13 +40,14 @@ basedir = pathlib.Path().resolve()
 from components.vis import Visualized
 from components.pop_up import PopUp
 from components.load_qt_images_models import LoadImagesModels
-
+from misc import simple_get_json, simple_save_json
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
 MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 HEMISPHERES = ("N", "S")
+
 
 
 # Here let's do some simple machine learning to get
@@ -64,6 +65,11 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
             self.ask_for_prompt()
         
         setting = json.load(open("settings.json"))
+        self.json_data = simple_get_json("data.json")
+        calculuated_paths = dict()
+        for obj in self.json_data["past_records"]:
+            calculuated_paths[obj["path"]] = obj
+        self.calculuated_paths = calculuated_paths
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
  
 
@@ -267,6 +273,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
 
         path = str((self.get_context_dir() / MODELS_FILES_DIR))
         all_model_paths = glob(path)
+        
+         
         if not all_model_paths:
             self.statusLabel.setText(f"No models were found")
         # Setting up the model
@@ -313,27 +321,56 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
 
             for item in items:
                 index = item[0]
+                 
                 path = item[1]
-                m = re.search(MODELS_FILES_RE, path.replace("\\", "/"))
-                # This error happens when the relative path is different
-                batch_num = m.group(1)
-                piece_num = m.group(2)
+                
+                if path in self.calculuated_paths:
+                    batch_num = self.calculuated_paths[path]["batch_num"]
+                    piece_num = self.calculuated_paths[path]["piece_num"]
+                    brightness_summary = self.calculuated_paths[path]["brightness_summary"]
+                    colors_summary = self.calculuated_paths[path]["colors_summary"]
+                    width_length_summary = self.calculuated_paths[path]["width_length_summary"]
+                    area = self.calculuated_paths[path]["area"]
+                    index = self.calculuated_paths[path]["index"]    
+                else:
 
-                # Calculate the area of the current piece
+                    m = re.search(MODELS_FILES_RE, path.replace("\\", "/"))
+                    # This error happens when the relative path is different
+                    batch_num = m.group(1)
+                    piece_num = m.group(2)
 
-                brightness_summary = self.comparator.get_brightness_summary_from_3d(
-                    path
-                )
-                # Calculate the color summary of the current piece
-                colors_summary = self.comparator.get_color_summary_from_3d(path)
+                    # Calculate the area of the current piece
 
-                (
-                    area,
-                    width_length_summary,
-                ) = self.comparator.get_3d_object_area_and_width_length(path)
-
+                    brightness_summary = self.comparator.get_brightness_summary_from_3d(
+                        path
+                    )
+                    brightness_summary = list(brightness_summary)
+                
+                    # Calculate the color summary of the current piece
+                    colors_summary = self.comparator.get_color_summary_from_3d(path)
+                    colors_summary = list(colors_summary)
+                    (
+                        area,
+                        width_length_summary,
+                    ) = self.comparator.get_3d_object_area_and_width_length(path)
+                    width_length_summary = list(width_length_summary)
+                    json_data = self.json_data
+                    temp = {}
+                    temp["path"] = path
+                    temp["index"] = index
+                    temp["batch_num"] = batch_num
+                    temp["piece_num"] = piece_num
+                    
+                    temp["brightness_summary"] = brightness_summary
+                    temp["colors_summary"] =  colors_summary
+                    temp["area"] =  area
+                    temp["width_length_summary"] =  width_length_summary
+                    json_data["past_records"].append(temp)
                 all_3d_colors_summaries.append(colors_summary)
                 print(f"index: {actual_index}: 3dArea: {area}")
+
+                 
+                #Here we better save the information
                 all_3d_areas.append([area, batch_num, piece_num])
                 all_3d_brightness_summaries.append(
                     [brightness_summary, batch_num, piece_num]
@@ -348,6 +385,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
+        simple_save_json(self.json_data, "data.json")
+
         print(f"{time.time() - now} seconds")
         self.all_3d_areas = all_3d_areas
         self.all_3d_width_length_summaries = all_3d_width_length_summaries

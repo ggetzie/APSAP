@@ -35,6 +35,7 @@ class LoadImagesModels:
         front_photo = ImageQt(open_image(str(photos_dir / "1.jpg"), full_size=False))
          
         back_photo =  ImageQt(open_image(str(photos_dir / "2.jpg"), full_size=False))
+        #
         print(f"time passed: {time.time() - now}")
         self.findFrontPhoto_l.setPixmap(
             QPixmap.fromImage(front_photo).scaledToWidth(self.findFrontPhoto_l.width())

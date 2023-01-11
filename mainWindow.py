@@ -253,20 +253,26 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         # Get a dictionary to get all
         self._3d_model_dict = dict()
         for find in finds:
-            item = QListWidgetItem(find)
-            _3d_locations = get_pottery_sherd_info(
-                easting_northing_context[0],
-                easting_northing_context[1],
-                easting_northing_context[2],
-                int(find),
-            )
+             
+            first_jpg_path = self.get_context_dir() / FINDS_SUBDIR / find / FINDS_PHOTO_DIR / "1.jpg"
+            second_jpg_path = self.get_context_dir() / FINDS_SUBDIR / find / FINDS_PHOTO_DIR / "2.jpg"
+             
+            if pathlib.Path(first_jpg_path).is_file() and pathlib.Path(second_jpg_path).is_file:
 
-            if _3d_locations[0] != None and _3d_locations[1] != None:
-                item.setForeground(QColor("red"))
-            self.findsList.addItem(item)
-            self._3d_model_dict[
-                f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find)}"
-            ] = _3d_locations
+                item = QListWidgetItem(find)
+                _3d_locations = get_pottery_sherd_info(
+                    easting_northing_context[0],
+                    easting_northing_context[1],
+                    easting_northing_context[2],
+                    int(find),
+                )
+
+                if _3d_locations[0] != None and _3d_locations[1] != None:
+                    item.setForeground(QColor("red"))
+                self.findsList.addItem(item)
+                self._3d_model_dict[
+                    f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find)}"
+                ] = _3d_locations
 
     def populate_models(self):
         # Populate all models and at the same time get the information of those models for comparison.

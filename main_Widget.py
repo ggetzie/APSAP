@@ -282,6 +282,7 @@ class Main_Widget(QWidget):
     def set_images(self):
         self.path_img_frt = self.path_curr_img / "1.jpg"
         self.path_img_back = self.path_curr_img / "2.jpg"
+        #For now there are cases where 1.jpg and 2.jpg don't exist. We need to use cr3 files.abs(x)
         self.myimage = QImage(str(self.path_img_frt))
         if self.myimage.isNull():
             self.clear_query_area(mode=2)

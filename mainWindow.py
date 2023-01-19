@@ -32,6 +32,7 @@ import open3d as o3d
 import re
 from database_tools import get_pottery_sherd_info, update_match_info
 from glob import glob as glob
+from database_tools import get_all_pottery_sherd_info
 
 import json
 import numpy as np
@@ -89,15 +90,51 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         self.remove_button.clicked.connect(self.foo)
 
     def foo(self):
-        from database_tools import get_all_pottery_sherd_info
 
-        data = (get_all_pottery_sherd_info())
-        non_none = [x for x in data if x[12]!= None and x[13]!=None and x[2]== 478020 and x[3] == 4419550]
+        _3d_object ={}
 
-        for i in non_none:
-            print(i)
-        temp = self.get_context_dir() / FINDS_SUBDIR / "123" / FINDS_PHOTO_DIR / "1.jpg"
-        print(temp)
+        for data in self.json_data["past_records"]:
+            key =  f'{data["utm_easting"]}-{data["utm_northing"]}-{data["hemisphere"]}-{data["zone"]}-{data["context"]}-{int(data["batch_num"])}-{data["piece_num"]}'  
+           
+            _3d_object[key] = data
+
+        sherds = (get_all_pottery_sherd_info())
+        non_sherds = [x for x in sherds if x[12]!= None and x[13]!=None]
+
+        for i in non_sherds:
+            key=f"{i[2]}-{i[3]}-{i[0]}-{i[1]}-{i[4]}-{i[11]}-{i[12]}"
+            res = (
+            self.file_root
+            / self.hemisphere_cb.currentText()
+            / self.zone_cb.currentText()
+            / self.easting_cb.currentText()
+            / self.northing_cb.currentText()
+            / self.context_cb.currentText()
+            )
+            if key in _3d_object: #This means we have a 2d_pic matching a 3d model
+                _2d_pic_id = i[5]
+                res = ( self.file_root/ str(i[0])/ str(i[1])/  str(i[2])/ str(i[3])/  str(i[4]))
+                
+                _3d_object_info = _3d_object[key]
+                _3d_area = _3d_object_info["area"]
+ 
+                _3d_color = _3d_object_info["colors_summary"]
+                width_length_3d = _3d_object_info["width_length_summary"]
+                    
+                color_brightness_3d = (_3d_object_info["brightness_summary"][3]) 
+                color_brightness_std_3d = (_3d_object_info["brightness_summary"][-1]) 
+
+                #print(_3d_object[key])
+                wholeAddress_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
+                wholeAddress_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
+                print(_3d_object_info)
+                print(wholeAddress_1)
+                print(wholeAddress_2)
+                print()
+        
+        #('N', 38, 478130, 4419430, 128, 74, 'pottery', 'body', None, '2b2e382f-b307-4bb5-a01b-23618b47573b', 2022, 19, 7, False)
+
+  
     def populate_hemispheres(self):
         self.hemisphere_cb.clear()
         res = [

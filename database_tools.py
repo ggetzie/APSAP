@@ -100,7 +100,9 @@ def get_all_pottery_sherd_info():
         SELECT *
         FROM object.finds
         """
+        print("Started query")
         cursor.execute(query)
+        print("Ended query")
         # Fetch result
         records = cursor.fetchall()
         return records

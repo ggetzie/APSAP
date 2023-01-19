@@ -103,6 +103,9 @@ class LoadImagesModels:
         self.sortedModelList.setModel(model)
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
  
+
+
+    
     def get_similaritiy_scores(self, index,  image_path):
         _2d_image_path_image_1 = image_path/ "1.jpg"
        
@@ -134,33 +137,32 @@ class LoadImagesModels:
                 _3d_area = self.all_3d_areas[i][0]
                 batch_num = self.all_3d_areas[i][1]
                 piece_num = self.all_3d_areas[i][2]
-
-
+                _3d_color = (self.all_3d_colors_summaries[i])
+                width_length_3d = self.all_3d_width_length_summaries[i][0]
                     
                 color_brightness_3d = (self.all_3d_brightness_summaries[i][0][3]) 
                 color_brightness_std_3d = (self.all_3d_brightness_summaries[i][0][-1]) 
  
-                area_similarity = min( max(_3d_area/_2d_area_image_2, _2d_area_image_2/_3d_area) , max(_3d_area/_2d_area_image_1, _2d_area_image_1/_3d_area))
+           
                 
-                
-                brightness_similarity = min( max((color_brightness_2d_image_2[3]/1.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[3]/1.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[3]/1.2), (color_brightness_2d_image_1[3]/1.2)/color_brightness_3d))
-         
-                
-                brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.1)/color_brightness_std_3d, color_brightness_std_3d/(color_brightness_2d_image_2[-1]/2.1)) , max(color_brightness_std_3d/(color_brightness_2d_image_1[-1]/2.1), (color_brightness_2d_image_1[-1]/2.1)/color_brightness_std_3d))
-                color_similarity = self.comparator.get_color_difference(front_color, back_color  ,(self.all_3d_colors_summaries[i]))          
-                 
-                width_length_3d = self.all_3d_width_length_summaries[i][0]
-               
-                width_length_simlarity_with_image_1  = (max (width_length_3d[0]/_2d_width_length_image_1[0],_2d_width_length_image_1[0]/  width_length_3d[0]) +  max (width_length_3d[1]/_2d_width_length_image_1[1],_2d_width_length_image_1[1]/  width_length_3d[1]))/2
-                width_length_simlarity_with_image_2  = (max (width_length_3d[0]/_2d_width_length_image_2[0],_2d_width_length_image_2[0]/  width_length_3d[0]) +  max (width_length_3d[1]/_2d_width_length_image_2[1],_2d_width_length_image_2[1]/  width_length_3d[1]))/2
-                width_length_simlarity = min (width_length_simlarity_with_image_1, width_length_simlarity_with_image_2)
-                
-                
-                all_similarities = np.array([area_similarity, brightness_similarity, width_length_simlarity,  brightness_std_similarity, color_similarity])
-                multipliers = np.array([90, 65, 40,5, 0.15])
-                
-                similarity_scores.append([np.dot(all_similarities, multipliers), batch_num, piece_num])
+                similarity_scores.append([self.get_3d_2d_simi(color_brightness_3d, color_brightness_std_3d, _3d_area, _2d_area_image_2, _2d_area_image_1, color_brightness_2d_image_2, color_brightness_2d_image_1, front_color, back_color, _3d_color, width_length_3d, _2d_width_length_image_1, _2d_width_length_image_2  ), batch_num, piece_num])
                 
         return similarity_scores
+
+
+    def get_3d_2d_simi(self, color_brightness_3d, color_brightness_std_3d, _3d_area, _2d_area_image_2, _2d_area_image_1, color_brightness_2d_image_2, color_brightness_2d_image_1, front_color, back_color, _3d_color, width_length_3d, _2d_width_length_image_1, _2d_width_length_image_2  ):
+        area_similarity = min( max(_3d_area/_2d_area_image_2, _2d_area_image_2/_3d_area) , max(_3d_area/_2d_area_image_1, _2d_area_image_1/_3d_area))
+        brightness_similarity = min( max((color_brightness_2d_image_2[3]/1.2)/color_brightness_3d, color_brightness_3d/(color_brightness_2d_image_2[3]/1.2)) , max(color_brightness_3d/(color_brightness_2d_image_1[3]/1.2), (color_brightness_2d_image_1[3]/1.2)/color_brightness_3d))
+        brightness_std_similarity = min( max((color_brightness_2d_image_2[-1]/2.1)/color_brightness_std_3d, color_brightness_std_3d/(color_brightness_2d_image_2[-1]/2.1)) , max(color_brightness_std_3d/(color_brightness_2d_image_1[-1]/2.1), (color_brightness_2d_image_1[-1]/2.1)/color_brightness_std_3d))
+        color_similarity = self.comparator.get_color_difference(front_color, back_color  ,_3d_color)          
+        width_length_simlarity_with_image_1  = (max (width_length_3d[0]/_2d_width_length_image_1[0],_2d_width_length_image_1[0]/  width_length_3d[0]) +  max (width_length_3d[1]/_2d_width_length_image_1[1],_2d_width_length_image_1[1]/  width_length_3d[1]))/2
+        width_length_simlarity_with_image_2  = (max (width_length_3d[0]/_2d_width_length_image_2[0],_2d_width_length_image_2[0]/  width_length_3d[0]) +  max (width_length_3d[1]/_2d_width_length_image_2[1],_2d_width_length_image_2[1]/  width_length_3d[1]))/2
+        width_length_simlarity = min (width_length_simlarity_with_image_1, width_length_simlarity_with_image_2)
+        all_similarities = np.array([area_similarity, brightness_similarity, width_length_simlarity,  brightness_std_similarity, color_similarity])
+        multipliers = np.array([90, 65, 40,5, 0.15])
+        result = np.dot(all_similarities, multipliers) /np.sum(multipliers) #Now we reduce it to a number close to 1, the closer it is to one, the more accurate the prediction it is.
+        
+        
+        return result
 
  

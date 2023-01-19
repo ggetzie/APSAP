@@ -86,8 +86,18 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         self.findsList.currentItemChanged.connect(self.load_find_images)
 
         self.update_button.clicked.connect(self.update_model_db)
-        self.remove_button.clicked.connect(self.remove_match)
+        self.remove_button.clicked.connect(self.foo)
 
+    def foo(self):
+        from database_tools import get_all_pottery_sherd_info
+
+        data = (get_all_pottery_sherd_info())
+        non_none = [x for x in data if x[12]!= None and x[13]!=None and x[2]== 478020 and x[3] == 4419550]
+
+        for i in non_none:
+            print(i)
+        temp = self.get_context_dir() / FINDS_SUBDIR / "123" / FINDS_PHOTO_DIR / "1.jpg"
+        print(temp)
     def populate_hemispheres(self):
         self.hemisphere_cb.clear()
         res = [
@@ -244,6 +254,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         #    self.splash.showMessage("Loading finds")
         self.findsList.clear()
         context_dir = self.get_context_dir()
+ 
         finds_dir = context_dir / FINDS_SUBDIR
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
@@ -338,6 +349,9 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                     width_length_summary = self.calculuated_paths[path]["width_length_summary"]
                     area = self.calculuated_paths[path]["area"]
                     index = self.calculuated_paths[path]["index"]    
+                    context =  self.calculuated_paths[path]["context"]
+ 
+
                 else:
 
                     m = re.search(MODELS_FILES_RE, path.replace("\\", "/"))
@@ -371,6 +385,12 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                     temp["colors_summary"] =  colors_summary
                     temp["area"] =  area
                     temp["width_length_summary"] =  width_length_summary
+                    temp["context"] =  self.context_cb.currentText()
+                    temp["zone"] = self.zone_cb.currentText()
+                    temp['hemisphere'] = self.hemisphere_cb.currentText()
+                    temp["utm_easting"] = self.easting_cb.currentText()
+                    temp["utm_northing"] = self.northing_cb.currentText()
+
                     json_data["past_records"].append(temp)
                 all_3d_colors_summaries.append(colors_summary)
                 print(f"index: {actual_index}: 3dArea: {area}")

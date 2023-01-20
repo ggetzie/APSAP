@@ -81,7 +81,7 @@ def fig2img(fig):
 
 
 def simple_get_json(json_file):
-    f = open('data.json')
+    f = open(json_file)
     data = json.load(f)
     return data
 

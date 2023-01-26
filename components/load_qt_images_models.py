@@ -168,4 +168,16 @@ class LoadImagesModels:
         
         return result
 
+    def get_area_similarity(self, _3d_area, _2d_area_image_1, _2d_area_image_2, A, B, C):
+        smaller_area_ = min(_2d_area_image_1, _2d_area_image_2)
+        larger_area = max(_2d_area_image_1, _2d_area_image_2)
+        result = _3d_area * A/ 
+
+
+    def get_similarity(self):
+        #A new function to get the similarity.
+        #Consider area similarity:
+        #   The old function is find the
+        pass
+
  

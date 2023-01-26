@@ -168,12 +168,32 @@ class LoadImagesModels:
         
         return result
 
-    def get_area_similarity(self, _3d_area, _2d_area_image_1, _2d_area_image_2, A, B, C):
+    def ratio_larger_than_1(self, a, b):
+        #When we compare two numbers and assess if they are close, we reorder the divider and dividend to make sure the ratio is larger than 1, so that we can use the ratio as a similarity matric
+        #E.g. We can't easily compare 0.2 and 1.8 and say which ratio indicates a better similarity score, but we can compare 1.2 and 1.8 and say 1.2 is a better similiar score.
+        if (a > b):
+            return a/b
+        else:
+            return b/a
+         
+
+    def get_area_similarity(self, _3d_area, _2d_area_image_1, _2d_area_image_2, a, b):
+        #By using a model to find coefficient, a, b, c that minimize the equation  
+        #After getting such a model, by running this function, we can get the similarity 
+
+   
+     
         smaller_area_ = min(_2d_area_image_1, _2d_area_image_2)
         larger_area = max(_2d_area_image_1, _2d_area_image_2)
-        result = _3d_area * A/ 
+
+        small_ratio = ratio_larger_than_1(smaller_area_ * a + b, _3d_area)
+        large__ratio = ratio_larger_than_1(larger_area * a + b, _3d_area)
 
 
+        return result
+
+    def get_brightness_similairty(self, color_brightness_3d, color_brightness_2d_1, color_brightness_2d_2, abc):
+        pass
     def get_similarity(self):
         #A new function to get the similarity.
         #Consider area similarity:

@@ -114,6 +114,9 @@ class LoadImagesModels:
         #Area based similiarity
         _2d_area_image_1 = self.comparator.get_2d_picture_area(_2d_image_path_image_1)
         _2d_area_image_2 = self.comparator.get_2d_picture_area(_2d_image_path_image_2)    
+
+        print(_2d_area_image_1)
+        print(_2d_area_image_2)
         #Brightness based simliarity
         color_brightness_2d_image_2 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
         color_brightness_2d_image_1 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)

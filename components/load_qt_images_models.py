@@ -177,20 +177,31 @@ class LoadImagesModels:
             return b/a
          
 
-    def get_area_similarity(self, _3d_area, _2d_area_image_1, _2d_area_image_2, a, b):
-        #By using a model to find coefficient, a, b, c that minimize the equation  
-        #After getting such a model, by running this function, we can get the similarity 
+    def get_area_similarity(self, _3d_area, _2d_area_1, _2d_area_2, a, b):
+        #Assumtion 1: there is a linear relation between the _3d_area and the _2d_area
+        #We compare the 3d model's area with two pictures. Possible future improvement is to compare two 2d areas with two 3d areas.
+        smaller_area_ = min(_2d_area_1, _2d_area_2)
+        larger_area = max(_2d_area_1, _2d_area_2)
 
-   
-     
-        smaller_area_ = min(_2d_area_image_1, _2d_area_image_2)
-        larger_area = max(_2d_area_image_1, _2d_area_image_2)
+        #We assume there is a linear relationship between the the 3d area and the 2d area
+        small_ratio = self.ratio_larger_than_1(smaller_area_ * a + b, _3d_area)
+        large__ratio = self.ratio_larger_than_1(larger_area * a + b, _3d_area)
 
-        small_ratio = ratio_larger_than_1(smaller_area_ * a + b, _3d_area)
-        large__ratio = ratio_larger_than_1(larger_area * a + b, _3d_area)
+        #We assume the better result indicates the actual similairty
+        return min(large__ratio, small_ratio)
 
+    def get_brightness_similarity(self, _3d_brightness, _2d_brightness_1, _2d_brightness_2, a, b):
+        #Similiar reasoning behind function get_area_similarity()
+         
+        darker_brightness = min(_2d_brightness_1, _2d_brightness_2)
+        brighter_brightness = max(_2d_brightness_1, _2d_brightness_2)
 
-        return result
+         
+        darker_ratio = ratio_larger_than_1(darker_brightness * a + b, _3d_brightness)
+        brighter__ratio = ratio_larger_than_1(brighter_brightness * a + b, _3d_brightness)
+
+        return min(darker_ratio, brighter__ratio)
+
 
     def get_brightness_similairty(self, color_brightness_3d, color_brightness_2d_1, color_brightness_2d_2, abc):
         pass

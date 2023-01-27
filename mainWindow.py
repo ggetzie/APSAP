@@ -67,6 +67,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
         
         setting = json.load(open("settings.json"))
         self.json_data = simple_get_json("data.json")
+        self.parameters = simple_get_json("parameters.json")
         calculuated_paths = dict()
         for obj in self.json_data["past_records"]:
             calculuated_paths[obj["path"]] = obj
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
         self.findsList.currentItemChanged.connect(self.load_find_images)
 
         self.update_button.clicked.connect(self.update_model_db)
-        self.remove_button.clicked.connect(self.remove_match)
+        self.remove_button.clicked.connect(self.adjusting_similaritiy_weights)
 
 
   

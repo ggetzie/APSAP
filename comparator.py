@@ -229,14 +229,5 @@ class Comparator:
             return math.sqrt(2*( (colors2[0] - colors1[0])**2 ) + 4*( (colors2[1]  - colors1[1])**2 ) + 2 *( (colors2[2] - colors1[2])**2 ))
 
         
-    def get_color_difference(self, front_color, back_color, model_color ):
 
-    
-        
-        color_diff_1 = self.srgb_color_difference(front_color, model_color)
-        color_diff_2 = self.srgb_color_difference(back_color, model_color)
-        
-    
-        biggest_color_difference = self.srgb_color_difference([255,255,255],[0,0,0]) /2 #The color difference wouldn't be two drastic. Let's clamp the value a bit
-        return   biggest_color_difference / (biggest_color_difference - min(color_diff_1, color_diff_2)) 
     

@@ -18,7 +18,15 @@ import json
 import numpy as np
 import time
  
- 
+import smallestenclosingcircle
+from  model.nn_segmentation import MaskPredictor
+from misc import open_image
+ceremicPredictor =  MaskPredictor("./model/ceremicsmask.pt")
+import numpy as np
+from PIL import Image, ImageDraw
+#https://stackoverflow.com/questions/51696326/extracting-boundary-of-a-numpy-array
+from scipy.ndimage import binary_dilation
+import smallestenclosingcircle
  
 from misc import simple_get_json, simple_save_json
 FINDS_SUBDIR = "finds/individual"
@@ -35,7 +43,42 @@ HEMISPHERES = ("N", "S")
 
 class DebugFuncs():
 
+    def get_area_by_pixels(self, image_path, predictor):
+        image = open_image(image_path, full_size=False)
+        mask = predictor.predict(image)
+        mask_array = np.array(mask)
+        pixels = np.nonzero(mask_array)
+        pixel_area = len(pixels[0])
+        return pixel_area
+    def get_enclosing_circle_area(self, image_path, predictor):
+        image = open_image(image_path, full_size=False)
+        mask = predictor.predict(image)
+        mask_array = np.array(mask)
+        #Here using a technique to leave out only the points of the object consisting of the boundary, so that we have much fewer points to handle
+        k = np.ones((3,3),dtype=int)
+        boundary_array = binary_dilation(mask_array==0, k) & mask_array
+        #Here we get the x, y coordinates of the boundary(which is the non zeros values of the 2d array)
+        nonzeros_x_ys = np.nonzero(boundary_array)
+        #Tuples of all indices of the boundary
+        indices_tuples = list(zip(nonzeros_x_ys[0], nonzeros_x_ys[1]))
+        #Below is a nested O(n^2) for loop that gets
+        new_li = []
+        threshold = 100
+        for i in range(len(indices_tuples)): #For each of the tuple, compared it to all the tuples added before, if they are close in distance, don't add to it.
+            addable = True
+            for pairs in new_li:
+                if( (pairs[0] - indices_tuples[i][0])**2  +  (pairs[1] - indices_tuples[i][1])**2  < threshold):
+                    addable = False
+                    break
+            if(addable == True):
+                new_li.append(indices_tuples[i])
+        center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
+        return (radius**2 ) * 3.1416
 
+    
+ 
+
+   
     def adjust_parameters_slope_intercept(self):
         #This fucntion is used to get the data needed for finding the relationship between the 2d image and 3d model
         for_ml = simple_get_json("./for_ml.json")
@@ -174,7 +217,14 @@ class DebugFuncs():
   
         sherds = (get_all_pottery_sherd_info())
         non_sherds = [x for x in sherds if x[12]!= None and x[13]!=None]
+        to_be_saved = {}
+        to_be_saved["data"] = []
+        _3d_object ={}
 
+        for data in self.json_data["past_records"]:
+            key =  f'{data["utm_easting"]}-{data["utm_northing"]}-{data["hemisphere"]}-{data["zone"]}-{data["context"]}-{int(data["batch_num"])}-{data["piece_num"]}'  
+           
+            _3d_object[key] = data
         for i in non_sherds:
             key=f"{i[2]}-{i[3]}-{i[0]}-{i[1]}-{i[4]}-{i[11]}-{i[12]}"
             res = (
@@ -190,7 +240,13 @@ class DebugFuncs():
                 _2d_pic_id = i[5]
                 _2d_image_path_image_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
                 _2d_image_path_image_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
-
+                print()
+                print(_2d_image_path_image_1)
+                print(_2d_image_path_image_1)
+                print(self.get_enclosing_circle_area(_2d_image_path_image_1, self.comparator.ceremicPredictor))
+                print(self.get_area_by_pixels(_2d_image_path_image_1, self.comparator.ceremicPredictor))
+                print(self.get_enclosing_circle_area(_2d_image_path_image_2, self.comparator.ceremicPredictor))
+                print(self.get_area_by_pixels(_2d_image_path_image_2, self.comparator.ceremicPredictor))
     def adjusting_similaritiy_weights(self):
 
         current = time.time()

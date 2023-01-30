@@ -88,7 +88,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
         self.findsList.currentItemChanged.connect(self.load_find_images)
 
         self.update_button.clicked.connect(self.update_model_db)
-        self.remove_button.clicked.connect(self.adjust_parameters_slope_intercept)
+        self.remove_button.clicked.connect(self.remove_match)
 
 
   

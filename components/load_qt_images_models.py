@@ -116,7 +116,7 @@ class LoadImagesModels:
         width_length_similarity = self.get_width_length_similarity(_3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1,  _first_pic_side_2, _second_pic_side_1, _second_pic_side_2,parameters["width"]["slope"], parameters["width"]["intercept"],parameters["length"]["slope"], parameters["length"]["intercept"])
         total_similarity = area_similarity + brightness_similarity + brightness_std_similarity + width_length_similarity
         #weights = np.array([0.4, 0.38, 0.12, 0.1])
-        weights = np.array([1,1,1,1])
+        weights = np.array([2.85877858e-01 ,7.14122142e-01 ,0.00000000e+00, 5.55111512e-17])
         similarities = np.array([area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity])
         return np.dot(weights, similarities)# total_similarity/4
 
@@ -168,19 +168,21 @@ class LoadImagesModels:
 
  
 
-    def get_similarity_two_nums(self, a, b):
-        #When we compare two numbers and assess if they are close, we reorder the divider and dividend to make sure the ratio is larger than 1, so that we can use the ratio as a similarity matric
-        #E.g. We can't easily compare 0.2 and 1.8 and say which ratio indicates a better similarity score, but we can compare 1.2 and 1.8 and say 1.2 is a better similiar score.
+    def get_similarity_two_nums(self, a, b): #a, b >
+
+        #A new similiarity function
+        return abs(a - b) / (a + b) #If they are the same, it becomes zeros, if their difference approaches infinitry, it becomes 1.
+                
         """
+        Depreciated
+        When we compare two numbers and assess if they are close, we reorder the divider and dividend to make sure the ratio is larger than 1, so that we can use the ratio as a similarity matric
+        E.g. We can't easily compare 0.2 and 1.8 and say which ratio indicates a better similarity score, but we can compare 1.2 and 1.8 and say 1.2 is a better similiar score.
         if (a > b):
             return a/b
         else:
             return b/a
         
         """
-        #A new similiarity function
-        return abs(a - b) / (a + b) #If they are the same, it becomes zeros, if their differen approach infinitry, it becomes 1.
-         
 
     def get_area_similarity(self, _3d_area, _2d_area_1, _2d_area_2, a, b):
         #Assumtion 1: there is a linear relation between the _3d_area and the _2d_area

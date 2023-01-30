@@ -124,20 +124,20 @@ class DebugFuncs():
                     #1. area data
                     current_match = {}
                     current_match["_3d_area"] = _3d_area
-                    if(self.ratio_larger_than_1(_3d_area, _2d_area_image_1 ) >  self.ratio_larger_than_1(_3d_area, _2d_area_image_2 ) ): 
+                    if(self.get_similarity_two_nums(_3d_area, _2d_area_image_1 ) >  self.get_similarity_two_nums(_3d_area, _2d_area_image_2 ) ): 
                         current_match["_2d_area"] = _2d_area_image_2
                     else: 
                         current_match["_2d_area"] = _2d_area_image_1
                     
                     #2 brightness data
                     current_match["_3d_brightness"] = _3d_brightness      
-                    if(self.ratio_larger_than_1(_3d_brightness, _2d_brightness_1 ) >  self.ratio_larger_than_1(_3d_brightness, _2d_brightness_2 ) ): 
+                    if(self.get_similarity_two_nums(_3d_brightness, _2d_brightness_1 ) >  self.get_similarity_two_nums(_3d_brightness, _2d_brightness_2 ) ): 
                         current_match["_2d_brightness"] = _2d_brightness_2
                     else: 
                         current_match["_2d_brightness"] = _2d_brightness_1                    
                     #3 brightness std data
                     current_match["_3d_brightness_std"] = _3d_brightness_std      
-                    if(self.ratio_larger_than_1(_3d_brightness_std, _2d_brightness_std_1 ) >  self.ratio_larger_than_1(_3d_brightness_std, _2d_brightness_std_2 ) ): 
+                    if(self.get_similarity_two_nums(_3d_brightness_std, _2d_brightness_std_1 ) >  self.get_similarity_two_nums(_3d_brightness_std, _2d_brightness_std_2 ) ): 
                         current_match["_2d_brightness_std"] = _2d_brightness_std_2
                     else: 
                         current_match["_2d_brightness_std"] = _2d_brightness_std_1                    
@@ -146,8 +146,8 @@ class DebugFuncs():
                     # 
                     current_match["_3d_width"] = _3d_width                              
                     current_match["_3d_length"] = _3d_length                          
-                    unadjusted_similarity_1  = (self.ratio_larger_than_1(_2d_length_1, _3d_length ) +  self.ratio_larger_than_1( _2d_width_1, _3d_width ))/2
-                    unadjusted_similarity_2  = (self.ratio_larger_than_1(_2d_length_2, _3d_length ) +  self.ratio_larger_than_1(_2d_width_2, _3d_width))/2
+                    unadjusted_similarity_1  = (self.get_similarity_two_nums(_2d_length_1, _3d_length ) +  self.get_similarity_two_nums( _2d_width_1, _3d_width ))/2
+                    unadjusted_similarity_2  = (self.get_similarity_two_nums(_2d_length_2, _3d_length ) +  self.get_similarity_two_nums(_2d_width_2, _3d_width))/2
                     if(unadjusted_similarity_1 > unadjusted_similarity_2):
                         current_match["_2d_width"] = _2d_width_2                              
                         current_match["_2d_length"] = _2d_length_2         
@@ -167,6 +167,29 @@ class DebugFuncs():
         #('N', 38, 478130, 4419430, 128, 74, 'pottery', 'body', None, '2b2e382f-b307-4bb5-a01b-23618b47573b', 2022, 19, 7, False)
 
 
+
+
+
+    def testing_images_bounding_circcle(self):
+  
+        sherds = (get_all_pottery_sherd_info())
+        non_sherds = [x for x in sherds if x[12]!= None and x[13]!=None]
+
+        for i in non_sherds:
+            key=f"{i[2]}-{i[3]}-{i[0]}-{i[1]}-{i[4]}-{i[11]}-{i[12]}"
+            res = (
+            self.file_root
+            / self.hemisphere_cb.currentText()
+            / self.zone_cb.currentText()
+            / self.easting_cb.currentText()
+            / self.northing_cb.currentText()
+            / self.context_cb.currentText()
+            )
+            if key in _3d_object: #This means we have a 2d_pic matching a 3d model
+                res = ( self.file_root/ str(i[0])/ str(i[1])/  str(i[2])/ str(i[3])/  str(i[4]))
+                _2d_pic_id = i[5]
+                _2d_image_path_image_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
+                _2d_image_path_image_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
 
     def adjusting_similaritiy_weights(self):
 

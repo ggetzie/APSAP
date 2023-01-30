@@ -115,7 +115,8 @@ class LoadImagesModels:
         brightness_std_similarity = self.get_brightness_std_similarity(_3d_brightness_std, _2d_brightness_std_1, _2d_brightness_std_2,parameters["brightness_std"]["slope"], parameters["brightness_std"]["intercept"])
         width_length_similarity = self.get_width_length_similarity(_3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1,  _first_pic_side_2, _second_pic_side_1, _second_pic_side_2,parameters["width"]["slope"], parameters["width"]["intercept"],parameters["length"]["slope"], parameters["length"]["intercept"])
         total_similarity = area_similarity + brightness_similarity + brightness_std_similarity + width_length_similarity
-        weights = np.array([0.4, 0.38, 0.12, 0.1])
+        #weights = np.array([0.4, 0.38, 0.12, 0.1])
+        weights = np.array([1,1,1,1])
         similarities = np.array([area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity])
         return np.dot(weights, similarities)# total_similarity/4
 
@@ -129,9 +130,7 @@ class LoadImagesModels:
         #Area based similiarity
         _2d_area_image_1 = self.comparator.get_2d_picture_area(_2d_image_path_image_1)
         _2d_area_image_2 = self.comparator.get_2d_picture_area(_2d_image_path_image_2)    
-
-        print(_2d_area_image_1)
-        print(_2d_area_image_2)
+ 
         #Brightness based simliarity
         color_brightness_2d_image_2 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
         color_brightness_2d_image_1 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)
@@ -169,13 +168,18 @@ class LoadImagesModels:
 
  
 
-    def ratio_larger_than_1(self, a, b):
+    def get_similarity_two_nums(self, a, b):
         #When we compare two numbers and assess if they are close, we reorder the divider and dividend to make sure the ratio is larger than 1, so that we can use the ratio as a similarity matric
         #E.g. We can't easily compare 0.2 and 1.8 and say which ratio indicates a better similarity score, but we can compare 1.2 and 1.8 and say 1.2 is a better similiar score.
+        """
         if (a > b):
             return a/b
         else:
             return b/a
+        
+        """
+        #A new similiarity function
+        return abs(a - b) / (a + b) #If they are the same, it becomes zeros, if their differen approach infinitry, it becomes 1.
          
 
     def get_area_similarity(self, _3d_area, _2d_area_1, _2d_area_2, a, b):
@@ -186,11 +190,11 @@ class LoadImagesModels:
         larger_area = max(_2d_area_1, _2d_area_2)
 
         #We only calculuate the similirity based upon the more simliar image in terms of the area regardless a and b.
-        if(self.ratio_larger_than_1(smaller_area, _3d_area) >  self.ratio_larger_than_1(larger_area, _3d_area) ):
+        if(self.get_similarity_two_nums(smaller_area, _3d_area) >  self.get_similarity_two_nums(larger_area, _3d_area) ):
             #We use a and b to get a more accurate similarity.
-            return self.ratio_larger_than_1(larger_area * a + b, _3d_area)  
+            return self.get_similarity_two_nums(larger_area * a + b, _3d_area)  
         else:
-             return self.ratio_larger_than_1(smaller_area * a + b, _3d_area)  
+             return self.get_similarity_two_nums(smaller_area * a + b, _3d_area)  
  
 
     def get_brightness_similarity(self, _3d_brightness, _2d_brightness_1, _2d_brightness_2, a, b):
@@ -199,11 +203,11 @@ class LoadImagesModels:
         darker_brightness = min(_2d_brightness_1, _2d_brightness_2)
         brighter_brightness = max(_2d_brightness_1, _2d_brightness_2)
 
-        if(self.ratio_larger_than_1(darker_brightness, _3d_brightness) >  self.ratio_larger_than_1(brighter_brightness, _3d_brightness) ):
+        if(self.get_similarity_two_nums(darker_brightness, _3d_brightness) >  self.get_similarity_two_nums(brighter_brightness, _3d_brightness) ):
            
-            return self.ratio_larger_than_1(brighter_brightness * a + b, _3d_brightness)  
+            return self.get_similarity_two_nums(brighter_brightness * a + b, _3d_brightness)  
         else:
-             return self.ratio_larger_than_1(darker_brightness * a + b, _3d_brightness)  
+             return self.get_similarity_two_nums(darker_brightness * a + b, _3d_brightness)  
     
     def get_brightness_std_similarity(self, _3d_brightness_std, _2d_brightness_std_1, _2d_brightness_std_2, a, b):
         #Similiar reasoning behind function get_area_similarity()
@@ -212,11 +216,11 @@ class LoadImagesModels:
         larger_brightness_std = max(_2d_brightness_std_1, _2d_brightness_std_2)
 
          
-        if(self.ratio_larger_than_1(smaller_brightness_std, _3d_brightness_std) >  self.ratio_larger_than_1(larger_brightness_std, _3d_brightness_std) ):
+        if(self.get_similarity_two_nums(smaller_brightness_std, _3d_brightness_std) >  self.get_similarity_two_nums(larger_brightness_std, _3d_brightness_std) ):
            
-            return self.ratio_larger_than_1(larger_brightness_std * a + b, _3d_brightness_std)  
+            return self.get_similarity_two_nums(larger_brightness_std * a + b, _3d_brightness_std)  
         else:
-             return self.ratio_larger_than_1(smaller_brightness_std * a + b, _3d_brightness_std)  
+             return self.get_similarity_two_nums(smaller_brightness_std * a + b, _3d_brightness_std)  
     
 
     def get_width_length_similarity(self, _3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1, _first_pic_side_2, _second_pic_side_1, _second_pic_side_2, a, b, c, d):
@@ -233,12 +237,12 @@ class LoadImagesModels:
         shorter_side_pic_2 = min(_second_pic_side_1,_second_pic_side_2 )
 
         #if without linear adjustment, the image is closer, the image is the one we pick. //For now, arithematic mean is used, other types of mean maybe considered later
-        unadjusted_similarity_1  = (self.ratio_larger_than_1(longer_side_pic_1, longer_side_3d ) +  self.ratio_larger_than_1( shorter_side_pic_1, shorter_side_3d ))/2
-        unadjusted_similarity_2  = (self.ratio_larger_than_1(longer_side_pic_2, longer_side_3d ) +  self.ratio_larger_than_1(shorter_side_pic_2, shorter_side_3d))/2
+        unadjusted_similarity_1  = (self.get_similarity_two_nums(longer_side_pic_1, longer_side_3d ) +  self.get_similarity_two_nums( shorter_side_pic_1, shorter_side_3d ))/2
+        unadjusted_similarity_2  = (self.get_similarity_two_nums(longer_side_pic_2, longer_side_3d ) +  self.get_similarity_two_nums(shorter_side_pic_2, shorter_side_3d))/2
         if(unadjusted_similarity_1 > unadjusted_similarity_2):
-            result = (self.ratio_larger_than_1( shorter_side_pic_2* a + b, shorter_side_3d ))+ self.ratio_larger_than_1(longer_side_pic_2* c + d, longer_side_3d   ) /2
+            result = (self.get_similarity_two_nums( shorter_side_pic_2* a + b, shorter_side_3d ))+ self.get_similarity_two_nums(longer_side_pic_2* c + d, longer_side_3d   ) /2
         else:
-            result = (self.ratio_larger_than_1( shorter_side_pic_1* a + b, shorter_side_3d ) + self.ratio_larger_than_1(longer_side_pic_1* c + d, longer_side_3d   ) )/2
+            result = (self.get_similarity_two_nums( shorter_side_pic_1* a + b, shorter_side_3d ) + self.get_similarity_two_nums(longer_side_pic_1* c + d, longer_side_3d   ) )/2
        
         return  result
 

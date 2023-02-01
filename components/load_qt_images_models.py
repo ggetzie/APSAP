@@ -104,22 +104,29 @@ class LoadImagesModels:
         self.sortedModelList.selectionModel().currentChanged.connect(self.change_3d_model)
  
 
- 
+    def get_area_circle_similarity(self, _2d_area_circle_ratio_image_1,_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio, a, b):
 
+        if(self.get_similarity_two_nums(_2d_area_circle_ratio_image_1, all_3d_area_circle_ratio) >  self.get_similarity_two_nums(_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio) ):
+            
+             return self.get_similarity_two_nums(_2d_area_circle_ratio_image_2 * a + b, all_3d_area_circle_ratio)  
+        else:
+             return self.get_similarity_two_nums(_2d_area_circle_ratio_image_1 * a + b, all_3d_area_circle_ratio)  
 
-    def get_similarity(self, _3d_area, _2d_area_1, _2d_area_2, _3d_brightness, _2d_brightness_1, _2d_brightness_2, _3d_brightness_std, _2d_brightness_std_1, _2d_brightness_std_2, _3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1, _first_pic_side_2, _second_pic_side_1, _second_pic_side_2):
+    def get_similarity(self, _3d_area, _2d_area_1, _2d_area_2, _3d_brightness, _2d_brightness_1, _2d_brightness_2, _3d_brightness_std, _2d_brightness_std_1, _2d_brightness_std_2, _3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1, _first_pic_side_2, _second_pic_side_1, _second_pic_side_2,  _2d_area_circle_ratio_image_1,_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio):
 
         parameters = self.parameters
         area_similarity = self.get_area_similarity(_3d_area, _2d_area_1, _2d_area_2,parameters["area"]["slope"], parameters["area"]["intercept"])
         brightness_similarity = self.get_brightness_similarity(_3d_brightness, _2d_brightness_1, _2d_brightness_2,parameters["brightness"]["slope"], parameters["brightness"]["intercept"])
         brightness_std_similarity = self.get_brightness_std_similarity(_3d_brightness_std, _2d_brightness_std_1, _2d_brightness_std_2,parameters["brightness_std"]["slope"], parameters["brightness_std"]["intercept"])
         width_length_similarity = self.get_width_length_similarity(_3d_pic_side_1, _3d_pic_side_2, _first_pic_side_1,  _first_pic_side_2, _second_pic_side_1, _second_pic_side_2,parameters["width"]["slope"], parameters["width"]["intercept"],parameters["length"]["slope"], parameters["length"]["intercept"])
+        area_circle_similarity = self.get_area_circle_similarity(_2d_area_circle_ratio_image_1,_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio, 0.9055558282782922, 0.03996414943733839)
         total_similarity = area_similarity + brightness_similarity + brightness_std_similarity + width_length_similarity
         #weights = np.array([0.4, 0.38, 0.12, 0.1])
-        weights = np.array([2.85877858e-01 ,7.14122142e-01 ,0.00000000e+00, 5.55111512e-17])
-        similarities = np.array([area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity])
-        return np.dot(weights, similarities)# total_similarity/4
 
+        #
+        similarities = np.array([area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity])
+        return np.dot(weights, similarities)# total_similarity/4
+        #return area_circle_similarity
 
     
     def get_similaritiy_scores(self, index,  image_path):
@@ -146,9 +153,11 @@ class LoadImagesModels:
         _2d_width_length_image_1 = (self.comparator.get_2d_width_length(_2d_image_path_image_1))
         _2d_width_length_image_2 = (self.comparator.get_2d_width_length(_2d_image_path_image_2))
         #Getting the simlarity scores here 
+        _2d_area_circle_ratio_image_1 = self.comparator.get_2d_area_circle_ratio(_2d_image_path_image_1)
+        _2d_area_circle_ratio_image_2 = self.comparator.get_2d_area_circle_ratio(_2d_image_path_image_2)
+
         similarity_scores = []    
-
-
+        
         for i in range(len(self.all_3d_areas)):
            
                 _3d_area = self.all_3d_areas[i][0]
@@ -159,9 +168,9 @@ class LoadImagesModels:
                     
                 color_brightness_3d = (self.all_3d_brightness_summaries[i][0][3]) 
                 color_brightness_std_3d = (self.all_3d_brightness_summaries[i][0][-1]) 
- 
+                all_3d_area_circle_ratio = self.all_3d_area_circle_ratios[i][0]
            
-                similairty = (self.get_similarity( _3d_area, _2d_area_image_1, _2d_area_image_2, color_brightness_3d, color_brightness_2d_image_1[3], color_brightness_2d_image_2[3], color_brightness_std_3d, color_brightness_2d_image_1[-1], color_brightness_2d_image_2[-1], width_length_3d[0], width_length_3d[1], _2d_width_length_image_1[0], _2d_width_length_image_1[1], _2d_width_length_image_2[0], _2d_width_length_image_2[1]))
+                similairty = (self.get_similarity( _3d_area, _2d_area_image_1, _2d_area_image_2, color_brightness_3d, color_brightness_2d_image_1[3], color_brightness_2d_image_2[3], color_brightness_std_3d, color_brightness_2d_image_1[-1], color_brightness_2d_image_2[-1], width_length_3d[0], width_length_3d[1], _2d_width_length_image_1[0], _2d_width_length_image_1[1], _2d_width_length_image_2[0], _2d_width_length_image_2[1], _2d_area_circle_ratio_image_1,_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio ))
                 #similarity_scores.append([self.get_3d_2d_simi(color_brightness_3d, color_brightness_std_3d, _3d_area, _2d_area_image_2, _2d_area_image_1, color_brightness_2d_image_2, color_brightness_2d_image_1, front_color, back_color, _3d_color, width_length_3d, _2d_width_length_image_1, _2d_width_length_image_2  ), batch_num, piece_num])
                 similarity_scores.append([similairty, batch_num, piece_num])
         return similarity_scores

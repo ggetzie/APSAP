@@ -1,5 +1,5 @@
 import sys
-opengl_path = 'E:\\Users\\bertliu\\Downloads\\opengl32.dll'
+opengl_path = './opengl32.dll'
 
 import ctypes
 import scipy.optimize as opt
@@ -66,8 +66,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
             self.ask_for_prompt()
         
         setting = json.load(open("settings.json"))
-        self.json_data = simple_get_json("data.json")
-        self.parameters = simple_get_json("parameters.json")
+        self.json_data = simple_get_json("./parameters/data/data.json")
+        self.parameters = simple_get_json("./parameters/data/parameters.json")
         calculuated_paths = dict()
         for obj in self.json_data["past_records"]:
             calculuated_paths[obj["path"]] = obj
@@ -323,6 +323,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
         all_3d_brightness_summaries = []
         all_3d_colors_summaries = []
         all_3d_width_length_summaries = []
+        all_3d_area_circle_ratios = []
         import time
 
         now = time.time()
@@ -344,7 +345,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
                     area = self.calculuated_paths[path]["area"]
                     index = self.calculuated_paths[path]["index"]    
                     context =  self.calculuated_paths[path]["context"]
- 
+                    cirlcle_area_ratio = self.calculuated_paths[path]["cirlcle_area_ratio"]
 
                 else:
 
@@ -367,6 +368,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
                         area,
                         width_length_summary,
                     ) = self.comparator.get_3d_object_area_and_width_length(path)
+
+                    cirlcle_area_ratio = self.comparator.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
                     json_data = self.json_data
                     temp = {}
@@ -375,6 +378,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
                     temp["batch_num"] = batch_num
                     temp["piece_num"] = piece_num
                     
+                    temp["cirlcle_area_ratio"] = cirlcle_area_ratio
                     temp["brightness_summary"] = brightness_summary
                     temp["colors_summary"] =  colors_summary
                     temp["area"] =  area
@@ -391,6 +395,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
 
                  
                 #Here we better save the information
+                all_3d_area_circle_ratios.append([cirlcle_area_ratio, batch_num, piece_num])
                 all_3d_areas.append([area, batch_num, piece_num])
                 all_3d_brightness_summaries.append(
                     [brightness_summary, batch_num, piece_num]
@@ -405,12 +410,13 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        simple_save_json(self.json_data, "data.json")
+        simple_save_json(self.json_data, "./parameters/data/data.json")
 
         print(f"{time.time() - now} seconds")
         self.all_3d_areas = all_3d_areas
         self.all_3d_width_length_summaries = all_3d_width_length_summaries
         self.all_3d_brightness_summaries = all_3d_brightness_summaries
+        self.all_3d_area_circle_ratios = all_3d_area_circle_ratios
         self.all_3d_colors_summaries = all_3d_colors_summaries
         self.modelList.setModel(model)
         self.modelList.selectionModel().currentChanged.connect(self.change_3d_model)

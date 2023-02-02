@@ -15,8 +15,14 @@ MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/f
 MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
 HEMISPHERES = ("N", "S")
 import math
-
+from scipy.stats import gmean, tmean
 class LoadImagesModels:
+
+
+
+    def genereate_similiarity_ranked_pieces(similarities_list):
+        #Now the value become area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity, batch, piece)
+        pass
 
     def load_find_images(self, selected_item):
         self.selected_find_widget = selected_item
@@ -72,8 +78,35 @@ class LoadImagesModels:
             
         #We have an image chosen, we can get the simlarity scores against all 3d model's images
         _2d_image_path = photos_dir 
+
+        #Previously, here is simply a list of (val, batch  piece))
+        #Now the value become area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity, batch, piece)
+
+
+        old_flat_similairy_list = []
+
+
+
         flat_simllarity_list  = self.get_similaritiy_scores(find_num, _2d_image_path)
-      
+
+        #[area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity]
+
+
+
+
+
+
+
+
+        for i in (flat_simllarity_list):
+            temp = []
+            scores = i[0]
+            temp.append(gmean(scores ) + tmean(scores))
+            temp.append(i[1])
+            temp.append(i[2])
+            old_flat_similairy_list.append(temp)
+
+        flat_simllarity_list = old_flat_similairy_list
         all_matched_3d_models = set()
         
         for key in (self._3d_model_dict):
@@ -122,10 +155,10 @@ class LoadImagesModels:
         area_circle_similarity = self.get_area_circle_similarity(_2d_area_circle_ratio_image_1,_2d_area_circle_ratio_image_2, all_3d_area_circle_ratio, 0.9055558282782922, 0.03996414943733839)
         total_similarity = area_similarity + brightness_similarity + brightness_std_similarity + width_length_similarity
         #weights = np.array([0.4, 0.38, 0.12, 0.1])
-
-        #
+        #weights = np.array([2.85877858e-01 ,7.14122142e-01 ,0.00000000e+00, 5.55111512e-17, 0.1])
         similarities = np.array([area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity])
-        return np.dot(weights, similarities)# total_similarity/4
+        #return np.dot(weights, similarities)# total_similarity/4
+        return similarities
         #return area_circle_similarity
 
     

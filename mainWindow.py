@@ -1,5 +1,5 @@
 import sys
-opengl_path = './opengl32.dll'
+opengl_path = './model/opengl32.dll'
 
 import ctypes
 import scipy.optimize as opt

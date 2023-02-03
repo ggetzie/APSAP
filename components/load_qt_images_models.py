@@ -18,11 +18,59 @@ import math
 from scipy.stats import gmean, tmean
 class LoadImagesModels:
 
+    def genereate_similiarity_ranked_pieces(self, similarities_list):
 
-
-    def genereate_similiarity_ranked_pieces(similarities_list):
+        grand_similarity = []
+        for _threeple in similarities_list:
+            vals = _threeple[0]
+            grand_similarity.append([[gmean(vals) + tmean(vals)], _threeple[1], _threeple[2]])
+        return grand_similarity
+    def genereate_similiarity_ranked_pieces_priorty_ranking(self, similarities_list):
         #Now the value become area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity, batch, piece)
-        pass
+        area_similarity_list = []
+        brightness_similarity_list = []
+        brightness_similarity_std_list = []
+        width_length_similarity_list = []
+        area_circle_similarity_list = []
+        batch_items = {}
+        for row in similarities_list:
+           
+            area_similarity_list.append([row[0][0], row[-2], row[-1]])
+            brightness_similarity_list.append([row[0][1], row[-2], row[-1]])
+            brightness_similarity_std_list.append([row[0][2], row[-2], row[-1]])
+            width_length_similarity_list.append([row[0][3], row[-2], row[-1]])
+            area_circle_similarity_list.append([row[0][4], row[-2], row[-1]])
+            batch_items[(row[-2],  row[-1])] = {"area_similarity": -1, "brightness_similarity": -1, "brightness_std_similarity": -1, "width_length_similarity": -1, "area_circle_similarity": -1}
+        area_similarity_list.sort()
+        brightness_similarity_list.sort()
+        brightness_similarity_std_list.sort()
+        width_length_similarity_list.sort()
+        area_circle_similarity_list.sort()      
+ 
+        for index in batch_items:
+            batch = index[0]
+            piece = index[1]
+            for i in range(0, len(similarities_list)):
+                    
+                if area_similarity_list[i][-2] == batch and area_similarity_list[i][-1] == piece:
+                    batch_items[index]["area_similarity"] = i
+                if brightness_similarity_list[i][-2] == batch and brightness_similarity_list[i][-1] == piece:
+                    batch_items[index]["brightness_similarity"] = i
+                if brightness_similarity_std_list[i][-2] == batch and brightness_similarity_std_list[i][-1] == piece:
+                    batch_items[index]["brightness_std_similarity"] = i
+                if width_length_similarity_list[i][-2] == batch and width_length_similarity_list[i][-1] == piece:
+                    batch_items[index]["width_length_similarity"] = i
+                if area_circle_similarity_list[i][-2] == batch and area_circle_similarity_list[i][-1] == piece:
+                    batch_items[index]["area_circle_similarity"] = i
+        grand_similarity = []
+        for i in batch_items:
+            #It looks like brigthness_std is a terrible measure to compare, let's ignore it
+            similaritiy_scores_all = [batch_items[i]["area_similarity"] /len(similarities_list) , batch_items[i]["brightness_similarity"]/len(similarities_list) , batch_items[i]["brightness_std_similarity"]/len(similarities_list) , batch_items[i]["width_length_similarity"] /len(similarities_list) ,  batch_items[i]["area_circle_similarity"] /len(similarities_list)] 
+            value = gmean(similaritiy_scores_all )  
+            tup = (value, i[0], i[1])
+            grand_similarity.append(tup)
+        grand_similarity.sort()
+        return grand_similarity
 
     def load_find_images(self, selected_item):
         self.selected_find_widget = selected_item
@@ -91,22 +139,12 @@ class LoadImagesModels:
 
         #[area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity]
 
-
-
-
-
-
-
-
-        for i in (flat_simllarity_list):
-            temp = []
-            scores = i[0]
-            temp.append(gmean(scores ) + tmean(scores))
-            temp.append(i[1])
-            temp.append(i[2])
-            old_flat_similairy_list.append(temp)
-
-        flat_simllarity_list = old_flat_similairy_list
+ 
+ 
+      
+        #flat_simllarity_list = old_flat_similairy_list
+        flat_simllarity_list =     self.genereate_similiarity_ranked_pieces(flat_simllarity_list)
+     
         all_matched_3d_models = set()
         
         for key in (self._3d_model_dict):

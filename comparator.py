@@ -1,15 +1,17 @@
+#https://doc.qt.io/qt-5/model-view-programming.html
+
 import open3d as o3d 
 import numpy as np
-from misc import open_image, get_mask_pixel_width, get_ceremic_area
-from  model.nn_segmentation import MaskPredictor
+from helper.misc import open_image, get_mask_pixel_width, get_ceremic_area
+from  computation.nn_segmentation import MaskPredictor
 
 
 
 from PIL import Image
 import open3d as o3d 
 import numpy as np
-from misc import open_image, get_mask_pixel_width, get_ceremic_area
-from  model.nn_segmentation import MaskPredictor
+from helper.misc import open_image, get_mask_pixel_width, get_ceremic_area
+from  computation.nn_segmentation import MaskPredictor
 
 import math
 
@@ -22,22 +24,22 @@ class Comparator:
     def __init__(self, vis) -> None:
 
         self.vis = vis #o3d.visualization.Visualizer()
-        self.ceremicPredictor = MaskPredictor("./model/ceremicsmask.pt")
-        self.colorgridPredictor = MaskPredictor("./model/colorgridmask.pt")
+        self.ceremicPredictor = MaskPredictor("./computation/ceremicsmask.pt")
+        self.colorgridPredictor = MaskPredictor("./computation/colorgridmask.pt")
         self.vis.get_render_option().light_on = False
         self.vis.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
                                             #When we use our own field of view
-    def get_2d_area_circle_ratio(self, _2d_object_path):
+    def get_2d_area_circle_ratio(self, _2d_object_path) -> float:
         area_in_pixels= self.get_2d_area_by_pixels(_2d_object_path, self.ceremicPredictor)
         circle_in_pixels = self.get_2d_enclosing_circle_area(_2d_object_path, self.ceremicPredictor)
         return area_in_pixels/circle_in_pixels
 
-    def get_3d_area_circle_ratio(self, _3d_object_path):
+    def get_3d_area_circle_ratio(self, _3d_object_path) -> float:
         area_in_pixels= self.get_3d_object_area_in_pixels(_3d_object_path)
         circle_in_pixels = self.get_3d_object_circle_in_pixels(_3d_object_path)
         return area_in_pixels/circle_in_pixels
 
-    def get_3d_object_area_in_pixels(self, _3d_object_path):
+    def get_3d_object_area_in_pixels(self, _3d_object_path) -> int:
 
         
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 

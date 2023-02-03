@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QListWidgetItem,
 import pathlib
 import json
 from glob import glob as glob
-from database_tools import update_match_info
+from model.database_tools import update_match_info
 from PyQt5.QtGui import QColor 
 
 class LoadingSplash(QSplashScreen):
@@ -48,17 +48,17 @@ class PopUp():
                 if has_N_S:
                     #This is when the path is actually nice enough that we can save it
                     true_path = text
-                    if not pathlib.Path("./settings.json").is_file():
+                    if not pathlib.Path("./config/settings.json").is_file():
                         #In this case, we can make a settings from scratch
                         file_dict = {"FILE_ROOT": f"{true_path}"}
 
                     else:
-                        f = open('settings.json')
+                        f = open('./config/settings.json')
                         #Whether if the key is not there  or the path doesn't exist, we are sure we can save it in the dict now
                         file_dict = json.load(f)                        
                         file_dict["FILE_ROOT"] = true_path
                         f.close()
-                    with open('settings.json', 'w') as fp:
+                    with open('./config/settings.json', 'w') as fp:
                             json.dump(file_dict, fp)
                             fp.close()
                     break    
@@ -68,11 +68,11 @@ class PopUp():
                 Title = "Path doesn't exist"
                 
     def check_has_path_in_setting(self):
-        setting_found = pathlib.Path("./settings.json").is_file()  
+        setting_found = pathlib.Path("./config/settings.json").is_file()  
         if not setting_found:
             return False
         else:
-            setting_dict = json.load(open("settings.json")) if setting_found else {}  
+            setting_dict = json.load(open("./config/settings.json")) if setting_found else {}  
             key_exist = "FILE_ROOT" in setting_dict
             if key_exist:
                 path_exist =  pathlib.Path(setting_dict["FILE_ROOT"]).is_dir()

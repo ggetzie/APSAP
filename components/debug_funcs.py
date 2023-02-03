@@ -1,34 +1,18 @@
- 
- 
-import scipy.optimize as opt
- 
-from PyQt5 import uic
- 
- 
- 
-
 import pathlib
 import open3d as o3d
-import re
-from database_tools import get_pottery_sherd_info, update_match_info
+from model.database_tools import get_pottery_sherd_info, update_match_info, get_all_pottery_sherd_info
 from glob import glob as glob
-from database_tools import get_all_pottery_sherd_info
-
 import json
 import numpy as np
 import time
- 
 import smallestenclosingcircle
-from  model.nn_segmentation import MaskPredictor
-from misc import open_image
-ceremicPredictor =  MaskPredictor("./model/ceremicsmask.pt")
+from  computation.nn_segmentation import MaskPredictor
+from helper.misc import open_image
+ceremicPredictor =  MaskPredictor("./computation/ceremicsmask.pt")
 import numpy as np
-from PIL import Image, ImageDraw
-#https://stackoverflow.com/questions/51696326/extracting-boundary-of-a-numpy-array
 from scipy.ndimage import binary_dilation
-import smallestenclosingcircle
  
-from misc import simple_get_json, simple_save_json
+from helper.misc import simple_get_json, simple_save_json
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"

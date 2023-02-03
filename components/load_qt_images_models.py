@@ -6,8 +6,8 @@ from PIL.ImageQt import ImageQt
 
 import numpy as np
 import open3d as o3d
-from misc import open_image
-from database_tools import get_pottery_sherd_info
+from helper.misc import open_image
+from model.database_tools import get_pottery_sherd_info
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"

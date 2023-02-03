@@ -8,7 +8,7 @@ env = environ.Env()
 
 # Store sensitive data and configuration in a file .env
 # outside source control
-env.read_env(str(SRC_DIR / ".env"))
+env.read_env(str(SRC_DIR / "../.env"))
 
 READ_SETTINGS = {
     "database": env("DB_NAME"),

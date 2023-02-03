@@ -1,5 +1,5 @@
 import sys
-opengl_path = './model/opengl32.dll'
+opengl_path = './computation/opengl32.dll'
 
 import ctypes
 import scipy.optimize as opt
@@ -30,10 +30,9 @@ from PyQt5.QtWidgets import (
 import pathlib
 import open3d as o3d
 import re
-from database_tools import get_pottery_sherd_info, update_match_info
+from model.database_tools import get_pottery_sherd_info, update_match_info
 from glob import glob as glob
-from database_tools import get_all_pottery_sherd_info
-from components.debug_funcs import DebugFuncs
+from model.database_tools import get_all_pottery_sherd_info
 import json
 import numpy as np
 import time
@@ -41,7 +40,7 @@ basedir = pathlib.Path().resolve()
 from components.vis import Visualized
 from components.pop_up import PopUp
 from components.load_qt_images_models import LoadImagesModels
-from misc import simple_get_json, simple_save_json
+from helper.misc import simple_get_json, simple_save_json
 FINDS_SUBDIR = "finds/individual"
 BATCH_3D_SUBDIR = "finds/3dbatch"
 FINDS_PHOTO_DIR = "photos"
@@ -54,18 +53,18 @@ HEMISPHERES = ("N", "S")
 # Here let's do some simple machine learning to get
 
 
-class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
+class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
     """View (GUI)."""
 
     def __init__(self):
         """View initializer."""
         super(MainWindow, self).__init__()
 
-        uic.loadUi("qtcreator/MainWindow.ui", self)
+        uic.loadUi("View/MainWindow.ui", self)
         if not self.check_has_path_in_setting():
             self.ask_for_prompt()
         
-        setting = json.load(open("settings.json"))
+        setting = json.load(open("./config/settings.json"))
         self.json_data = simple_get_json("./parameters/data/data.json")
         self.parameters = simple_get_json("./parameters/data/parameters.json")
         calculuated_paths = dict()
@@ -88,7 +87,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels, DebugFuncs):
         self.findsList.currentItemChanged.connect(self.load_find_images)
 
         self.update_button.clicked.connect(self.update_model_db)
-        self.remove_button.clicked.connect(self.testing_images_bounding_circcle)
+        self.remove_button.clicked.connect(self.remove_match)
 
 
   

@@ -1,21 +1,11 @@
 #https://doc.qt.io/qt-5/model-view-programming.html
-
-import open3d as o3d 
-import numpy as np
 from helper.misc import open_image, get_mask_pixel_width, get_ceremic_area
 from  computation.nn_segmentation import MaskPredictor
-
-
-
+from scipy.ndimage import binary_dilation
 from PIL import Image
 import open3d as o3d 
 import numpy as np
-from helper.misc import open_image, get_mask_pixel_width, get_ceremic_area
-from  computation.nn_segmentation import MaskPredictor
-
 import math
-
-from scipy.ndimage import binary_dilation
 import smallestenclosingcircle
 class Comparator:
     #This stores the functions associated getting the areas, brightness, colors, brightness's standard deviation and width-length pairs 

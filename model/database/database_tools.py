@@ -8,7 +8,7 @@ env = environ.Env()
 
 # Store sensitive data and configuration in a file .env
 # outside source control
-env.read_env(str(SRC_DIR / "../.env"))
+env.read_env(str(SRC_DIR / "../../.env"))
 
 READ_SETTINGS = {
     "database": env("DB_NAME"),
@@ -27,27 +27,6 @@ WRITE_SETTINGS = {
     "port": env("DB_PORT"),
     "sslmode": env("DB_SSL_MODE"),
 }
-
-
-def list_all_tables():
-    try:
-        conn = psycopg2.connect(**READ_SETTINGS)
-
-        cursor = conn.cursor()
-
-        query = "select relname from pg_class where relkind='r' and relname !~ '^(pg_|sql_)';"
-        cursor.execute(query)
-        # Fetch result
-        record = cursor.fetchall()
-        print(record, "\n")
-
-    except (Exception) as error:
-        print("Error while connecting to PostgreSQL", error)
-    finally:
-        if conn:
-            cursor.close()
-            conn.close()
-            print("PostgreSQL connection is closed")
 
 
 def get_pottery_sherd_info(utm_easting, utm_northing, context_num, find_num):
@@ -176,9 +155,4 @@ def update_match_info(
             cursor.close()
             conn.close()
             # print("PostgreSQL connection is closed")
-
-
-# list_all_tables()
-# get_pottery_sherd_info(478130,4419430,43,1)
-# update_match_info(478130, 4419430, 43, 1, 0, 0)
-# get_pottery_sherd_info(478130,4419430,43,1)
+ 

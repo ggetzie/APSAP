@@ -16,5 +16,9 @@
     "psycopg2",
     "qtcreator"
   ],
-  "cSpell.words": ["keypoints", "threed"]
+  "cSpell.words": [
+    "keypoints",
+    "threed"
+  ],
+  "python.formatting.provider": "black"
 }

@@ -1,21 +1,12 @@
-
-from PyQt5 import uic
-from PyQt5.QtCore import Qt,QTimer
-from PyQt5.QtGui import QColor, QIcon, QPixmap, QImage, QWindow, QStandardItem, QStandardItemModel, QMovie, QPainter
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PIL.ImageQt import ImageQt
-
+from scipy.stats import gmean, tmean
 import numpy as np
 import open3d as o3d
 from helper.misc import open_image
-from model.database_tools import get_pottery_sherd_info
-FINDS_SUBDIR = "finds/individual"
-BATCH_3D_SUBDIR = "finds/3dbatch"
-FINDS_PHOTO_DIR = "photos"
-MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
-MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
-HEMISPHERES = ("N", "S")
-import math
-from scipy.stats import gmean, tmean
+from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
+
 class LoadImagesModels:
 
     def genereate_similiarity_ranked_pieces(self, similarities_list):

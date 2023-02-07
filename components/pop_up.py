@@ -1,11 +1,11 @@
 #This class contains classes and functiosn related to functionalities related to pop_up
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QListWidgetItem, QFileDialog, QMessageBox, QSplashScreen
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QSplashScreen
+from PyQt5.QtGui import QColor 
 import pathlib
 import json
 from glob import glob as glob
-from model.database_tools import update_match_info
-from PyQt5.QtGui import QColor 
+from model.database.database_tools import update_match_info
+
 
 class LoadingSplash(QSplashScreen):
     

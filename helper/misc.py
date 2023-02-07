@@ -1,7 +1,6 @@
 import numpy as np
 from PIL import Image, ImageStat
 import cv2
-from PyQt5.QtWidgets import QSplashScreen
 import json
 
 

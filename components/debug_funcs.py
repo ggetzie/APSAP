@@ -1,38 +1,17 @@
 import pathlib
-import open3d as o3d
-from model.database_tools import get_pottery_sherd_info, update_match_info, get_all_pottery_sherd_info
-from glob import glob as glob
+from model.database.database_tools import  get_all_pottery_sherd_info
 import json
-import numpy as np
 import time
-import smallestenclosingcircle
 from  computation.nn_segmentation import MaskPredictor
-from helper.misc import open_image
 ceremicPredictor =  MaskPredictor("./computation/ceremicsmask.pt")
-import numpy as np
 from scipy.ndimage import binary_dilation
  
 from helper.misc import simple_get_json, simple_save_json
-FINDS_SUBDIR = "finds/individual"
-BATCH_3D_SUBDIR = "finds/3dbatch"
-FINDS_PHOTO_DIR = "photos"
-MODELS_FILES_DIR = "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply"
-MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
-HEMISPHERES = ("N", "S")
 
+from config.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
-
-# Here let's do some simple machine learning to get
-
-
- 
 class DebugFuncs():
 
-
-    
- 
-
-   
     def adjust_parameters_slope_intercept(self):
         #This fucntion is used to get the data needed for finding the relationship between the 2d image and 3d model
         for_ml = simple_get_json("./for_ml.json")

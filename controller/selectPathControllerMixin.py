@@ -4,58 +4,61 @@ from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR
 
 class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
 
-    def __init__(self, view):
+    def __init__(self, view, model):
+
         self.contextDisplay = view.contextDisplay
+        self.file_root = view.file_root
+        self.model = model
         self.hemisphere_cb = view.hemisphere_cb
         self.zone_cb = view.zone_cb
         self.easting_cb = view.easting_cb
         self.northing_cb = view.northing_cb
         self.hemisphere_cb = view.hemisphere_cb
         self.context_cb = view.context_cb
-        self.file_root = view.file_root
+
+
+
         self.populate_finds = view.populate_finds
         self.populate_models = view.populate_models
         self.load_and_run = view.load_and_run
         self.contextChanged = view.contextChanged
-        self.populate_hemispheres()
+        self.populate_hemispheres(view, model)
 
-        self.hemisphere_cb.currentIndexChanged.connect(self.populate_zones)
+        #Here we connect the view with the control of mouse clicks and selects
+        self.hemisphere_cb.currentIndexChanged.connect(lambda: self.populate_zones(view, model))
         self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
         self.easting_cb.currentIndexChanged.connect(self.populate_northings)
         self.northing_cb.currentIndexChanged.connect(self.populate_contexts)
         self.context_cb.currentIndexChanged.connect(self.contextChanged)
         self.contextDisplay.setText(self.get_context_string())
 
-    def populate_hemispheres(self): 
-        self.hemisphere_cb.clear()
-        res = [
-            d.name
-            for d in self.file_root.iterdir()
-            if d.name in HEMISPHERES and d.is_dir()
-        ]
-        self.hemisphere_cb.addItems(res)
-        self.set_hemisphere(0 if len(res) > 0 else -1)
-        self.hemisphere_cb.setEnabled(len(res) > 1)
+    def populate_hemispheres(self, view, model): 
+        view.hemisphere_cb.clear()
+        res = model.get_hemispheres()
+        view.hemisphere_cb.addItems(res)
+        self.set_hemisphere(0 if len(res) > 0 else -1, view, model)
+        view.hemisphere_cb.setEnabled(len(res) > 1)
         self.contextDisplay.setText(self.get_context_string())
 
-    def set_hemisphere(self, index):
-        self.hemisphere_cb.setCurrentIndex(index)
-        self.populate_zones()
+    def set_hemisphere(self, index, view, model):
+        view.hemisphere_cb.setCurrentIndex(index)
+        self.populate_zones(view, model)
 
-    def populate_zones(self):
-        self.zone_cb.clear()
-        hemisphere = self.hemisphere_cb.currentText()
-        zone_root = self.file_root / hemisphere
-        res = [d.name for d in zone_root.iterdir() if d.is_dir() and d.name.isdigit()]
-        self.zone_cb.addItems(res)
-        self.zone_cb.setEnabled(len(res) > 1)
-        self.set_zone(0 if len(res) > 0 else -1)
 
-    def set_zone(self, index):
-        self.zone_cb.setCurrentIndex(index)
-        self.populate_eastings()
+    def populate_zones(self, view, model):
+        view.zone_cb.clear()
+        hemisphere = view.hemisphere_cb.currentText()
+        zone_root = view.file_root / hemisphere
+        res = model.get_zones(zone_root)
+        view.zone_cb.addItems(res)
+        view.zone_cb.setEnabled(len(res) > 1)
+        self.set_zone(0 if len(res) > 0 else -1, view, model)
 
-    def populate_eastings(self):
+    def set_zone(self, index, view, model):
+        view.zone_cb.setCurrentIndex(index)
+        self.populate_eastings(view, model)
+
+    def populate_eastings(self, videw, model):
         self.easting_cb.clear()
         hemisphere = self.hemisphere_cb.currentText()
         zone = self.zone_cb.currentText()

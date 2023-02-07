@@ -28,7 +28,7 @@ from helper.misc import simple_get_json, simple_save_json
 from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
  
 from controller.mainController import MainController
-
+from model.mainModel import MainModel
 # Here let's do some simple machine learning to get
 
 
@@ -54,8 +54,8 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
  
 
         self.set_up_3d_window()
- 
-        self.controller = MainController(self)
+        mod =  MainModel(self.file_root)
+        self.controller = MainController(self,mod)
 
  
         self.findsList.currentItemChanged.connect(self.load_find_images)

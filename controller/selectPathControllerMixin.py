@@ -1,118 +1,124 @@
 
 from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
+from functools import partial
 
 
 class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
 
     def __init__(self, view, model):
-
-        self.contextDisplay = view.contextDisplay
-        self.file_root = view.file_root
-        self.model = model
-        self.hemisphere_cb = view.hemisphere_cb
-        self.zone_cb = view.zone_cb
-        self.easting_cb = view.easting_cb
-        self.northing_cb = view.northing_cb
-        self.hemisphere_cb = view.hemisphere_cb
-        self.context_cb = view.context_cb
-
-
-
-        self.populate_finds = view.populate_finds
-        self.populate_models = view.populate_models
-        self.load_and_run = view.load_and_run
-        self.contextChanged = view.contextChanged
-        self.populate_hemispheres(view, model)
+        #Notice this object is the controller, that which connects the view(GUI) and the model(data)
+        controller = self
+        self.populate_hemispheres()
 
         #Here we connect the view with the control of mouse clicks and selects
-        self.hemisphere_cb.currentIndexChanged.connect(lambda: self.populate_zones(view, model))
-        self.zone_cb.currentIndexChanged.connect(self.populate_eastings)
-        self.easting_cb.currentIndexChanged.connect(self.populate_northings)
-        self.northing_cb.currentIndexChanged.connect(self.populate_contexts)
-        self.context_cb.currentIndexChanged.connect(self.contextChanged)
-        self.contextDisplay.setText(self.get_context_string())
+        view.hemisphere_cb.currentIndexChanged.connect( controller.populate_zones)
+        view.zone_cb.currentIndexChanged.connect(controller.populate_eastings)
+        view.easting_cb.currentIndexChanged.connect(controller.populate_northings)
+        view.northing_cb.currentIndexChanged.connect( (controller.populate_contexts))
+        view.context_cb.currentIndexChanged.connect(controller.contextChanged)
 
-    def populate_hemispheres(self, view, model): 
+
+    def populate_hemispheres(self): 
+        #Getting m, v, c from to update the gui and get the data.
+        model, view, controller = self.get_model_view_controller()
+        
+        #Clear the combox box
         view.hemisphere_cb.clear()
+        
+        #Get the hemispheres and add it to the combo box
         res = model.get_hemispheres()
         view.hemisphere_cb.addItems(res)
-        self.set_hemisphere(0 if len(res) > 0 else -1, view, model)
+
+        #Set the index of the select as 0 by default and allow the select to be "selected"  if there are more than 1 elements 
+        view.hemisphere_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         view.hemisphere_cb.setEnabled(len(res) > 1)
-        self.contextDisplay.setText(self.get_context_string())
 
-    def set_hemisphere(self, index, view, model):
-        view.hemisphere_cb.setCurrentIndex(index)
-        self.populate_zones(view, model)
+        #This is important. The hierarchy is hemispheres, zones, eastings, northings, contexts, finds/models
+        #When the former one is populated, ther ones after that are populated one by one til the end of the chain.
+        controller.populate_zones()
 
 
-    def populate_zones(self, view, model):
+    def populate_zones(self ):
+        #Check populate_zones for explanations
+        model, view, controller = self.get_model_view_controller()
+
         view.zone_cb.clear()
+
         hemisphere = view.hemisphere_cb.currentText()
-        zone_root = view.file_root / hemisphere
-        res = model.get_zones(zone_root)
+        zone_root = model.file_root / hemisphere
+        res = model.get_options(zone_root)
         view.zone_cb.addItems(res)
+
+        view.zone_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         view.zone_cb.setEnabled(len(res) > 1)
-        self.set_zone(0 if len(res) > 0 else -1, view, model)
 
-    def set_zone(self, index, view, model):
-        view.zone_cb.setCurrentIndex(index)
-        self.populate_eastings(view, model)
+        controller.populate_eastings()
+ 
+    def populate_eastings(self):
+        #Check populate_zones for explanations
+        model, view, controller = self.get_model_view_controller()
 
-    def populate_eastings(self, videw, model):
-        self.easting_cb.clear()
-        hemisphere = self.hemisphere_cb.currentText()
-        zone = self.zone_cb.currentText()
-        eastings_root = self.file_root / hemisphere / zone
-        res = [
-            d.name for d in eastings_root.iterdir() if d.is_dir() and d.name.isdigit()
-        ]
-        self.easting_cb.addItems(res)
-        self.set_easting(0 if len(res) > 0 else -1)
-        self.easting_cb.setEnabled(len(res) > 1)
+        view.easting_cb.clear()
 
-    def set_easting(self, index):
-        self.easting_cb.setCurrentIndex(index)
-        self.populate_northings()
+        hemisphere = view.hemisphere_cb.currentText()
+        zone = view.zone_cb.currentText()
+        eastings_root = model.file_root / hemisphere / zone
+        res = model.get_options(eastings_root)
+        view.easting_cb.addItems(res)
+
+        view.easting_cb.setCurrentIndex(0 if len(res) > 0 else -1)
+        view.easting_cb.setEnabled(len(res) > 1)
+
+        controller.populate_northings()
 
     def populate_northings(self):
-        self.northing_cb.clear()
-        northings_root = (
-            self.file_root
-            / self.hemisphere_cb.currentText()
-            / self.zone_cb.currentText()
-            / self.easting_cb.currentText()
-        )
-        res = [
-            d.name for d in northings_root.iterdir() if d.is_dir() and d.name.isdigit()
-        ]
-        self.northing_cb.addItems(res)
-        self.set_northing(0 if len(res) > 0 else -1)
-        self.northing_cb.setEnabled(len(res) > 1)
+        #Check populate_zones for explanations
+        model, view, controller = self.get_model_view_controller()
 
-    def set_northing(self, index):
-        self.northing_cb.setCurrentIndex(index)
-        self.populate_contexts()
+        view.northing_cb.clear()
+
+        northings_root = (
+            model.file_root
+            / view.hemisphere_cb.currentText()
+            / view.zone_cb.currentText()
+            / view.easting_cb.currentText()
+        )
+        res = model.get_options(northings_root)
+        view.northing_cb.addItems(res)
+
+        view.northing_cb.setCurrentIndex(0 if len(res) > 0 else -1)
+        view.northing_cb.setEnabled(len(res) > 1)
+
+        controller.populate_contexts()
 
     def populate_contexts(self):
-        self.context_cb.clear()
-        contexts_root = (
-            self.file_root
-            / self.hemisphere_cb.currentText()
-            / self.zone_cb.currentText()
-            / self.easting_cb.currentText()
-            / self.northing_cb.currentText()
-        )
-        res = [
-            d.name for d in contexts_root.iterdir() if d.is_dir() and d.name.isdigit()
-        ]
-        res.sort(key=int)
-        self.context_cb.addItems(res)
-        self.set_context(0 if len(res) > 0 else -1)
-        self.context_cb.setEnabled(len(res) > 1)
-        self.contextChanged()
+        #Check populate_zones for explanations,  except this "populate" function takes the final functions populate_finds and populate_models in a load_and_run mechanism that shows
+        model, view, controller = self.get_model_view_controller()
 
-    def set_context(self, index):
-        self.context_cb.setCurrentIndex(index)
+        view.context_cb.clear()
+
+        contexts_root = (
+            model.file_root
+            / view.hemisphere_cb.currentText()
+            / view.zone_cb.currentText()
+            / view.easting_cb.currentText()
+            / view.northing_cb.currentText()
+        )
+        res = model.get_options(contexts_root)  
+        res.sort(key=int)
+        view.context_cb.addItems(res)
+
+        view.context_cb.setCurrentIndex(0 if len(res) > 0 else -1)
+        view.context_cb.setEnabled(len(res) > 1)
+
+        #Using these lines we print the progress when we load the finds and models, which takes considerable amount of time
+        funcs_to_run = [
+            ["Loading finds. It might take a while", view.populate_finds],
+            ["Loading models. It might take a while", view.populate_models],
+        ]
+        view.load_and_run(funcs_to_run)
+
+
 
     def get_context_string(self):
         """Return a string representing the full designation of the current context
@@ -121,12 +127,14 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
         Returns:
             str: The full designation of the currently selected context
         """
+        model, view, controller = self.get_model_view_controller()
+
         hzenc = [
-            self.hemisphere_cb.currentText(),
-            self.zone_cb.currentText(),
-            self.easting_cb.currentText(),
-            self.northing_cb.currentText(),
-            self.context_cb.currentText(),
+            view.hemisphere_cb.currentText(),
+            view.zone_cb.currentText(),
+            view.easting_cb.currentText(),
+            view.northing_cb.currentText(),
+            view.context_cb.currentText(),
         ]
         return "-".join(hzenc)
-     
+ 

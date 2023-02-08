@@ -34,30 +34,21 @@ from model.mainModel import MainModel
 
 class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
     """View (GUI)."""
-
+ 
+ 
     def __init__(self):
         """View initializer."""
         super(MainWindow, self).__init__()
-        #view 
-        uic.loadUi("View/MainWindow.ui", self)
-        if not self.check_has_path_in_setting():
-            self.ask_for_prompt()
         
-        setting = json.load(open("./config/settings.json"))
-        self.json_data = simple_get_json("./parameters/data/data.json")
-        self.parameters = simple_get_json("./parameters/data/parameters.json")
-        calculuated_paths = dict()
-        for obj in self.json_data["past_records"]:
-            calculuated_paths[obj["path"]] = obj
-        self.calculuated_paths = calculuated_paths
-        self.file_root = pathlib.Path(setting["FILE_ROOT"] )
- 
+        
 
+        #model, view, controller
+        self.mainModel =  MainModel( )
+        uic.loadUi("View/MainWindow.ui", self)
         self.set_up_3d_window()
-        mod =  MainModel(self.file_root)
-        self.controller = MainController(self,mod)
+        self.mainController = MainController(self, self.mainModel)
+        
 
- 
         self.findsList.currentItemChanged.connect(self.load_find_images)
 
         self.update_button.clicked.connect(self.update_model_db)
@@ -67,7 +58,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
 
     def get_context_dir(self):
         res = (
-            self.file_root
+            self.mainModel.file_root
             / self.hemisphere_cb.currentText()
             / self.zone_cb.currentText()
             / self.easting_cb.currentText()
@@ -87,29 +78,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
         context = int(path_parts[2])
         return (easting, northing, context)
 
-    def contextChanged(self):
-        self.statusLabel.setText(f"")
-        self.selected_find.setText(f"")
-        self.current_batch.setText(f"")
-        self.current_piece.setText(f"")
-        self.new_batch.setText(f"")
-        self.new_piece.setText(f"")
-        #self.contextDisplay.setText(self.get_context_string())
-        if hasattr(self, "current_pcd"):
-            self.vis.remove_geometry(self.current_pcd)
-            self.current_pcd = None
 
-        model = QStandardItemModel(self)
-        self.sortedModelList.setModel(model)
-        funcs_to_run = [
-            ["Loading finds. It might take a while", self.populate_finds],
-            ["Loading models. It might take a while", self.populate_models],
-        ]
-        import time
-
-        now = time.time()
-        self.load_and_run(funcs_to_run)
-        print(f"Timed passed: {time.time() - now} seconds")
     def populate_finds(self):
         # if self.splash:
         #    self.splash.showMessage("Loading finds")
@@ -203,16 +172,16 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                  
                 path = item[1]
                 
-                if path in self.calculuated_paths:
-                    batch_num = self.calculuated_paths[path]["batch_num"]
-                    piece_num = self.calculuated_paths[path]["piece_num"]
-                    brightness_summary = self.calculuated_paths[path]["brightness_summary"]
-                    colors_summary = self.calculuated_paths[path]["colors_summary"]
-                    width_length_summary = self.calculuated_paths[path]["width_length_summary"]
-                    area = self.calculuated_paths[path]["area"]
-                    index = self.calculuated_paths[path]["index"]    
-                    context =  self.calculuated_paths[path]["context"]
-                    cirlcle_area_ratio = self.calculuated_paths[path]["cirlcle_area_ratio"]
+                if path in self.mainModel.calculuated_paths:
+                    batch_num = self.mainModel.calculuated_paths[path]["batch_num"]
+                    piece_num = self.mainModel.calculuated_paths[path]["piece_num"]
+                    brightness_summary = self.mainModel.calculuated_paths[path]["brightness_summary"]
+                    colors_summary = self.mainModel.calculuated_paths[path]["colors_summary"]
+                    width_length_summary = self.mainModel.calculuated_paths[path]["width_length_summary"]
+                    area = self.mainModel.calculuated_paths[path]["area"]
+                    index = self.mainModel.calculuated_paths[path]["index"]    
+                    context =  self.mainModel.calculuated_paths[path]["context"]
+                    cirlcle_area_ratio = self.mainModel.calculuated_paths[path]["cirlcle_area_ratio"]
 
                 else:
 
@@ -238,7 +207,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
 
                     cirlcle_area_ratio = self.comparator.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
-                    json_data = self.json_data
+                    json_data = self.mainModel.json_data
                     temp = {}
                     temp["path"] = path
                     temp["index"] = index
@@ -277,7 +246,7 @@ class MainWindow(QMainWindow, PopUp, Visualized, LoadImagesModels):
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        simple_save_json(self.json_data, "./parameters/data/data.json")
+        simple_save_json(self.mainModel.json_data, "./parameters/data/data.json")
 
         print(f"{time.time() - now} seconds")
         self.all_3d_areas = all_3d_areas

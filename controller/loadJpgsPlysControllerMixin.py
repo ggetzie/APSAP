@@ -6,16 +6,12 @@ from PyQt5.QtCore import Qt
 
 from config.path_variables import (
     FINDS_SUBDIR,
-    BATCH_3D_SUBDIR,
     FINDS_PHOTO_DIR,
     MODELS_FILES_DIR,
     MODELS_FILES_RE,
-    HEMISPHERES,
 )
-from model.database.database_tools import get_pottery_sherd_info, update_match_info
+from model.database.database_tools import get_pottery_sherd_info
 from PyQt5.QtWidgets import (
-    QMainWindow,
-    QApplication,
     QListWidgetItem,
 )
 from PyQt5.QtGui import (
@@ -24,41 +20,17 @@ from PyQt5.QtGui import (
     QStandardItemModel,
 )
 from glob import glob as glob
-from helper.misc import simple_get_json, simple_save_json
+from helper.misc import  simple_save_json
 import pathlib
 
 
-class TempMixin:  # bridging the view(gui) and the model(data)
+class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
         # Notice this object is the controller, that which connects the view(GUI) and the model(data)
         controller = self
 
         view.contextDisplay.setText(controller.get_context_string())
 
-    def contextChanged(self):
-        model, view, controller = self.get_model_view_controller()
-
-        view.statusLabel.setText(f"")
-        view.selected_find.setText(f"")
-        view.current_batch.setText(f"")
-        view.current_piece.setText(f"")
-        view.new_batch.setText(f"")
-        view.new_piece.setText(f"")
-        # self.contextDisplay.setText(self.get_context_string())
-        if hasattr(view, "current_pcd"):
-            view.vis.remove_geometry(view.current_pcd)
-            view.current_pcd = None
-
-        model = QStandardItemModel(view)
-        view.sortedModelList.setModel(model)
-        funcs_to_run = [
-            ["Loading finds. It might take a while", controller.populate_finds],
-            ["Loading models. It might take a while", controller.populate_models],
-        ]
-
-        now = time.time()
-        view.load_and_run(funcs_to_run)
-        print(f"Timed passed: {time.time() - now} seconds")
 
     def get_context_dir(self):
         model, view, controller = self.get_model_view_controller()

@@ -1,7 +1,30 @@
 
-from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
-from functools import partial
+from PyQt5.QtGui import (
+    QColor,
+    QStandardItem,
+    QStandardItemModel,
+)
+import time
+from PyQt5.QtGui import (
+    QStandardItemModel,
+)
+from PyQt5.QtCore import Qt
 
+from config.path_variables import (
+    FINDS_SUBDIR,
+    FINDS_PHOTO_DIR,
+    MODELS_FILES_DIR,
+    MODELS_FILES_RE,
+)
+
+#This class contains classes and functiosn related to functionalities related to pop_up
+from PyQt5.QtWidgets import QMainWindow, QSplashScreen
+
+class LoadingSplash(QSplashScreen):
+    
+    def mousePressEvent(self, event):
+            
+        pass
 
 class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
 
@@ -111,12 +134,32 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
         view.context_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         view.context_cb.setEnabled(len(res) > 1)
 
-        #Using these lines we print the progress when we load the finds and models, which takes considerable amount of time
+        controller.contextChanged()
+
+    def contextChanged(self):
+        mainModel, view, controller = self.get_model_view_controller()
+
+        view.statusLabel.setText(f"")
+        view.selected_find.setText(f"")
+        view.current_batch.setText(f"")
+        view.current_piece.setText(f"")
+        view.new_batch.setText(f"")
+        view.new_piece.setText(f"")
+        view.contextDisplay.setText(self.get_context_string())
+        if hasattr(view, "current_pcd"):
+            view.vis.remove_geometry(view.current_pcd)
+            view.current_pcd = None
+
+        model = QStandardItemModel(view)
+        view.sortedModelList.setModel(model)
         funcs_to_run = [
             ["Loading finds. It might take a while", controller.populate_finds],
             ["Loading models. It might take a while", controller.populate_models],
         ]
-        view.load_and_run(funcs_to_run)
+
+        now = time.time()
+        controller.load_and_run(funcs_to_run)
+        print(f"Timed passed: {time.time() - now} seconds")
 
 
 
@@ -137,4 +180,21 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
             view.context_cb.currentText(),
         ]
         return "-".join(hzenc)
- 
+
+
+    def load_and_run(self, funcs_to_run):
+        #Load the splash
+        splash = LoadingSplash()
+        splash.show()
+        #Run all functions and the message during loading time
+        for message_func in funcs_to_run:
+            message = message_func[0]
+            func = message_func[1]
+            splash.showMessage(message)
+            func()
+        #Close the window    
+        window = QMainWindow()
+        window.show()
+        splash.finish(window)
+      
+    

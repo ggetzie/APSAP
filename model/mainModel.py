@@ -54,7 +54,7 @@ class MainModel:
                 return False
 
     
-    def ask_for_prompt(self):
+    def ask_for_prompt(self): #Although this technically involves a lot of code of GUI(as a pop up), it is in here instead of View because this function ensures that settings are well imported before we run the application
         Title = "Please enter the file path!"
         while True:
             
@@ -90,3 +90,4 @@ class MainModel:
             else:
                 Title = "Path doesn't exist"
                 
+ 

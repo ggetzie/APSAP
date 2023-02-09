@@ -5,9 +5,7 @@ from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
 import re
- 
-MODELS_FILES_RE = "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply"
-
+from config.path_variables import MODELS_FILES_RE
 
 class Visualized:
     def set_up_3d_window(self):
@@ -57,7 +55,7 @@ class Visualized:
             m = re.search(MODELS_FILES_RE, current_model_path.replace("\\", "/"))
             # This error happens when the relative path is different
             if m:
-
+                print(m)
                 batch_num = str(
                     int(m.group(1))
                 )  # int("006") -> int(6). We remove leading 0

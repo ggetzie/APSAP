@@ -85,7 +85,7 @@ class PopUp():
 
     def update_button_click(self, e):
         if e.text() == "OK":
-            easting, northing, context =  (self.get_easting_northing_context())
+            easting, northing, context =  (self.mainController.get_easting_northing_context())
             find_num = self.selected_find.text()
             batch_num = self.new_batch.text()
             piece_num = self.new_piece.text()

@@ -113,8 +113,8 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
 
         #Using these lines we print the progress when we load the finds and models, which takes considerable amount of time
         funcs_to_run = [
-            ["Loading finds. It might take a while", view.populate_finds],
-            ["Loading models. It might take a while", view.populate_models],
+            ["Loading finds. It might take a while", controller.populate_finds],
+            ["Loading models. It might take a while", controller.populate_models],
         ]
         view.load_and_run(funcs_to_run)
 

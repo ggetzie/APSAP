@@ -73,7 +73,7 @@ class LoadImagesModels:
             return
         
 
-        photos_dir = self.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
+        photos_dir = self.mainController.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
         self.path_2d_picture = photos_dir
         import time
         now = time.time()
@@ -89,7 +89,7 @@ class LoadImagesModels:
             QPixmap.fromImage(back_photo).scaledToWidth(self.findBackPhoto_l.width())
         )
         self.selected_find.setText(find_num)
-        easting_northing_context = self.get_easting_northing_context()
+        easting_northing_context = self.mainController.get_easting_northing_context()
         _3d_locations = self._3d_model_dict[f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"]    
 
         #If we already matched the 
@@ -98,7 +98,7 @@ class LoadImagesModels:
             self.current_piece.setText(str(_3d_locations[1]))
             #Change to the piece matched as default
           
-            path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
+            path =  (str((self.mainController.get_context_dir()/MODELS_FILES_DIR)))
             whole_path = (path.replace("*", f"{int(_3d_locations[0]):03}", 1).replace("*", f"{int(_3d_locations[1])}", 1)) 
             current_pcd_load = o3d.io.read_point_cloud(whole_path)
             if hasattr(self, "current_pcd") :
@@ -154,7 +154,7 @@ class LoadImagesModels:
       
             
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
-            path =  (str((self.get_context_dir()/MODELS_FILES_DIR)))
+            path =  (str((self.mainController.get_context_dir()/MODELS_FILES_DIR)))
             whole_path = (path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace("*", f"{int(score_i_j_tuple[2])}", 1)) 
             if (int(score_i_j_tuple[1]), int(score_i_j_tuple[2])) in all_matched_3d_models:
                     ply.setForeground(QColor("red"))

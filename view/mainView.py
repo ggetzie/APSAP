@@ -5,13 +5,11 @@ ctypes.cdll.LoadLibrary(opengl_path)
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow
-from view.vis import Visualized
- 
-from view.load_qt_images_models import LoadImagesModels
+from view.plyWindowView import PlyWindowView
 from controller.mainController import MainController
 
 
-class MainView(QMainWindow, Visualized, LoadImagesModels):
+class MainView(QMainWindow, PlyWindowView):
     """View (GUI)."""
 
     def __init__(self, mainModel):
@@ -25,7 +23,7 @@ class MainView(QMainWindow, Visualized, LoadImagesModels):
         
         #Setting up view
         uic.loadUi("view/MainWindow.ui", self)
-        self.set_up_3d_window()
+        self.setUpPlyWindow()
 
         #Setting up controller
         self.mainController = MainController(self, self.mainModel)

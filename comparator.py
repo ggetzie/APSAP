@@ -11,13 +11,13 @@ class Comparator:
     #This stores the functions associated getting the areas, brightness, colors, brightness's standard deviation and width-length pairs 
     # 
     
-    def __init__(self, vis) -> None:
+    def __init__(self, plyWindow) -> None:
 
-        self.vis = vis #o3d.visualization.Visualizer()
+        self.plyWindow = plyWindow 
         self.ceremicPredictor = MaskPredictor("./computation/ceremicsmask.pt")
         self.colorgridPredictor = MaskPredictor("./computation/colorgridmask.pt")
-        self.vis.get_render_option().light_on = False
-        self.vis.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
+        self.plyWindow.get_render_option().light_on = False
+        self.plyWindow.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
                                             #When we use our own field of view
     def get_2d_area_circle_ratio(self, _2d_object_path) -> float:
         area_in_pixels= self.get_2d_area_by_pixels(_2d_object_path, self.ceremicPredictor)
@@ -33,17 +33,17 @@ class Comparator:
 
         
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        self.vis.add_geometry(current_pcd_load)
-        ctr = self.vis.get_view_control()
+        self.plyWindow.add_geometry(current_pcd_load)
+        ctr = self.plyWindow.get_view_control()
         ctr.change_field_of_view(step=-9)
-        object_image = self.vis.capture_screen_float_buffer(True)
+        object_image = self.plyWindow.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
       
         object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))    
         pixel_counts = (np.count_nonzero(object_image_array_object_locations))
    
 
-        self.vis.remove_geometry(current_pcd_load)
+        self.plyWindow.remove_geometry(current_pcd_load)
         del ctr
         
         return pixel_counts
@@ -54,10 +54,10 @@ class Comparator:
 
       
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        self.vis.add_geometry(current_pcd_load)
-        ctr = self.vis.get_view_control()
+        self.plyWindow.add_geometry(current_pcd_load)
+        ctr = self.plyWindow.get_view_control()
         ctr.change_field_of_view(step=-9)
-        object_image = self.vis.capture_screen_float_buffer(True)
+        object_image = self.plyWindow.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8) 
      
         _1_white_other_0 = (~((object_image_array[:, :, 0] == 255 ) & (object_image_array[:, :, 1] == 255 )& (object_image_array[:, :, 2] == 255))).astype(int)
@@ -82,7 +82,7 @@ class Comparator:
             if(addable == True):
                 new_li.append(indices_tuples[i])
         center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
-        self.vis.remove_geometry(current_pcd_load)
+        self.plyWindow.remove_geometry(current_pcd_load)
 
         del ctr
         return (radius**2 ) * 3.1416
@@ -91,7 +91,7 @@ class Comparator:
 
     def get_3d_object_area_and_width_length(self, _3d_object_path):
         #Loading a bounding box to get the actual width length in cm and the pixel, we got the 
-        vis = self.vis
+        plyWindow = self.plyWindow
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
         bounding_box = current_pcd_load.get_axis_aligned_bounding_box() 
         bounding_box.color = (1,0,0)
@@ -101,18 +101,18 @@ class Comparator:
         bounding_box.color = (1,0,0)
         
         
-        vis.add_geometry(bounding_box)
-        ctr = vis.get_view_control()
+        plyWindow.add_geometry(bounding_box)
+        ctr = plyWindow.get_view_control()
         ctr.change_field_of_view(step=-9)
         bounding_box_pixels_difference = self.bounding_box_get_pixel_difference()
         bounding_box_width_mm = extents[0]
-        vis.remove_geometry(bounding_box)
+        plyWindow.remove_geometry(bounding_box)
         #We now got 
         #When geomoetry is added camera is supposed to change, so we need to change the field of view again
-        vis.add_geometry(current_pcd_load)
+        plyWindow.add_geometry(current_pcd_load)
         ctr.change_field_of_view(step=-9)
         
-        object_image = vis.capture_screen_float_buffer(True)
+        object_image = plyWindow.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
 
         object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))   
@@ -122,7 +122,7 @@ class Comparator:
         
          
         #Cleanup
-        vis.remove_geometry(current_pcd_load)
+        plyWindow.remove_geometry(current_pcd_load)
         del ctr
         
         area = ((mm_pixels_ratio ** 2 )* pixel_counts)/100 
@@ -140,11 +140,11 @@ class Comparator:
     def bounding_box_get_pixel_difference(self ):
         #Detecting the length of bounding box to get the correct ratio
 
-        vis = self.vis
+        plyWindow = self.plyWindow
       
                 
-        vis.get_render_option().point_size = 5
-        red_box_image = vis.capture_screen_float_buffer(True)
+        plyWindow.get_render_option().point_size = 5
+        red_box_image = plyWindow.capture_screen_float_buffer(True)
  
 
         red_box_image_array = np.multiply(np.array(red_box_image), 255).astype(np.uint8)
@@ -232,16 +232,16 @@ class Comparator:
         return (int(max_),int(min_),int(median), (mean),int(upper_q), int(lower_q), (std))
     
     def get_brightness_summary_from_3d (self, model_path):
-        vis = self.vis
+        plyWindow = self.plyWindow
         current_pcd_load = o3d.io.read_point_cloud(model_path) 
         
-        vis.add_geometry(current_pcd_load)
-        ctr = vis.get_view_control()
+        plyWindow.add_geometry(current_pcd_load)
+        ctr = plyWindow.get_view_control()
             
-        vis.get_render_option().point_size = 5
+        plyWindow.get_render_option().point_size = 5
 
         ctr.change_field_of_view(step=-9)
-        object_image = vis.capture_screen_float_buffer(True)
+        object_image = plyWindow.capture_screen_float_buffer(True)
         
         pic = (np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')).ravel())
         pic[pic==255] = 0
@@ -252,7 +252,7 @@ class Comparator:
         mean = (np.sum(pixels_sorted)/len(pixels_sorted))
         upper_q = pixels_sorted[int(len(pixels_sorted)* (3/4))]
         lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
-        vis.remove_geometry(current_pcd_load)
+        plyWindow.remove_geometry(current_pcd_load)
         del ctr
         std = np.std(pixels_sorted)
         return (max_,min_,median, mean,upper_q, lower_q, std)
@@ -277,16 +277,16 @@ class Comparator:
         return (r_mean, g_mean, b_mean)
 
     def get_color_summary_from_3d (self, model_path):
-        vis = self.vis
+        plyWindow = self.plyWindow
         current_pcd_load = o3d.io.read_point_cloud(model_path) 
         
-        vis.add_geometry(current_pcd_load)
-        ctr = vis.get_view_control()
+        plyWindow.add_geometry(current_pcd_load)
+        ctr = plyWindow.get_view_control()
             
-        vis.get_render_option().point_size = 5
+        plyWindow.get_render_option().point_size = 5
 
         ctr.change_field_of_view(step=-9)
-        object_image = vis.capture_screen_float_buffer(True)
+        object_image = plyWindow.capture_screen_float_buffer(True)
         
         pic =  np.multiply(np.array(object_image), 255) 
         
@@ -303,7 +303,7 @@ class Comparator:
         g_mean = np.mean(g)
         b_mean = np.mean(b)
     
-        vis.remove_geometry(current_pcd_load)
+        plyWindow.remove_geometry(current_pcd_load)
         del ctr
         return (float(r_mean), float(g_mean), float(b_mean))
  

@@ -3,10 +3,10 @@ from controller.loadJpgsPlysControllerMixin import LoadJpgsPlysControllerMixin
 from controller.addAndRemoveMatchControllerMixin import AddAndRemoveMatchControllerMixin
 from controller.load1jpgPairController import Load1jpgPairController
 from controller.display3dModelControllerMixin import Display3dModelControllerMixin
-
-class MainController(SelectPathControllerMixin, LoadJpgsPlysControllerMixin, AddAndRemoveMatchControllerMixin, Load1jpgPairController, Display3dModelControllerMixin):
-     #bridging the view(gui) and the model(data)
-
+from controller.calculuateSimilarityControllerMixin import CalculateSimilarityControllerMixin
+class MainController( SelectPathControllerMixin,   CalculateSimilarityControllerMixin, Load1jpgPairController,LoadJpgsPlysControllerMixin, AddAndRemoveMatchControllerMixin,  Display3dModelControllerMixin):
+     #1) bridging the view(gui) and the model(data) when events(such as mouse click) happen
+     #2) calculation and application logic
      
     def __init__(self, view, model):
         self.mainModel = model

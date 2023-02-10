@@ -12,6 +12,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
 
 
     def load_find_images(self, selected_item):
+     
         mainModel, view, controller = self.get_model_view_controller()
 
 
@@ -61,7 +62,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
             view.current_batch.setText("NS")
             view.current_piece.setText("NS")
             if hasattr(view, "current_pcd"):
-                view.vis.remove_geometry(view.current_pcd)
+                view.plyWindow.remove_geometry(view.current_pcd)
                 view.current_pcd = None
             #Here let's remove the 3d model
             
@@ -77,7 +78,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
 
 
 
-        flat_simllarity_list  = view.get_similaritiy_scores(find_num, _2d_image_path)
+        flat_simllarity_list  = controller.get_similaritiy_scores(find_num, _2d_image_path)
 
         #[area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity]
 
@@ -85,7 +86,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
  
       
         #flat_simllarity_list = old_flat_similairy_list
-        flat_simllarity_list =     view.genereate_similiarity_ranked_pieces(flat_simllarity_list)
+        flat_simllarity_list =     controller.genereate_similiarity_ranked_pieces(flat_simllarity_list)
      
         all_matched_3d_models = set()
         

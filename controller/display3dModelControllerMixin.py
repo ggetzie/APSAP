@@ -15,14 +15,14 @@ class Display3dModelControllerMixin:
 
     def change_model(self, current_pcd, previous_pcd):
         mainModel, view, controller = self.get_model_view_controller()
-        view.vis.get_render_option().point_size = (
+        view.plyWindow.get_render_option().point_size = (
             5  # Generally we need this value to be larger only if we draw the jpgs
         )
         if previous_pcd:
-            view.vis.remove_geometry(previous_pcd)
+            view.plyWindow.remove_geometry(previous_pcd)
         view.current_pcd = current_pcd
-        view.vis.add_geometry(current_pcd)
-        view.vis.update_geometry(current_pcd)
+        view.plyWindow.add_geometry(current_pcd)
+        view.plyWindow.update_geometry(current_pcd)
 
     def change_3d_model(self, current, previous):
         mainModel, view, controller = self.get_model_view_controller()

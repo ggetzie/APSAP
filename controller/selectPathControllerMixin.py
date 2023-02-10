@@ -142,7 +142,7 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
         view.new_piece.setText(f"")
         view.contextDisplay.setText(self.get_context_string())
         if hasattr(view, "current_pcd"):
-            view.vis.remove_geometry(view.current_pcd)
+            view.plyWindow.remove_geometry(view.current_pcd)
             view.current_pcd = None
 
         model = QStandardItemModel(view)

@@ -1,6 +1,5 @@
 
 #https://doc.qt.io/qt-5/model-view-programming.html
-from helper.misc import open_image, get_mask_pixel_width, get_ceremic_area
 from  computation.nn_segmentation import MaskPredictor
 from scipy.ndimage import binary_dilation
 from PIL import Image
@@ -8,7 +7,9 @@ import open3d as o3d
 import numpy as np
 import math
 import smallestenclosingcircle
+ 
 
+ 
 
 class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
@@ -18,7 +19,15 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         view.plyWindow.get_render_option().light_on = False
         view.plyWindow.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
                                             #When we use our own field of view
- 
+    def get_ceremic_area(self, ceremic_mask, mm_per_pixel):
+        #Turn the mask to an array
+        ceremic_array = (np.array(ceremic_mask))
+        ceremic_pixel = (np.count_nonzero((ceremic_array >=170)))
+        # Turn number of pixels(aka pixel area) into area in mm
+        mmSquared = (ceremic_pixel * (mm_per_pixel* mm_per_pixel)) 
+        # mm to cm
+        cmSquared = mmSquared / 100 
+        return cmSquared
     def get_2d_area_circle_ratio(self, _2d_object_path) -> float:
         model, view, controller = self.get_model_view_controller()
 
@@ -97,7 +106,12 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
 
-
+    def get_mask_pixel_width(self, image):
+        #Turned the color_grid mask into numpy array
+        np_array = (np.array(image))
+    
+        x_coordiantes_mask = (sorted(np.where(np_array>200)[1]))
+        return x_coordiantes_mask[-15] - x_coordiantes_mask[5]
 
 
 
@@ -146,12 +160,12 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
     def get_2d_picture_area(self, _2d_picture_path):
         model, view, controller = self.get_model_view_controller()
 
-        image = open_image(_2d_picture_path, full_size=False)
+        image = model.open_image(_2d_picture_path, full_size=False)
         
         mask_image = controller.colorgridPredictor.predict(image)
-        mm_per_pixel =  53.98 /get_mask_pixel_width(mask_image)  #53.98 is the width of the credit-card size color grid
+        mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_image)  #53.98 is the width of the credit-card size color grid
         ceremic_mask = controller.ceremicPredictor.predict(image) 
-        tif_area =  get_ceremic_area(ceremic_mask, mm_per_pixel)
+        tif_area =  self.get_ceremic_area(ceremic_mask, mm_per_pixel)
         return tif_area
     
 
@@ -186,11 +200,11 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         model, view, controller = self.get_model_view_controller()
 
     
-        image = open_image(path_2d,full_size=False)
+        image = model.open_image(path_2d,full_size=False)
         masked_ceremics = controller.ceremicPredictor.predict(image)
         masked_ceremics_bool = (((np.array(masked_ceremics)).astype(bool)))
         mask_grid = controller.colorgridPredictor.predict(image)
-        mm_per_pixel =  53.98 /get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
+        mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
         indices = (np.nonzero(masked_ceremics_bool))
         sorted_y_indices = sorted(indices[0])
         sorted_x_indices = sorted(indices [1])
@@ -207,7 +221,7 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
         model, view, controller = self.get_model_view_controller()
 
-        image = open_image(image_path,full_size=False)
+        image = model.open_image(image_path,full_size=False)
         masked = controller.ceremicPredictor.predict(image)
         
         masked_ravel = (((np.array(masked).ravel()).astype(bool)))
@@ -259,7 +273,9 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
     def get_2d_area_by_pixels(self, image_path, predictor):
-        image = open_image(image_path, full_size=False)
+        model, view, controller = self.get_model_view_controller()
+
+        image = model.open_image(image_path, full_size=False)
         mask = predictor.predict(image)
         mask_array = np.array(mask)
         pixels = np.nonzero(mask_array)
@@ -268,7 +284,9 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
         
     def get_2d_enclosing_circle_area(self, image_path, predictor):
-        image = open_image(image_path, full_size=False)
+        model, view, controller = self.get_model_view_controller()
+
+        image = model.open_image(image_path, full_size=False)
         mask = predictor.predict(image)
         mask_array = np.array(mask)
         #Here using a technique to leave out only the points of the object consisting of the boundary, so that we have much fewer points to handle
@@ -297,7 +315,7 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
 
-        image = open_image(image_path,full_size=False)
+        image = model.open_image(image_path,full_size=False)
         masked = controller.ceremicPredictor.predict(image)
         
         masked_ravel = (((np.array(masked)).astype(bool)))

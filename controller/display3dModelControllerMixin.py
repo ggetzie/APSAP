@@ -38,7 +38,7 @@ class Display3dModelControllerMixin:
             m = re.search(MODELS_FILES_RE, current_model_path.replace("\\", "/"))
             # This error happens when the relative path is different
             if m:
-                print(m)
+              
                 batch_num = str(
                     int(m.group(1))
                 )  # int("006") -> int(6). We remove leading 0

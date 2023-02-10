@@ -20,7 +20,6 @@ from PyQt5.QtGui import (
     QStandardItemModel,
 )
 from glob import glob as glob
-from helper.misc import  simple_save_json
 import pathlib
 
 
@@ -251,7 +250,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        simple_save_json(mainModel.json_data, "./configs/data.json")
+        mainModel.simple_save_json(mainModel.json_data, "./configs/data.json")
 
         print(f"{time.time() - now} seconds")
         view.all_3d_areas = all_3d_areas

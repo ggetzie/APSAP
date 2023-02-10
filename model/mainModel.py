@@ -1,13 +1,12 @@
 #In MVVN, Model View ViewModel architecture, Model represents the data in the application.
 
 from configs.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
-from helper.misc import simple_get_json
 import pathlib, json
 #here
-
+from model.fileIOModel import FileIOModel
  
  
-class MainModel:
+class MainModel(FileIOModel):
     def __init__(self):
 
         if not self.check_has_path_in_setting():
@@ -15,9 +14,9 @@ class MainModel:
         setting = json.load(open("./configs/settings.json"))
 
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
-        self.json_data = simple_get_json("./configs/data.json")
+        self.json_data = self.simple_get_json("./configs/data.json")
     
-        self.parameters = simple_get_json("./configs/parameters.json")
+        self.parameters = self.simple_get_json("./configs/parameters.json")
         calculuated_paths = dict()
         for obj in self.json_data["past_records"]:
             calculuated_paths[obj["path"]] = obj

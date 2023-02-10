@@ -2,7 +2,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PIL.ImageQt import ImageQt
 import open3d as o3d
-from helper.misc import open_image
 from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class Load1jpgPairController:  # bridging the view(gui) and the model(data)
@@ -29,9 +28,9 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
         view.path_2d_picture = photos_dir
         import time
         now = time.time()
-        front_photo = ImageQt(open_image(str(photos_dir / "1.jpg"), full_size=False))
+        front_photo = ImageQt(mainModel.open_image(str(photos_dir / "1.jpg"), full_size=False))
          
-        back_photo =  ImageQt(open_image(str(photos_dir / "2.jpg"), full_size=False))
+        back_photo =  ImageQt(mainModel.open_image(str(photos_dir / "2.jpg"), full_size=False))
         #
         print(f"time passed: {time.time() - now}")
         view.findFrontPhoto_l.setPixmap(

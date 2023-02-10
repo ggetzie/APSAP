@@ -5,9 +5,6 @@ import time
 from  computation.nn_segmentation import MaskPredictor
 ceremicPredictor =  MaskPredictor("./computation/ceremicsmask.pt")
 from scipy.ndimage import binary_dilation
- 
-from helper.misc import simple_get_json, simple_save_json
-
 from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class DebugFuncs():

@@ -1,13 +1,10 @@
 
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
+from PyQt5.QtGui import  QStandardItem 
 from PIL.ImageQt import ImageQt
 from scipy.stats import gmean, tmean
 import numpy as np
-import open3d as o3d
-from helper.misc import open_image
-from configs.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
 
 class CalculateSimilarityControllerMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):

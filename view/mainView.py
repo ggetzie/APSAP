@@ -39,7 +39,6 @@ class MainView(QMainWindow, PlyWindowView):
         view = self
         controller = self.mainController
         view.findsList.currentItemChanged.connect(controller.load_find_images)
-        view.sortedModelList.selectionModel().currentChanged.connect(controller.change_3d_model)
 
         view.update_button.clicked.connect(controller.add_match)
         view.remove_button.clicked.connect(controller.remove_match)

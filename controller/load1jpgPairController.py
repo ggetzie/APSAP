@@ -3,7 +3,7 @@ from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PIL.ImageQt import ImageQt
 import open3d as o3d
 from helper.misc import open_image
-from config.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
+from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class Load1jpgPairController:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):

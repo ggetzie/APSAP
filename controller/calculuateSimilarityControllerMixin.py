@@ -7,7 +7,7 @@ from scipy.stats import gmean, tmean
 import numpy as np
 import open3d as o3d
 from helper.misc import open_image
-from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
+from configs.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
 
 class CalculateSimilarityControllerMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
@@ -22,26 +22,26 @@ class CalculateSimilarityControllerMixin:  # bridging the view(gui) and the mode
         _2d_image_path_image_2 = image_path/ "2.jpg"
 
         #Area based similiarity
-        _2d_area_image_1 = view.comparator.get_2d_picture_area(_2d_image_path_image_1)
-        _2d_area_image_2 = view.comparator.get_2d_picture_area(_2d_image_path_image_2)    
+        _2d_area_image_1 = controller.get_2d_picture_area(_2d_image_path_image_1)
+        _2d_area_image_2 = controller.get_2d_picture_area(_2d_image_path_image_2)    
  
         #Brightness based simliarity
-        color_brightness_2d_image_2 = view.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
-        color_brightness_2d_image_1 = view.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)
+        color_brightness_2d_image_2 = controller.get_brightness_summary_from_2d(_2d_image_path_image_2)
+        color_brightness_2d_image_1 = controller.get_brightness_summary_from_2d(_2d_image_path_image_1)
         
 
         #Let's do the third one: color based similarity
         #Prepare the colors summaries for these two pictures
         #Not that useful we found out.
-        front_color = (view.comparator.get_color_summary_from_2d(_2d_image_path_image_1))
-        back_color = (view.comparator.get_color_summary_from_2d(_2d_image_path_image_2))  
+        front_color = (controller.get_color_summary_from_2d(_2d_image_path_image_1))
+        back_color = (controller.get_color_summary_from_2d(_2d_image_path_image_2))  
         
         #Fourth one, width length
-        _2d_width_length_image_1 = (view.comparator.get_2d_width_length(_2d_image_path_image_1))
-        _2d_width_length_image_2 = (view.comparator.get_2d_width_length(_2d_image_path_image_2))
+        _2d_width_length_image_1 = (controller.get_2d_width_length(_2d_image_path_image_1))
+        _2d_width_length_image_2 = (controller.get_2d_width_length(_2d_image_path_image_2))
         #Getting the simlarity scores here 
-        _2d_area_circle_ratio_image_1 = view.comparator.get_2d_area_circle_ratio(_2d_image_path_image_1)
-        _2d_area_circle_ratio_image_2 = view.comparator.get_2d_area_circle_ratio(_2d_image_path_image_2)
+        _2d_area_circle_ratio_image_1 = controller.get_2d_area_circle_ratio(_2d_image_path_image_1)
+        _2d_area_circle_ratio_image_2 = controller.get_2d_area_circle_ratio(_2d_image_path_image_2)
 
         similarity_scores = []    
         

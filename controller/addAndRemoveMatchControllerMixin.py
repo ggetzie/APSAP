@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import  QMessageBox
 from model.database.database_tools import update_match_info
 
 class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(data)
+    
     def __init__(self, view, model):
-        # Notice this object is the controller, that which connects the view(GUI) and the model(data)
+       
         pass
 
     def remove_match(self):

@@ -1,6 +1,6 @@
 #In MVVN, Model View ViewModel architecture, Model represents the data in the application.
 
-from config.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
+from configs.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
 from helper.misc import simple_get_json
 import pathlib, json
 #here

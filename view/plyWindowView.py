@@ -1,6 +1,5 @@
 import win32gui
 import open3d as o3d
-from comparator import Comparator
 from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
@@ -14,8 +13,7 @@ class PlyWindowView:
         #This creates a window that shows the 3d model in ply format
         self.plyWindow = o3d.visualization.Visualizer()
         self.plyWindow.create_window(visible=False)   
-        self.comparator = Comparator(self.plyWindow)
-
+      
         #This fixes the ply window inside the mainWindow
         hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
         window = QWindow.fromWinId(hwnd)

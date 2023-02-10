@@ -4,7 +4,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import Qt
 
-from config.path_variables import (
+from configs.path_variables import (
     FINDS_SUBDIR,
     FINDS_PHOTO_DIR,
     MODELS_FILES_DIR,
@@ -196,20 +196,20 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                     # Calculate the area of the current piece
 
-                    brightness_summary = view.comparator.get_brightness_summary_from_3d(
+                    brightness_summary = controller.get_brightness_summary_from_3d(
                         path
                     )
                     brightness_summary = list(brightness_summary)
 
                     # Calculate the color summary of the current piece
-                    colors_summary = view.comparator.get_color_summary_from_3d(path)
+                    colors_summary = controller.get_color_summary_from_3d(path)
                     colors_summary = list(colors_summary)
                     (
                         area,
                         width_length_summary,
-                    ) = view.comparator.get_3d_object_area_and_width_length(path)
+                    ) = controller.get_3d_object_area_and_width_length(path)
 
-                    cirlcle_area_ratio = view.comparator.get_3d_area_circle_ratio(path)
+                    cirlcle_area_ratio = controller.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
                     json_data = mainModel.json_data
                     temp = {}
@@ -251,7 +251,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        simple_save_json(mainModel.json_data, "./parameters/data/data.json")
+        simple_save_json(mainModel.json_data, "./configs/data.json")
 
         print(f"{time.time() - now} seconds")
         view.all_3d_areas = all_3d_areas

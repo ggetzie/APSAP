@@ -10,7 +10,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import Qt
 
-from config.path_variables import (
+from configs.path_variables import (
     FINDS_SUBDIR,
     FINDS_PHOTO_DIR,
     MODELS_FILES_DIR,

@@ -1,11 +1,10 @@
 import win32gui
 import open3d as o3d
-from comparator import Comparator
 from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
 import re
-from config.path_variables import MODELS_FILES_RE
+from configs.path_variables import MODELS_FILES_RE
 
 
 class Display3dModelControllerMixin:

@@ -8,7 +8,7 @@ from scipy.ndimage import binary_dilation
  
 from helper.misc import simple_get_json, simple_save_json
 
-from config.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
+from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class DebugFuncs():
 

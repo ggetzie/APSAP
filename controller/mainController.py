@@ -1,8 +1,10 @@
 from controller.selectPathControllerMixin import SelectPathControllerMixin
 from controller.loadJpgsPlysControllerMixin import LoadJpgsPlysControllerMixin
 from controller.addAndRemoveMatchControllerMixin import AddAndRemoveMatchControllerMixin
+from controller.load1jpgPairController import Load1jpgPairController
+from controller.display3dModelControllerMixin import Display3dModelControllerMixin
 
-class MainController(SelectPathControllerMixin, LoadJpgsPlysControllerMixin, AddAndRemoveMatchControllerMixin):
+class MainController(SelectPathControllerMixin, LoadJpgsPlysControllerMixin, AddAndRemoveMatchControllerMixin, Load1jpgPairController, Display3dModelControllerMixin):
      #bridging the view(gui) and the model(data)
 
      

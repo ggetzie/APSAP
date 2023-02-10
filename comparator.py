@@ -135,12 +135,6 @@ class Comparator:
         tif_area =  get_ceremic_area(ceremic_mask, mm_per_pixel)
         return tif_area
     
- 
-    def compare_3d_with_2d(self,_3d_object_path, _2d_picture_path):
-        _3d_area = self.get_3d_object_area(_3d_object_path)
-        _2d_area = self.get_2d_picture_area(_2d_picture_path)
-        return  (max(_3d_area/_2d_area, _2d_area/ _3d_area))
- 
 
  
     def bounding_box_get_pixel_difference(self ):
@@ -312,17 +306,6 @@ class Comparator:
         vis.remove_geometry(current_pcd_load)
         del ctr
         return (float(r_mean), float(g_mean), float(b_mean))
-        
-    def srgb_color_difference(self, colors1, colors2):
-        #https://en.wikipedia.org/wiki/Color_difference#sRGB
-
-        if abs(colors1[0] - colors2[0]) < 128:
-            
-            return math.sqrt(2*( (colors2[0] - colors1[0])**2 ) + 4*( (colors2[1]  - colors1[1])**2 ) + 3 *( (colors2[2] - colors1[2])**2 ))
-    
-        else:
-            return math.sqrt(2*( (colors2[0] - colors1[0])**2 ) + 4*( (colors2[1]  - colors1[1])**2 ) + 2 *( (colors2[2] - colors1[2])**2 ))
-
-        
+ 
 
     

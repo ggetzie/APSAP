@@ -23,6 +23,8 @@ class MainModel:
             calculuated_paths[obj["path"]] = obj
         self.calculuated_paths = calculuated_paths
 
+ 
+
     def get_hemispheres(self):
         hemispheres = [
             d.name

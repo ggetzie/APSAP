@@ -260,4 +260,4 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         view.all_3d_area_circle_ratios = all_3d_area_circle_ratios
         view.all_3d_colors_summaries = all_3d_colors_summaries
         view.modelList.setModel(model)
-        view.modelList.selectionModel().currentChanged.connect(view.change_3d_model)
+        view.modelList.selectionModel().currentChanged.connect(controller.change_3d_model)

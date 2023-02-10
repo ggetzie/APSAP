@@ -19,14 +19,37 @@ class MainView(QMainWindow, Visualized, LoadImagesModels):
         super(MainView, self).__init__()
 
         # model, view, controller
+
+        #Setting up model
         self.mainModel = mainModel
+        
+        #Setting up view
         uic.loadUi("view/MainWindow.ui", self)
-        self.mainController = MainController(self, self.mainModel)
         self.set_up_3d_window()
 
-        self.findsList.currentItemChanged.connect(self.load_find_images)
+        #Setting up controller
+        self.mainController = MainController(self, self.mainModel)
+      
+        self.setUpViewControllerConnection()
 
-        self.update_button.clicked.connect(self.mainController.update_model_db)
-        self.remove_button.clicked.connect(self.mainController.remove_match)
 
         # Remove the current 3d model
+
+
+    def setUpViewControllerConnection(self):
+
+        view = self
+        controller = self.mainController
+        view.findsList.currentItemChanged.connect(controller.load_find_images)
+        view.sortedModelList.selectionModel().currentChanged.connect(controller.change_3d_model)
+
+        view.update_button.clicked.connect(controller.add_match)
+        view.remove_button.clicked.connect(controller.remove_match)
+
+        #These 
+        view.hemisphere_cb.currentIndexChanged.connect(controller.populate_zones)
+        view.zone_cb.currentIndexChanged.connect(controller.populate_eastings)
+        view.easting_cb.currentIndexChanged.connect(controller.populate_northings)
+        view.northing_cb.currentIndexChanged.connect(controller.populate_contexts)
+        view.context_cb.currentIndexChanged.connect(controller.contextChanged)
+

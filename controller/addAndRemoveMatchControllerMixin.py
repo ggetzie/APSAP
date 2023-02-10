@@ -69,7 +69,7 @@ class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(
 
 
 
-    def update_button_click(self, e): 
+    def add_match_confirm(self, e): 
         mainModel, view, controller = self.get_model_view_controller()
 
         if e.text() == "OK":
@@ -124,7 +124,7 @@ class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(
                 
             else:
                 QMessageBox(view,text="Please select both a find and a model").exec()
-    def update_model_db(self):
+    def add_match(self):
             mainModel, view, controller = self.get_model_view_controller()
  
             find_num = view.selected_find.text()
@@ -133,5 +133,5 @@ class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(
             msg = QMessageBox()
             msg.setText(f"Find ({find_num}) will be updated to 3d Batch ({batch_num}) 3d Piece ({piece_num}). Proceed?")
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            msg.buttonClicked.connect(controller.update_button_click)
+            msg.buttonClicked.connect(controller.add_match_confirm)
             msg.exec()

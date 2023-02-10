@@ -33,12 +33,7 @@ class SelectPathControllerMixin: #bridging the view(gui) and the model(data)
         controller = self
         self.populate_hemispheres()
 
-        #Here we connect the view with the control of mouse clicks and selects
-        view.hemisphere_cb.currentIndexChanged.connect( controller.populate_zones)
-        view.zone_cb.currentIndexChanged.connect(controller.populate_eastings)
-        view.easting_cb.currentIndexChanged.connect(controller.populate_northings)
-        view.northing_cb.currentIndexChanged.connect( (controller.populate_contexts))
-        view.context_cb.currentIndexChanged.connect(controller.contextChanged)
+
 
 
     def populate_hemispheres(self): 

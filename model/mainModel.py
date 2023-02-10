@@ -12,12 +12,12 @@ class MainModel:
 
         if not self.check_has_path_in_setting():
             self.ask_for_prompt()
-        setting = json.load(open("./config/settings.json"))
+        setting = json.load(open("./configs/settings.json"))
 
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
-        self.json_data = simple_get_json("./parameters/data/data.json")
+        self.json_data = simple_get_json("./configs/data.json")
     
-        self.parameters = simple_get_json("./parameters/data/parameters.json")
+        self.parameters = simple_get_json("./configs/parameters.json")
         calculuated_paths = dict()
         for obj in self.json_data["past_records"]:
             calculuated_paths[obj["path"]] = obj
@@ -40,11 +40,11 @@ class MainModel:
         return res
 
     def check_has_path_in_setting(self):
-        setting_found = pathlib.Path("./config/settings.json").is_file()  
+        setting_found = pathlib.Path("./configs/settings.json").is_file()  
         if not setting_found:
             return False
         else:
-            setting_dict = json.load(open("./config/settings.json")) if setting_found else {}  
+            setting_dict = json.load(open("./configs/settings.json")) if setting_found else {}  
             key_exist = "FILE_ROOT" in setting_dict
             if key_exist:
                 path_exist =  pathlib.Path(setting_dict["FILE_ROOT"]).is_dir()
@@ -73,17 +73,17 @@ class MainModel:
                 if has_N_S:
                     #This is when the path is actually nice enough that we can save it
                     true_path = text
-                    if not pathlib.Path("./config/settings.json").is_file():
+                    if not pathlib.Path("./configs/settings.json").is_file():
                         #In this case, we can make a settings from scratch
                         file_dict = {"FILE_ROOT": f"{true_path}"}
 
                     else:
-                        f = open('./config/settings.json')
+                        f = open('./configs/settings.json')
                         #Whether if the key is not there  or the path doesn't exist, we are sure we can save it in the dict now
                         file_dict = json.load(f)                        
                         file_dict["FILE_ROOT"] = true_path
                         f.close()
-                    with open('./config/settings.json', 'w') as fp:
+                    with open('./configs/settings.json', 'w') as fp:
                             json.dump(file_dict, fp)
                             fp.close()
                     break    

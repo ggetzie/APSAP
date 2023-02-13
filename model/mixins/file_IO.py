@@ -16,7 +16,7 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
         
-class FileIOModelMixin:
+class FileIOMixin:
 
     def open_image(self, image_path, full_size):
         if full_size == True:

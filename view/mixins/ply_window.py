@@ -4,14 +4,14 @@ from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
 
-class PlyWindowView:
+class PlyWindowMixin:
 
-    def setUpPlyWindow(self):
+    def set_up_ply_window(self):
         widget = self.model
 
         #This creates a window that shows the 3d model in ply format
-        self.plyWindow = o3d.visualization.Visualizer()
-        self.plyWindow.create_window(visible=False)   
+        self.ply_window = o3d.visualization.Visualizer()
+        self.ply_window.create_window(visible=False)   
       
         #This fixes the ply window inside the mainWindow
         hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
@@ -21,12 +21,12 @@ class PlyWindowView:
 
         #Contiously update the open3d ply window
         timer = QTimer(self)
-        timer.timeout.connect(self.updatePlyWindow)
+        timer.timeout.connect(self.update_ply_window)
         timer.start(1)
 
-    def updatePlyWindow(self):
+    def update_ply_window(self):
 
-        self.plyWindow.poll_events()
-        self.plyWindow.update_renderer()
+        self.ply_window.poll_events()
+        self.ply_window.update_renderer()
 
  

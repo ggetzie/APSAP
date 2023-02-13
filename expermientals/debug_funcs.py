@@ -2,7 +2,7 @@ import pathlib
 import json
 import time
 from  computation.nn_segmentation import MaskPredictor
-ceremicPredictor =  MaskPredictor("./computation/ceremicsmask.pt")
+ceremic_predictor =  MaskPredictor("./computation/ceremicsmask.pt")
 from scipy.ndimage import binary_dilation
 
 class DebugFuncs():
@@ -183,10 +183,10 @@ class DebugFuncs():
                     current_data = {
 
                     }
-                    _2d_pixel_area_1 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_1, self.comparator.ceremicPredictor)
-                    _2d_pixel_area_2 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_2, self.comparator.ceremicPredictor)
-                    _2d_pixel_circle_1 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_1, self.comparator.ceremicPredictor)
-                    _2d_pixel_circle_2 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_2, self.comparator.ceremicPredictor)
+                    _2d_pixel_area_1 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_1, self.comparator.ceremic_predictor)
+                    _2d_pixel_area_2 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_2, self.comparator.ceremic_predictor)
+                    _2d_pixel_circle_1 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_1, self.comparator.ceremic_predictor)
+                    _2d_pixel_circle_2 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_2, self.comparator.ceremic_predictor)
                     _3d_pixel_area = self.comparator.get_3d_object_area_in_pixels(_3d_model_path )
                     _3d_pixel_circle = self.comparator.get_3d_object_circle_in_pixels(_3d_model_path)
                     _2d_ratio_1 = _2d_pixel_area_1/_2d_pixel_circle_1

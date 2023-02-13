@@ -1,5 +1,3 @@
-
-#https://doc.qt.io/qt-5/model-view-programming.html
 from  computation.nn_segmentation import MaskPredictor
 from scipy.ndimage import binary_dilation
 from PIL import Image
@@ -10,54 +8,55 @@ import smallestenclosingcircle
 
  
 
-class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(data)
+class MeasurePixelsDataMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
      
-        self.ceremicPredictor = MaskPredictor("./computation/ceremicsmask.pt")
-        self.colorgridPredictor = MaskPredictor("./computation/colorgridmask.pt")
-        view.plyWindow.get_render_option().light_on = False
-        view.plyWindow.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
+        self.ceremic_predictor = MaskPredictor("./computation/ceremicsmask.pt")
+        self.colorgrid_predictor = MaskPredictor("./computation/colorgridmask.pt")
+        view.ply_window.get_render_option().light_on = False
+        view.ply_window.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
                                             #When we use our own field of view
     def get_ceremic_area(self, ceremic_mask, mm_per_pixel):
         #Turn the mask to an array
         ceremic_array = (np.array(ceremic_mask))
         ceremic_pixel = (np.count_nonzero((ceremic_array >=170)))
         # Turn number of pixels(aka pixel area) into area in mm
-        mmSquared = (ceremic_pixel * (mm_per_pixel* mm_per_pixel)) 
+        mm_squared = (ceremic_pixel * (mm_per_pixel* mm_per_pixel)) 
         # mm to cm
-        cmSquared = mmSquared / 100 
-        return cmSquared
+        cm_squared = mm_squared / 100 
+        return cm_squared
+        
     def get_2d_area_circle_ratio(self, _2d_object_path) -> float:
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        area_in_pixels= mainController.get_2d_area_by_pixels(_2d_object_path, mainController.ceremicPredictor)
-        circle_in_pixels = mainController.get_2d_enclosing_circle_area(_2d_object_path, mainController.ceremicPredictor)
+        area_in_pixels= main_controller.get_2d_area_by_pixels(_2d_object_path, main_controller.ceremic_predictor)
+        circle_in_pixels = main_controller.get_2d_enclosing_circle_area(_2d_object_path, main_controller.ceremic_predictor)
         return area_in_pixels/circle_in_pixels
 
     def get_3d_area_circle_ratio(self, _3d_object_path) -> float:
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        area_in_pixels= mainController.get_3d_object_area_in_pixels(_3d_object_path)
-        circle_in_pixels = mainController.get_3d_object_circle_in_pixels(_3d_object_path)
+        area_in_pixels= main_controller.get_3d_object_area_in_pixels(_3d_object_path)
+        circle_in_pixels = main_controller.get_3d_object_circle_in_pixels(_3d_object_path)
         return area_in_pixels/circle_in_pixels
 
         
     def get_3d_object_area_in_pixels(self, _3d_object_path) -> int:
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
         
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        mainView.plyWindow.add_geometry(current_pcd_load)
-        ctr = mainView.plyWindow.get_view_control()
+        main_view.ply_window.add_geometry(current_pcd_load)
+        ctr = main_view.ply_window.get_view_control()
         ctr.change_field_of_view(step=-9)
-        object_image = mainView.plyWindow.capture_screen_float_buffer(True)
+        object_image = main_view.ply_window.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
       
         object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))    
         pixel_counts = (np.count_nonzero(object_image_array_object_locations))
    
 
-        mainView.plyWindow.remove_geometry(current_pcd_load)
+        main_view.ply_window.remove_geometry(current_pcd_load)
         del ctr
         
         return pixel_counts
@@ -65,14 +64,14 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
     def get_3d_object_circle_in_pixels(self, _3d_object_path):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
       
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        mainView.plyWindow.add_geometry(current_pcd_load)
-        ctr = mainView.plyWindow.get_view_control()
+        main_view.ply_window.add_geometry(current_pcd_load)
+        ctr = main_view.ply_window.get_view_control()
         ctr.change_field_of_view(step=-9)
-        object_image = mainView.plyWindow.capture_screen_float_buffer(True)
+        object_image = main_view.ply_window.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8) 
      
         _1_white_other_0 = (~((object_image_array[:, :, 0] == 255 ) & (object_image_array[:, :, 1] == 255 )& (object_image_array[:, :, 2] == 255))).astype(int)
@@ -97,7 +96,7 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
             if(addable == True):
                 new_li.append(indices_tuples[i])
         center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
-        mainView.plyWindow.remove_geometry(current_pcd_load)
+        main_view.ply_window.remove_geometry(current_pcd_load)
 
         del ctr
         return (radius**2 ) * 3.1416
@@ -116,10 +115,10 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
     def get_3d_object_area_and_width_length(self, _3d_object_path):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
         #Loading a bounding box to get the actual width length in cm and the pixel, we got the 
-        plyWindow = mainView.plyWindow
+        ply_window = main_view.ply_window
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
         bounding_box = current_pcd_load.get_axis_aligned_bounding_box() 
         bounding_box.color = (1,0,0)
@@ -129,18 +128,18 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         bounding_box.color = (1,0,0)
         
         
-        plyWindow.add_geometry(bounding_box)
-        ctr = plyWindow.get_view_control()
+        ply_window.add_geometry(bounding_box)
+        ctr = ply_window.get_view_control()
         ctr.change_field_of_view(step=-9)
-        bounding_box_pixels_difference = mainController.bounding_box_get_pixel_difference()
+        bounding_box_pixels_difference = main_controller.bounding_box_get_pixel_difference()
         bounding_box_width_mm = extents[0]
-        plyWindow.remove_geometry(bounding_box)
+        ply_window.remove_geometry(bounding_box)
         #We now got 
         #When geomoetry is added camera is supposed to change, so we need to change the field of view again
-        plyWindow.add_geometry(current_pcd_load)
+        ply_window.add_geometry(current_pcd_load)
         ctr.change_field_of_view(step=-9)
         
-        object_image = plyWindow.capture_screen_float_buffer(True)
+        object_image = ply_window.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
 
         object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))   
@@ -150,20 +149,20 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         
          
         #Cleanup
-        plyWindow.remove_geometry(current_pcd_load)
+        ply_window.remove_geometry(current_pcd_load)
         del ctr
         
         area = ((mm_pixels_ratio ** 2 )* pixel_counts)/100 
         return (area), ((width,length))        
 
     def get_2d_picture_area(self, _2d_picture_path):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        image = mainModel.open_image(_2d_picture_path, full_size=False)
+        image = main_model.open_image(_2d_picture_path, full_size=False)
         
-        mask_image = mainController.colorgridPredictor.predict(image)
+        mask_image = main_controller.colorgrid_predictor.predict(image)
         mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_image)  #53.98 is the width of the credit-card size color grid
-        ceremic_mask = mainController.ceremicPredictor.predict(image) 
+        ceremic_mask = main_controller.ceremic_predictor.predict(image) 
         tif_area =  self.get_ceremic_area(ceremic_mask, mm_per_pixel)
         return tif_area
     
@@ -173,13 +172,13 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
     def bounding_box_get_pixel_difference(self ):
         #Detecting the length of bounding box to get the correct ratio
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        plyWindow = mainView.plyWindow
+        ply_window = main_view.ply_window
       
                 
-        plyWindow.get_render_option().point_size = 5
-        red_box_image = plyWindow.capture_screen_float_buffer(True)
+        ply_window.get_render_option().point_size = 5
+        red_box_image = ply_window.capture_screen_float_buffer(True)
  
 
         red_box_image_array = np.multiply(np.array(red_box_image), 255).astype(np.uint8)
@@ -196,13 +195,13 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
     def get_2d_width_length(self,path_2d):
 
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
     
-        image = mainModel.open_image(path_2d,full_size=False)
-        masked_ceremics = mainController.ceremicPredictor.predict(image)
+        image = main_model.open_image(path_2d,full_size=False)
+        masked_ceremics = main_controller.ceremic_predictor.predict(image)
         masked_ceremics_bool = (((np.array(masked_ceremics)).astype(bool)))
-        mask_grid = mainController.colorgridPredictor.predict(image)
+        mask_grid = main_controller.colorgrid_predictor.predict(image)
         mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
         indices = (np.nonzero(masked_ceremics_bool))
         sorted_y_indices = sorted(indices[0])
@@ -218,10 +217,10 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
     def get_brightness_summary_from_2d(self, image_path):
 
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        image = mainModel.open_image(image_path,full_size=False)
-        masked = mainController.ceremicPredictor.predict(image)
+        image = main_model.open_image(image_path,full_size=False)
+        masked = main_controller.ceremic_predictor.predict(image)
         
         masked_ravel = (((np.array(masked).ravel()).astype(bool)))
         np_image = np.array(image.convert('L')).ravel()
@@ -242,18 +241,18 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
     
     def get_brightness_summary_from_3d (self, model_path):
 
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        plyWindow = mainView.plyWindow
+        ply_window = main_view.ply_window
         current_pcd_load = o3d.io.read_point_cloud(model_path) 
         
-        plyWindow.add_geometry(current_pcd_load)
-        ctr = plyWindow.get_view_control()
+        ply_window.add_geometry(current_pcd_load)
+        ctr = ply_window.get_view_control()
             
-        plyWindow.get_render_option().point_size = 5
+        ply_window.get_render_option().point_size = 5
 
         ctr.change_field_of_view(step=-9)
-        object_image = plyWindow.capture_screen_float_buffer(True)
+        object_image = ply_window.capture_screen_float_buffer(True)
         
         pic = (np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')).ravel())
         pic[pic==255] = 0
@@ -264,7 +263,7 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         mean = (np.sum(pixels_sorted)/len(pixels_sorted))
         upper_q = pixels_sorted[int(len(pixels_sorted)* (3/4))]
         lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
-        plyWindow.remove_geometry(current_pcd_load)
+        ply_window.remove_geometry(current_pcd_load)
         del ctr
         std = np.std(pixels_sorted)
         return (max_,min_,median, mean,upper_q, lower_q, std)
@@ -272,9 +271,9 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
 
     def get_2d_area_by_pixels(self, image_path, predictor):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        image = mainModel.open_image(image_path, full_size=False)
+        image = main_model.open_image(image_path, full_size=False)
         mask = predictor.predict(image)
         mask_array = np.array(mask)
         pixels = np.nonzero(mask_array)
@@ -283,9 +282,9 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
 
         
     def get_2d_enclosing_circle_area(self, image_path, predictor):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        image = mainModel.open_image(image_path, full_size=False)
+        image = main_model.open_image(image_path, full_size=False)
         mask = predictor.predict(image)
         mask_array = np.array(mask)
         #Here using a technique to leave out only the points of the object consisting of the boundary, so that we have much fewer points to handle
@@ -310,12 +309,12 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         return (radius**2 ) * 3.1416
 
     def get_color_summary_from_2d(self, image_path):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
 
 
-        image = mainModel.open_image(image_path,full_size=False)
-        masked = mainController.ceremicPredictor.predict(image)
+        image = main_model.open_image(image_path,full_size=False)
+        masked = main_controller.ceremic_predictor.predict(image)
         
         masked_ravel = (((np.array(masked)).astype(bool)))
     
@@ -333,19 +332,19 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         return (r_mean, g_mean, b_mean)
 
     def get_color_summary_from_3d (self, model_path):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
         
-        plyWindow = mainView.plyWindow
+        ply_window = main_view.ply_window
         current_pcd_load = o3d.io.read_point_cloud(model_path) 
         
-        plyWindow.add_geometry(current_pcd_load)
-        ctr = plyWindow.get_view_control()
+        ply_window.add_geometry(current_pcd_load)
+        ctr = ply_window.get_view_control()
             
-        plyWindow.get_render_option().point_size = 5
+        ply_window.get_render_option().point_size = 5
 
         ctr.change_field_of_view(step=-9)
-        object_image = plyWindow.capture_screen_float_buffer(True)
+        object_image = ply_window.capture_screen_float_buffer(True)
         
         pic =  np.multiply(np.array(object_image), 255) 
         
@@ -362,7 +361,7 @@ class MeasurePixelsDataControllerMixin:  # bridging the view(gui) and the model(
         g_mean = np.mean(g)
         b_mean = np.mean(b)
     
-        plyWindow.remove_geometry(current_pcd_load)
+        ply_window.remove_geometry(current_pcd_load)
         del ctr
         return (float(r_mean), float(g_mean), float(b_mean))
  

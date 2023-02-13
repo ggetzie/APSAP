@@ -4,27 +4,27 @@ import pathlib, json
 from glob import glob as glob
 
 #here
-class InitialLoadModelMixin:
+class InitialLoadMixin:
  
-    def prepareData(self, mainView):
-        self.requestPath(mainView)
+    def prepare_data(self, main_view):
+        self.request_path(main_view)
         setting = self.simple_get_json("./configs/settings.json")
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
         self.json_data = self.simple_get_json("./configs/cache.json")
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        self.calculuated_paths = self.getPathObjectDict(self.json_data["past_records"])
+        self.calculuated_paths = self.get_path_object_dict(self.json_data["past_records"])
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
-    def getPathObjectDict(self, pastRecords):
+    def get_path_object_dict(self, past_records):
         calculuated_paths = dict()
         
-        for obj in pastRecords:
+        for obj in past_records:
             calculuated_paths[obj["path"]] = obj
         
         return calculuated_paths
 
 
-    def validPathExists(self):
+    def vali_path_exists(self):
         setting_found = pathlib.Path("./configs/settings.json").is_file()  
         if not setting_found:
             return False
@@ -41,16 +41,16 @@ class InitialLoadModelMixin:
                 return False
 
 
-    def requestPath(self, mainView): #Although this technically involves a lot of code of GUI(as a pop up), it is in here instead of View because this function ensures that settings are well imported before we run the application
-        if not self.validPathExists():
-            Title = "Please enter the file path!"
+    def request_path(self, main_view): #Although this technically involves a lot of code of GUI(as a pop up), it is in here instead of View because this function ensures that settings are well imported before we run the application
+        if not self.vali_path_exists():
+            title = "Please enter the file path!"
             while True:
                 
-                QMessageBox(mainView,text="Please select a path to the files").exec()
-                dlg = QFileDialog(mainView)
+                QMessageBox(main_view,text="Please select a path to the files").exec()
+                dlg = QFileDialog(main_view)
                 dlg.setFileMode(QFileDialog.Directory)
                 dlg.resize(600,100)                    
-                dlg.setWindowTitle(Title)
+                dlg.setWindowTitle(title)
                 dlg.exec()
                 text = dlg.selectedFiles()[0]
                 
@@ -74,8 +74,8 @@ class InitialLoadModelMixin:
                                 fp.close()
                         break    
                     else:
-                        Title = "Valid paths must contain a directory named N or S!"
+                        title = "Valid paths must contain a directory named N or S!"
                 else:
-                    Title = "Path doesn't exist"
+                    title = "Path doesn't exist"
                     
     

@@ -16,34 +16,33 @@ from glob import glob as glob
 import pathlib
 
 
-class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
+class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
         # Notice this object is the controller, that which connects the view(GUI) and the model(data)
         controller = self
-
         view.contextDisplay.setText(controller.get_context_string())
 
 
     def get_context_dir(self):
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
         res = (
-            mainModel.file_root
-            / mainView.hemisphere_cb.currentText()
-            / mainView.zone_cb.currentText()
-            / mainView.easting_cb.currentText()
-            / mainView.northing_cb.currentText()
-            / mainView.context_cb.currentText()
+            main_model.file_root
+            / main_view.hemisphere_cb.currentText()
+            / main_view.zone_cb.currentText()
+            / main_view.easting_cb.currentText()
+            / main_view.northing_cb.currentText()
+            / main_view.context_cb.currentText()
         )
         if not res.exists():
-            mainView.statusLabel.setText(f"{res} does not exist!")
+            main_view.statusLabel.setText(f"{res} does not exist!")
             return pathlib.Path()
         return res
 
     def get_easting_northing_context(self):
-        mainModel, view, mainController = self.get_model_view_controller()
+        main_model, view, main_controller = self.get_model_view_controller()
 
-        context_dir = mainController.get_context_dir()
+        context_dir = main_controller.get_context_dir()
         path_parts = pathlib.Path(context_dir).parts[-3:]
         easting = int(path_parts[0])
         northing = int(path_parts[1])
@@ -53,33 +52,33 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
     def populate_finds(self):
         # if self.splash:
         #    self.splash.showMessage("Loading finds")
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        mainView.findsList.clear()
-        context_dir = mainController.get_context_dir()
+        main_view.finds_list.clear()
+        context_dir = main_controller.get_context_dir()
 
-        finds_dir = context_dir / mainModel.path_variables["FINDS_SUBDIR"] 
+        finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"] 
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
-        easting_northing_context = mainController.get_easting_northing_context()
+        easting_northing_context = main_controller.get_easting_northing_context()
         finds.sort(key=lambda f: int(f))
 
         # Get a dictionary to get all
-        mainView._3d_model_dict = dict()
+        main_view._3d_model_dict = dict()
         for find in finds:
 
             first_jpg_path = (
-                mainController.get_context_dir()
-                / mainModel.path_variables["FINDS_SUBDIR"] 
+                main_controller.get_context_dir()
+                / main_model.path_variables["FINDS_SUBDIR"] 
                 / find
-                / mainModel.path_variables["FINDS_PHOTO_DIR"]  
+                / main_model.path_variables["FINDS_PHOTO_DIR"]  
                 / "1.jpg"
             )
             second_jpg_path = (
-                mainController.get_context_dir()
-                / mainModel.path_variables["FINDS_SUBDIR"] 
+                main_controller.get_context_dir()
+                / main_model.path_variables["FINDS_SUBDIR"] 
                 / find
-                / mainModel.path_variables["FINDS_PHOTO_DIR"]  
+                / main_model.path_variables["FINDS_PHOTO_DIR"]  
                 / "2.jpg"
             )
 
@@ -89,7 +88,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
             ):
 
                 item = QListWidgetItem(find)
-                _3d_locations = mainModel.get_pottery_sherd_info(
+                _3d_locations = main_model.get_pottery_sherd_info(
                     easting_northing_context[0],
                     easting_northing_context[1],
                     easting_northing_context[2],
@@ -98,8 +97,8 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                 if _3d_locations[0] != None and _3d_locations[1] != None:
                     item.setForeground(QColor("red"))
-                mainView.findsList.addItem(item)
-                mainView._3d_model_dict[
+                main_view.finds_list.addItem(item)
+                main_view._3d_model_dict[
                     f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find)}"
                 ] = _3d_locations
 
@@ -107,20 +106,20 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         import re
 
         # Populate all models and at the same time get the information of those models for comparison.
-        mainModel, mainView, mainController = self.get_model_view_controller()
+        main_model, main_view, main_controller = self.get_model_view_controller()
 
-        path = str((mainController.get_context_dir() / mainModel.path_variables["MODELS_FILES_DIR"]))
+        path = str((main_controller.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
         all_model_paths = glob(path)
 
         if not all_model_paths:
-            mainView.statusLabel.setText(f"No models were found")
+            main_view.statusLabel.setText(f"No models were found")
         # Setting up the model
-        model = QStandardItemModel(mainView)
+        model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Models"])
         # Getting a dict for all the batches
         batches_dict = dict()
         for path in all_model_paths:
-            m = re.search(mainModel.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
+            m = re.search(main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
             # This error happens when the relative path is different
             batch_num = m.group(1)
             piece_num = m.group(2)
@@ -134,12 +133,12 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
         all_matched_3d_models = set()
 
-        for key in mainView._3d_model_dict:
+        for key in main_view._3d_model_dict:
             if not (
-                mainView._3d_model_dict[key][0] == None
-                and mainView._3d_model_dict[key][1] == None
+                main_view._3d_model_dict[key][0] == None
+                and main_view._3d_model_dict[key][1] == None
             ):
-                all_matched_3d_models.add(mainView._3d_model_dict[key])
+                all_matched_3d_models.add(main_view._3d_model_dict[key])
 
         # Add all items onto the QTree
 
@@ -162,48 +161,48 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                 path = item[1]
 
-                if path in mainModel.calculuated_paths:
-                    batch_num = mainModel.calculuated_paths[path]["batch_num"]
-                    piece_num = mainModel.calculuated_paths[path]["piece_num"]
-                    brightness_summary = mainModel.calculuated_paths[path][
+                if path in main_model.calculuated_paths:
+                    batch_num = main_model.calculuated_paths[path]["batch_num"]
+                    piece_num = main_model.calculuated_paths[path]["piece_num"]
+                    brightness_summary = main_model.calculuated_paths[path][
                         "brightness_summary"
                     ]
-                    colors_summary = mainModel.calculuated_paths[path]["colors_summary"]
-                    width_length_summary = mainModel.calculuated_paths[path][
+                    colors_summary = main_model.calculuated_paths[path]["colors_summary"]
+                    width_length_summary = main_model.calculuated_paths[path][
                         "width_length_summary"
                     ]
-                    area = mainModel.calculuated_paths[path]["area"]
-                    index = mainModel.calculuated_paths[path]["index"]
-                    context = mainModel.calculuated_paths[path]["context"]
-                    cirlcle_area_ratio = mainModel.calculuated_paths[path][
+                    area = main_model.calculuated_paths[path]["area"]
+                    index = main_model.calculuated_paths[path]["index"]
+                    context = main_model.calculuated_paths[path]["context"]
+                    cirlcle_area_ratio = main_model.calculuated_paths[path][
                         "cirlcle_area_ratio"
                     ]
 
                 else:
 
-                    m = re.search(mainModel.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
+                    m = re.search(main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
                     # This error happens when the relative path is different
                     batch_num = m.group(1)
                     piece_num = m.group(2)
 
                     # Calculate the area of the current piece
 
-                    brightness_summary = mainController.get_brightness_summary_from_3d(
+                    brightness_summary = main_controller.get_brightness_summary_from_3d(
                         path
                     )
                     brightness_summary = list(brightness_summary)
 
                     # Calculate the color summary of the current piece
-                    colors_summary = mainController.get_color_summary_from_3d(path)
+                    colors_summary = main_controller.get_color_summary_from_3d(path)
                     colors_summary = list(colors_summary)
                     (
                         area,
                         width_length_summary,
-                    ) = mainController.get_3d_object_area_and_width_length(path)
+                    ) = main_controller.get_3d_object_area_and_width_length(path)
 
-                    cirlcle_area_ratio = mainController.get_3d_area_circle_ratio(path)
+                    cirlcle_area_ratio = main_controller.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
-                    json_data = mainModel.json_data
+                    json_data = main_model.json_data
                     temp = {}
                     temp["path"] = path
                     temp["index"] = index
@@ -215,11 +214,11 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                     temp["colors_summary"] = colors_summary
                     temp["area"] = area
                     temp["width_length_summary"] = width_length_summary
-                    temp["context"] = mainView.context_cb.currentText()
-                    temp["zone"] = mainView.zone_cb.currentText()
-                    temp["hemisphere"] = mainView.hemisphere_cb.currentText()
-                    temp["utm_easting"] = mainView.easting_cb.currentText()
-                    temp["utm_northing"] = mainView.northing_cb.currentText()
+                    temp["context"] = main_view.context_cb.currentText()
+                    temp["zone"] = main_view.zone_cb.currentText()
+                    temp["hemisphere"] = main_view.hemisphere_cb.currentText()
+                    temp["utm_easting"] = main_view.easting_cb.currentText()
+                    temp["utm_northing"] = main_view.northing_cb.currentText()
 
                     json_data["past_records"].append(temp)
                 all_3d_colors_summaries.append(colors_summary)
@@ -243,13 +242,13 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        mainModel.simple_save_json(mainModel.json_data, "./configs/cache.json")
+        main_model.simple_save_json(main_model.json_data, "./configs/cache.json")
 
         print(f"{time.time() - now} seconds")
-        mainView.all_3d_areas = all_3d_areas
-        mainView.all_3d_width_length_summaries = all_3d_width_length_summaries
-        mainView.all_3d_brightness_summaries = all_3d_brightness_summaries
-        mainView.all_3d_area_circle_ratios = all_3d_area_circle_ratios
-        mainView.all_3d_colors_summaries = all_3d_colors_summaries
-        mainView.modelList.setModel(model)
-        mainView.modelList.selectionModel().currentChanged.connect(mainController.change_3d_model)
+        main_view.all_3d_areas = all_3d_areas
+        main_view.all_3d_width_length_summaries = all_3d_width_length_summaries
+        main_view.all_3d_brightness_summaries = all_3d_brightness_summaries
+        main_view.all_3d_area_circle_ratios = all_3d_area_circle_ratios
+        main_view.all_3d_colors_summaries = all_3d_colors_summaries
+        main_view.modelList.setModel(model)
+        main_view.modelList.selectionModel().currentChanged.connect(main_controller.change_3d_model)

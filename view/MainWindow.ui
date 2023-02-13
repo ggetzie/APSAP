@@ -273,7 +273,7 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="findsList">
+   <widget class="QListWidget" name="finds_list">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -850,7 +850,7 @@
      <attribute name="title">
       <string>Order by Area Similarity</string>
      </attribute>
-     <widget class="QTreeView" name="sortedModelList">
+     <widget class="QTreeView" name="sorted_model_list">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -884,7 +884,7 @@
    <zorder>frame</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>contextDisplay</zorder>
-   <zorder>findsList</zorder>
+   <zorder>finds_list</zorder>
    <zorder>statusLabel</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>model</zorder>

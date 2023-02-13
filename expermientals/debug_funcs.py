@@ -1,11 +1,9 @@
 import pathlib
-from model.database.database_tools import  get_all_pottery_sherd_info
 import json
 import time
 from  computation.nn_segmentation import MaskPredictor
 ceremicPredictor =  MaskPredictor("./computation/ceremicsmask.pt")
 from scipy.ndimage import binary_dilation
-from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class DebugFuncs():
 

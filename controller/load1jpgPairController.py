@@ -2,7 +2,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PIL.ImageQt import ImageQt
 import open3d as o3d
-from configs.path_variables import FINDS_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR
 
 class Load1jpgPairController:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
@@ -24,7 +23,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
             return
         
 
-        photos_dir = view.mainController.get_context_dir() / FINDS_SUBDIR / find_num / FINDS_PHOTO_DIR
+        photos_dir = view.mainController.get_context_dir() / mainModel.path_variables["FINDS_SUBDIR"] / find_num / mainModel.path_variables["FINDS_PHOTO_DIR"]  
         view.path_2d_picture = photos_dir
         import time
         now = time.time()
@@ -49,7 +48,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
             view.current_piece.setText(str(_3d_locations[1]))
             #Change to the piece matched as default
           
-            path =  (str((controller.get_context_dir()/MODELS_FILES_DIR)))
+            path =  (str((controller.get_context_dir()/mainModel.path_variables["MODELS_FILES_DIR"])))
             whole_path = (path.replace("*", f"{int(_3d_locations[0]):03}", 1).replace("*", f"{int(_3d_locations[1])}", 1)) 
             current_pcd_load = o3d.io.read_point_cloud(whole_path)
             if hasattr(view, "current_pcd") :
@@ -105,7 +104,7 @@ class Load1jpgPairController:  # bridging the view(gui) and the model(data)
       
             
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
-            path =  (str((controller.get_context_dir()/MODELS_FILES_DIR)))
+            path =  (str((controller.get_context_dir()/mainModel.path_variables["MODELS_FILES_DIR"])))
             whole_path = (path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace("*", f"{int(score_i_j_tuple[2])}", 1)) 
             if (int(score_i_j_tuple[1]), int(score_i_j_tuple[2])) in all_matched_3d_models:
                     ply.setForeground(QColor("red"))

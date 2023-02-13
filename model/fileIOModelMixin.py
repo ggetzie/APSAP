@@ -16,7 +16,7 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
         
-class FileIOModel:
+class FileIOModelMixin:
     def __init__(self):
         pass
 

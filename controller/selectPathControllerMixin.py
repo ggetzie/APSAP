@@ -10,13 +10,6 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import Qt
 
-from configs.path_variables import (
-    FINDS_SUBDIR,
-    FINDS_PHOTO_DIR,
-    MODELS_FILES_DIR,
-    MODELS_FILES_RE,
-)
-
 #This class contains classes and functiosn related to functionalities related to pop_up
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
 

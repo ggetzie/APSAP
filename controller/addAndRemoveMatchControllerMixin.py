@@ -1,6 +1,5 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import  QMessageBox
-from model.database.database_tools import update_match_info
 
 class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(data)
     
@@ -24,7 +23,7 @@ class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(
                 northing,
                 context,
             ) = controller.get_easting_northing_context()
-            update_match_info(easting, northing, context, num, None, None)
+            mainModel.update_match_info(easting, northing, context, num, None, None)
             # Unred the matched items in the 3d models list
             previous_current_batch_num = view.current_batch.text()
             previous_current_piece_num = view.current_piece.text()
@@ -82,7 +81,7 @@ class AddAndRemoveMatchControllerMixin:  # bridging the view(gui) and the model(
             previous_current_piece_num = view.current_piece.text()
 
             if easting and northing and context and find_num and batch_num and piece_num:
-                update_match_info(easting, northing,context, int(find_num),int(batch_num),int(piece_num))
+                mainModel.update_match_info(easting, northing,context, int(find_num),int(batch_num),int(piece_num))
                 #Here to avoid loading time, we manually update some data. We can
                 #reload the contexts but it would be way too slow
 

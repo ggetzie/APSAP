@@ -1,12 +1,11 @@
 #In MVVN, Model View ViewModel architecture, Model represents the data in the application.
 
-from configs.path_variables import FINDS_SUBDIR, BATCH_3D_SUBDIR, FINDS_PHOTO_DIR, MODELS_FILES_DIR, MODELS_FILES_RE, HEMISPHERES
 import pathlib, json
 #here
-from model.fileIOModel import FileIOModel
+from model.fileIOModelMixin import FileIOModelMixin
+from model.databaseModelMixin import DatabaseModelMixin 
  
- 
-class MainModel(FileIOModel):
+class MainModel(FileIOModelMixin, DatabaseModelMixin):
     def __init__(self):
 
         if not self.check_has_path_in_setting():
@@ -21,14 +20,15 @@ class MainModel(FileIOModel):
         for obj in self.json_data["past_records"]:
             calculuated_paths[obj["path"]] = obj
         self.calculuated_paths = calculuated_paths
-
- 
+        self.path_variables = json.load(open("./configs/pathVariables.json"))
+        print(self.path_variables)
 
     def get_hemispheres(self):
+
         hemispheres = [
             d.name
             for d in self.file_root.iterdir()
-            if d.name in HEMISPHERES and d.is_dir()
+            if d.name in self.path_variables["HEMISPHERES"] and d.is_dir()
         ]
  
         return hemispheres

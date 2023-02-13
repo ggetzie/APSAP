@@ -4,7 +4,6 @@ from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
 import re
-from configs.path_variables import MODELS_FILES_RE
 
 
 class Display3dModelControllerMixin:
@@ -35,7 +34,7 @@ class Display3dModelControllerMixin:
             controller.change_model(current_pcd_load, view.current_pcd)
             view.current_pcd = current_pcd_load
 
-            m = re.search(MODELS_FILES_RE, current_model_path.replace("\\", "/"))
+            m = re.search(mainModel.path_variables["MODELS_FILES_RE"], current_model_path.replace("\\", "/"))
             # This error happens when the relative path is different
             if m:
               

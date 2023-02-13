@@ -4,13 +4,6 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import Qt
 
-from configs.path_variables import (
-    FINDS_SUBDIR,
-    FINDS_PHOTO_DIR,
-    MODELS_FILES_DIR,
-    MODELS_FILES_RE,
-)
-from model.database.database_tools import get_pottery_sherd_info
 from PyQt5.QtWidgets import (
     QListWidgetItem,
 )
@@ -65,7 +58,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         view.findsList.clear()
         context_dir = controller.get_context_dir()
 
-        finds_dir = context_dir / FINDS_SUBDIR
+        finds_dir = context_dir / model.path_variables["FINDS_SUBDIR"] 
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
         easting_northing_context = controller.get_easting_northing_context()
@@ -77,16 +70,16 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
             first_jpg_path = (
                 controller.get_context_dir()
-                / FINDS_SUBDIR
+                / model.path_variables["FINDS_SUBDIR"] 
                 / find
-                / FINDS_PHOTO_DIR
+                / model.path_variables["FINDS_PHOTO_DIR"]  
                 / "1.jpg"
             )
             second_jpg_path = (
                 controller.get_context_dir()
-                / FINDS_SUBDIR
+                / model.path_variables["FINDS_SUBDIR"] 
                 / find
-                / FINDS_PHOTO_DIR
+                / model.path_variables["FINDS_PHOTO_DIR"]  
                 / "2.jpg"
             )
 
@@ -96,7 +89,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
             ):
 
                 item = QListWidgetItem(find)
-                _3d_locations = get_pottery_sherd_info(
+                _3d_locations = model.get_pottery_sherd_info(
                     easting_northing_context[0],
                     easting_northing_context[1],
                     easting_northing_context[2],
@@ -116,7 +109,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         # Populate all models and at the same time get the information of those models for comparison.
         mainModel, view, controller = self.get_model_view_controller()
 
-        path = str((controller.get_context_dir() / MODELS_FILES_DIR))
+        path = str((controller.get_context_dir() / mainModel.path_variables["MODELS_FILES_DIR"]))
         all_model_paths = glob(path)
 
         if not all_model_paths:
@@ -127,7 +120,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         # Getting a dict for all the batches
         batches_dict = dict()
         for path in all_model_paths:
-            m = re.search(MODELS_FILES_RE, path.replace("\\", "/"))
+            m = re.search(mainModel.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
             # This error happens when the relative path is different
             batch_num = m.group(1)
             piece_num = m.group(2)
@@ -188,7 +181,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                 else:
 
-                    m = re.search(MODELS_FILES_RE, path.replace("\\", "/"))
+                    m = re.search(mainModel.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
                     # This error happens when the relative path is different
                     batch_num = m.group(1)
                     piece_num = m.group(2)

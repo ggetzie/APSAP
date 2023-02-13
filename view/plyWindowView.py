@@ -3,7 +3,6 @@ import open3d as o3d
 from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
-import re
 
 class PlyWindowView:
 

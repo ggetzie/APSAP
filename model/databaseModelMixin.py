@@ -31,9 +31,7 @@ WRITE_SETTINGS = {
 
 
 class DatabaseModelMixin:
-    def __init__(self):
-        pass
-
+ 
 
     def get_pottery_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
         try:

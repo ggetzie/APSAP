@@ -21,6 +21,10 @@ class MainView(QMainWindow, PlyWindowView):
         #Setting up model
         self.mainModel = mainModel
         
+        #Load the data needed in the mainmodel
+        self.mainModel.prepareData(self)
+
+
         #Setting up view
         uic.loadUi("view/MainWindow.ui", self)
         self.setUpPlyWindow()

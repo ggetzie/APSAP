@@ -25,25 +25,25 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
 
     def get_context_dir(self):
-        model, view, controller = self.get_model_view_controller()
+        mainModel, mainView, mainController = self.get_model_view_controller()
 
         res = (
-            model.file_root
-            / view.hemisphere_cb.currentText()
-            / view.zone_cb.currentText()
-            / view.easting_cb.currentText()
-            / view.northing_cb.currentText()
-            / view.context_cb.currentText()
+            mainModel.file_root
+            / mainView.hemisphere_cb.currentText()
+            / mainView.zone_cb.currentText()
+            / mainView.easting_cb.currentText()
+            / mainView.northing_cb.currentText()
+            / mainView.context_cb.currentText()
         )
         if not res.exists():
-            view.statusLabel.setText(f"{res} does not exist!")
+            mainView.statusLabel.setText(f"{res} does not exist!")
             return pathlib.Path()
         return res
 
     def get_easting_northing_context(self):
-        model, view, controller = self.get_model_view_controller()
+        mainModel, view, mainController = self.get_model_view_controller()
 
-        context_dir = controller.get_context_dir()
+        context_dir = mainController.get_context_dir()
         path_parts = pathlib.Path(context_dir).parts[-3:]
         easting = int(path_parts[0])
         northing = int(path_parts[1])
@@ -53,33 +53,33 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
     def populate_finds(self):
         # if self.splash:
         #    self.splash.showMessage("Loading finds")
-        model, view, controller = self.get_model_view_controller()
+        mainModel, mainView, mainController = self.get_model_view_controller()
 
-        view.findsList.clear()
-        context_dir = controller.get_context_dir()
+        mainView.findsList.clear()
+        context_dir = mainController.get_context_dir()
 
-        finds_dir = context_dir / model.path_variables["FINDS_SUBDIR"] 
+        finds_dir = context_dir / mainModel.path_variables["FINDS_SUBDIR"] 
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
-        easting_northing_context = controller.get_easting_northing_context()
+        easting_northing_context = mainController.get_easting_northing_context()
         finds.sort(key=lambda f: int(f))
 
         # Get a dictionary to get all
-        view._3d_model_dict = dict()
+        mainView._3d_model_dict = dict()
         for find in finds:
 
             first_jpg_path = (
-                controller.get_context_dir()
-                / model.path_variables["FINDS_SUBDIR"] 
+                mainController.get_context_dir()
+                / mainModel.path_variables["FINDS_SUBDIR"] 
                 / find
-                / model.path_variables["FINDS_PHOTO_DIR"]  
+                / mainModel.path_variables["FINDS_PHOTO_DIR"]  
                 / "1.jpg"
             )
             second_jpg_path = (
-                controller.get_context_dir()
-                / model.path_variables["FINDS_SUBDIR"] 
+                mainController.get_context_dir()
+                / mainModel.path_variables["FINDS_SUBDIR"] 
                 / find
-                / model.path_variables["FINDS_PHOTO_DIR"]  
+                / mainModel.path_variables["FINDS_PHOTO_DIR"]  
                 / "2.jpg"
             )
 
@@ -89,7 +89,7 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
             ):
 
                 item = QListWidgetItem(find)
-                _3d_locations = model.get_pottery_sherd_info(
+                _3d_locations = mainModel.get_pottery_sherd_info(
                     easting_northing_context[0],
                     easting_northing_context[1],
                     easting_northing_context[2],
@@ -98,8 +98,8 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                 if _3d_locations[0] != None and _3d_locations[1] != None:
                     item.setForeground(QColor("red"))
-                view.findsList.addItem(item)
-                view._3d_model_dict[
+                mainView.findsList.addItem(item)
+                mainView._3d_model_dict[
                     f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find)}"
                 ] = _3d_locations
 
@@ -107,15 +107,15 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
         import re
 
         # Populate all models and at the same time get the information of those models for comparison.
-        mainModel, view, controller = self.get_model_view_controller()
+        mainModel, mainView, mainController = self.get_model_view_controller()
 
-        path = str((controller.get_context_dir() / mainModel.path_variables["MODELS_FILES_DIR"]))
+        path = str((mainController.get_context_dir() / mainModel.path_variables["MODELS_FILES_DIR"]))
         all_model_paths = glob(path)
 
         if not all_model_paths:
-            view.statusLabel.setText(f"No models were found")
+            mainView.statusLabel.setText(f"No models were found")
         # Setting up the model
-        model = QStandardItemModel(view)
+        model = QStandardItemModel(mainView)
         model.setHorizontalHeaderLabels(["Models"])
         # Getting a dict for all the batches
         batches_dict = dict()
@@ -134,12 +134,12 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
         all_matched_3d_models = set()
 
-        for key in view._3d_model_dict:
+        for key in mainView._3d_model_dict:
             if not (
-                view._3d_model_dict[key][0] == None
-                and view._3d_model_dict[key][1] == None
+                mainView._3d_model_dict[key][0] == None
+                and mainView._3d_model_dict[key][1] == None
             ):
-                all_matched_3d_models.add(view._3d_model_dict[key])
+                all_matched_3d_models.add(mainView._3d_model_dict[key])
 
         # Add all items onto the QTree
 
@@ -188,20 +188,20 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
 
                     # Calculate the area of the current piece
 
-                    brightness_summary = controller.get_brightness_summary_from_3d(
+                    brightness_summary = mainController.get_brightness_summary_from_3d(
                         path
                     )
                     brightness_summary = list(brightness_summary)
 
                     # Calculate the color summary of the current piece
-                    colors_summary = controller.get_color_summary_from_3d(path)
+                    colors_summary = mainController.get_color_summary_from_3d(path)
                     colors_summary = list(colors_summary)
                     (
                         area,
                         width_length_summary,
-                    ) = controller.get_3d_object_area_and_width_length(path)
+                    ) = mainController.get_3d_object_area_and_width_length(path)
 
-                    cirlcle_area_ratio = controller.get_3d_area_circle_ratio(path)
+                    cirlcle_area_ratio = mainController.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
                     json_data = mainModel.json_data
                     temp = {}
@@ -215,11 +215,11 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                     temp["colors_summary"] = colors_summary
                     temp["area"] = area
                     temp["width_length_summary"] = width_length_summary
-                    temp["context"] = view.context_cb.currentText()
-                    temp["zone"] = view.zone_cb.currentText()
-                    temp["hemisphere"] = view.hemisphere_cb.currentText()
-                    temp["utm_easting"] = view.easting_cb.currentText()
-                    temp["utm_northing"] = view.northing_cb.currentText()
+                    temp["context"] = mainView.context_cb.currentText()
+                    temp["zone"] = mainView.zone_cb.currentText()
+                    temp["hemisphere"] = mainView.hemisphere_cb.currentText()
+                    temp["utm_easting"] = mainView.easting_cb.currentText()
+                    temp["utm_northing"] = mainView.northing_cb.currentText()
 
                     json_data["past_records"].append(temp)
                 all_3d_colors_summaries.append(colors_summary)
@@ -243,13 +243,13 @@ class LoadJpgsPlysControllerMixin:  # bridging the view(gui) and the model(data)
                 batch.appendRow(ply)
                 actual_index += 1
             model.appendRow(batch)
-        mainModel.simple_save_json(mainModel.json_data, "./configs/data.json")
+        mainModel.simple_save_json(mainModel.json_data, "./configs/cache.json")
 
         print(f"{time.time() - now} seconds")
-        view.all_3d_areas = all_3d_areas
-        view.all_3d_width_length_summaries = all_3d_width_length_summaries
-        view.all_3d_brightness_summaries = all_3d_brightness_summaries
-        view.all_3d_area_circle_ratios = all_3d_area_circle_ratios
-        view.all_3d_colors_summaries = all_3d_colors_summaries
-        view.modelList.setModel(model)
-        view.modelList.selectionModel().currentChanged.connect(controller.change_3d_model)
+        mainView.all_3d_areas = all_3d_areas
+        mainView.all_3d_width_length_summaries = all_3d_width_length_summaries
+        mainView.all_3d_brightness_summaries = all_3d_brightness_summaries
+        mainView.all_3d_area_circle_ratios = all_3d_area_circle_ratios
+        mainView.all_3d_colors_summaries = all_3d_colors_summaries
+        mainView.modelList.setModel(model)
+        mainView.modelList.selectionModel().currentChanged.connect(mainController.change_3d_model)

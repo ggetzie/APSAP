@@ -1,6 +1,6 @@
 
 import numpy as np
-from PIL import Image, ImageStat
+from PIL import Image
 import cv2
 import json
 
@@ -17,11 +17,7 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
         
 class FileIOModelMixin:
-    def __init__(self):
-        pass
 
-
-     
     def open_image(self, image_path, full_size):
         if full_size == True:
             return  (Image.open(image_path))

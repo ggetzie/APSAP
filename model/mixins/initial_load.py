@@ -26,34 +26,29 @@ class InitialLoadMixin:
 
     def vali_path_exists(self):
         setting_found = pathlib.Path("./configs/settings.json").is_file()  
-        if not setting_found:
-            return False
-        else:
-            setting_dict = json.load(open("./configs/settings.json")) if setting_found else {}  
-            key_exist = "FILE_ROOT" in setting_dict
-            if key_exist:
-                path_exist =  pathlib.Path(setting_dict["FILE_ROOT"]).is_dir()
-                if path_exist: #Only case when we don't have to ask for a path
+        if setting_found:
+            setting_dict = json.load(open("./configs/settings.json")) 
+            if "FILE_ROOT" in setting_dict:
+                if pathlib.Path(setting_dict["FILE_ROOT"]).is_dir(): 
                     return True
-                else:
-                    return False
-            else:
-                return False
+                
+        return False
 
-
-    def request_path(self, main_view): #Although this technically involves a lot of code of GUI(as a pop up), it is in here instead of View because this function ensures that settings are well imported before we run the application
+    def ask_for_path_to_files(self,main_view, title ):
+    
+        QMessageBox(main_view, text="Please select a path to the files").exec()
+        dlg = QFileDialog(main_view)
+        dlg.setFileMode(QFileDialog.Directory)
+        dlg.resize(600,100)                    
+        dlg.setWindowTitle(title)
+        dlg.exec()
+        return dlg.selectedFiles()[0]
+    def request_path(self, main_view):  
+        
         if not self.vali_path_exists():
             title = "Please enter the file path!"
             while True:
-                
-                QMessageBox(main_view,text="Please select a path to the files").exec()
-                dlg = QFileDialog(main_view)
-                dlg.setFileMode(QFileDialog.Directory)
-                dlg.resize(600,100)                    
-                dlg.setWindowTitle(title)
-                dlg.exec()
-                text = dlg.selectedFiles()[0]
-                
+                text = self.ask_for_path_to_files(main_view, title)
                 if (pathlib.Path(text).is_dir()):
                     has_N_S = (any([pathlib.Path(path).stem == "N" or pathlib.Path(path).stem == "S" for path in glob(f"{text}/*")]))
                     if has_N_S:
@@ -62,7 +57,6 @@ class InitialLoadMixin:
                         if not pathlib.Path("./configs/settings.json").is_file():
                             #In this case, we can make a settings from scratch
                             file_dict = {"FILE_ROOT": f"{true_path}"}
-
                         else:
                             f = open('./configs/settings.json')
                             #Whether if the key is not there  or the path doesn't exist, we are sure we can save it in the dict now

@@ -42,11 +42,8 @@ class DatabaseMixin:
             conn = self.conn 
         try:
             
-            print(
-                f"Fetching sherd from database: {utm_easting=}, {utm_northing=}, {context_num=}, {find_num=}"
-            )
-
             cursor = conn.cursor()
+            print(cursor.execute("""select pg_backend_pid();"""))
             query = """
             SELECT "3d_batch_number", "3d_batch_piece" 
             FROM object.finds

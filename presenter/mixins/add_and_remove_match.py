@@ -3,9 +3,6 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
-    def __init__(self, view, model):
-
-        pass
 
     def remove_match(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -154,14 +151,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
     def add_match(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
         find_num = main_view.selected_find.text()
         batch_num = main_view.new_batch.text()
         piece_num = main_view.new_piece.text()
-        msg = QMessageBox()
-        msg.setText(
-            f"Find ({find_num}) will be updated to 3d Batch ({batch_num}) 3d Piece ({piece_num}). Proceed?"
-        )
+        msg = QMessageBox(main_view, text=f"Update Find ({find_num}) to batch ({batch_num}) piece ({piece_num}). Proceed?")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.buttonClicked.connect(main_presenter.add_match_confirm)
         msg.exec()

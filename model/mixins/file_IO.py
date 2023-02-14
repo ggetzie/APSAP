@@ -21,7 +21,6 @@ class FileIOMixin:
             return Image.open(image_path)
         else:
             return Image.open(image_path).resize((450, 300), Image.ANTIALIAS)
-        # (Image.fromarray(cv2.cvtColor(cv2.resize((cv2.imread(image_path) ),(450, 300)),cv2.COLOR_BGR2RGB)))
 
     def simple_get_json(self, json_file):
         f = open(json_file)

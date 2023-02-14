@@ -31,11 +31,17 @@ WRITE_SETTINGS = {
 
 
 class DatabaseMixin:
- 
-
+    
+    def __init__(self):
+        self.conn = psycopg2.connect(**READ_SETTINGS)
     def get_pottery_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
+        if(self.conn):
+            conn = self.conn
+        else:
+            self.conn = psycopg2.connect(**READ_SETTINGS)
+            conn = self.conn 
         try:
-            conn = psycopg2.connect(**READ_SETTINGS)
+            
             print(
                 f"Fetching sherd from database: {utm_easting=}, {utm_northing=}, {context_num=}, {find_num=}"
             )
@@ -67,42 +73,18 @@ class DatabaseMixin:
         finally:
             if conn:
                 cursor.close()
-                conn.close()
+                #conn.close()
 
 
-
-    def get_all_pottery_sherd_info(self):
-        try:
-            conn = psycopg2.connect(**READ_SETTINGS)
-            print(
-                f"Fetching all sherds from database"
-            )
-
-            cursor = conn.cursor()
-            query = """
-            SELECT *
-            FROM object.finds
-            """
-            print("Started query")
-            cursor.execute(query)
-            print("Ended query")
-            # Fetch result
-            records = cursor.fetchall()
-            return records
-
-        except (Exception) as error:
-            print("Error while connecting to PostgreSQL", error)
-        finally:
-            if conn:
-                cursor.close()
-                conn.close()
-
-
-    #Adding this function to analyze the relations between the program's result(3d sherd's info) and all the informatioin in
 
     def update_match_info(
         self, utm_easting, utm_northing, context_num, find_num, new_batch_num, new_sherd_num
     ):
+        if(self.conn):
+            conn = self.conn
+        else:
+            self.conn = psycopg2.connect(**READ_SETTINGS)
+            conn = self.conn 
         try:
             conn = psycopg2.connect(**WRITE_SETTINGS)
 
@@ -157,6 +139,6 @@ class DatabaseMixin:
         finally:
             if conn:
                 cursor.close()
-                conn.close()
+                #conn.close()
                 # print("PostgreSQL connection is closed")
     

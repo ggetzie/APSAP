@@ -6,5 +6,4 @@ from model.mixins.initial_load import InitialLoadMixin
 
 
 class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin):
-    def __init__(self):
-        pass
+    pass

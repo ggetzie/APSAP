@@ -1,7 +1,5 @@
 import time
-from PyQt5.QtGui import (
-    QStandardItemModel,
-)
+
 from PyQt5.QtCore import Qt
 
 from PyQt5.QtWidgets import (
@@ -17,12 +15,6 @@ import pathlib
 
 
 class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
-    def __init__(self, view, model):
-        # Notice this object is the presenter, that which connects the view(GUI) and the model(data)
-        presenter = self
-       # view.contextDisplay.setText(presenter.get_context_string())
-
-
     def get_context_dir(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -50,14 +42,13 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         return (easting, northing, context)
 
     def populate_finds(self):
-        # if self.splash:
-        #    self.splash.showMessage("Loading finds")
+
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.finds_list.clear()
         context_dir = main_presenter.get_context_dir()
-        
-        finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"] 
+
+        finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"]
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
         easting_northing_context = main_presenter.get_easting_northing_context()
@@ -69,16 +60,16 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
 
             first_jpg_path = (
                 main_presenter.get_context_dir()
-                / main_model.path_variables["FINDS_SUBDIR"] 
+                / main_model.path_variables["FINDS_SUBDIR"]
                 / find
-                / main_model.path_variables["FINDS_PHOTO_DIR"]  
+                / main_model.path_variables["FINDS_PHOTO_DIR"]
                 / "1.jpg"
             )
             second_jpg_path = (
                 main_presenter.get_context_dir()
-                / main_model.path_variables["FINDS_SUBDIR"] 
+                / main_model.path_variables["FINDS_SUBDIR"]
                 / find
-                / main_model.path_variables["FINDS_PHOTO_DIR"]  
+                / main_model.path_variables["FINDS_PHOTO_DIR"]
                 / "2.jpg"
             )
 
@@ -108,7 +99,12 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         # Populate all models and at the same time get the information of those models for comparison.
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        path = str((main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
+        path = str(
+            (
+                main_presenter.get_context_dir()
+                / main_model.path_variables["MODELS_FILES_DIR"]
+            )
+        )
         all_model_paths = glob(path)
 
         if not all_model_paths:
@@ -119,7 +115,9 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         # Getting a dict for all the batches
         batches_dict = dict()
         for path in all_model_paths:
-            m = re.search(main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
+            m = re.search(
+                main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
+            )
             # This error happens when the relative path is different
             batch_num = m.group(1)
             piece_num = m.group(2)
@@ -167,7 +165,9 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
                     brightness_summary = main_model.calculuated_paths[path][
                         "brightness_summary"
                     ]
-                    colors_summary = main_model.calculuated_paths[path]["colors_summary"]
+                    colors_summary = main_model.calculuated_paths[path][
+                        "colors_summary"
+                    ]
                     width_length_summary = main_model.calculuated_paths[path][
                         "width_length_summary"
                     ]
@@ -180,7 +180,10 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
 
                 else:
 
-                    m = re.search(main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/"))
+                    m = re.search(
+                        main_model.path_variables["MODELS_FILES_RE"],
+                        path.replace("\\", "/"),
+                    )
                     # This error happens when the relative path is different
                     batch_num = m.group(1)
                     piece_num = m.group(2)
@@ -251,4 +254,6 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         main_view.all_3d_area_circle_ratios = all_3d_area_circle_ratios
         main_view.all_3d_colors_summaries = all_3d_colors_summaries
         main_view.modelList.setModel(model)
-        main_view.modelList.selectionModel().currentChanged.connect(main_presenter.change_3d_model)
+        main_view.modelList.selectionModel().currentChanged.connect(
+            main_presenter.change_3d_model
+        )

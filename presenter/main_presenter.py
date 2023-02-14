@@ -16,15 +16,12 @@ class Mainpresenter(
     AddAndRemoveMatchMixin,
     Display3dModelMixin,
 ):
+    def __init__(self, model, view):
 
-
-    def __init__(self,  model, view):
-
-        self.main_model= model
+        self.main_model = model
         self.main_view = view
         main_presenter = self
-        
-        
+
         self.main_model.prepare_data(self.main_view)
         self.populate_hemispheres()
         self.main_view.set_up_view_presenter_connection(main_presenter)

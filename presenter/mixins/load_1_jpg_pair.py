@@ -11,7 +11,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
     def __init__(self, view, model):
 
-        # Notice this object is the controller, that which connects the view(GUI) and the model(data)
+        # Notice this object is the presenter, that which connects the view(GUI) and the model(data)
         pass
 
 
@@ -19,7 +19,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
     def load_find_images(self, selected_item):
      
 
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
 
 
@@ -39,7 +39,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         
 
 
-        photos_dir = main_controller.get_context_dir() / main_model.path_variables["FINDS_SUBDIR"] / find_num / main_model.path_variables["FINDS_PHOTO_DIR"]  
+        photos_dir = main_presenter.get_context_dir() / main_model.path_variables["FINDS_SUBDIR"] / find_num / main_model.path_variables["FINDS_PHOTO_DIR"]  
 
         main_view.path_2d_picture = photos_dir
         import time
@@ -67,7 +67,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
         main_view.selected_find.setText(find_num)
 
-        easting_northing_context = main_controller.get_easting_northing_context()
+        easting_northing_context = main_presenter.get_easting_northing_context()
 
         _3d_locations = main_view._3d_model_dict[f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"]    
 
@@ -83,7 +83,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             #Change to the piece matched as default
           
 
-            path =  (str((main_controller.get_context_dir()/main_model.path_variables["MODELS_FILES_DIR"])))
+            path =  (str((main_presenter.get_context_dir()/main_model.path_variables["MODELS_FILES_DIR"])))
 
             whole_path = (path.replace("*", f"{int(_3d_locations[0]):03}", 1).replace("*", f"{int(_3d_locations[1])}", 1)) 
 
@@ -91,11 +91,11 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
             if hasattr(main_view, "current_pcd") :
 
-                main_controller.change_model(current_pcd_load, main_view.current_pcd)
+                main_presenter.change_model(current_pcd_load, main_view.current_pcd)
 
             else:
 
-                main_controller.change_model(current_pcd_load, None)
+                main_presenter.change_model(current_pcd_load, None)
                 
 
         else:
@@ -130,7 +130,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
 
 
-        flat_simllarity_list  = main_controller.get_similaritiy_scores(find_num, _2d_image_path)
+        flat_simllarity_list  = main_presenter.get_similaritiy_scores(find_num, _2d_image_path)
 
 
         #[area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity]
@@ -141,7 +141,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
         #flat_simllarity_list = old_flat_similairy_list
 
-        flat_simllarity_list =     main_controller.genereate_similiarity_ranked_pieces(flat_simllarity_list)
+        flat_simllarity_list =     main_presenter.genereate_similiarity_ranked_pieces(flat_simllarity_list)
      
 
         all_matched_3d_models = set()
@@ -171,7 +171,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
             ply = QStandardItem(f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}")
 
-            path =  (str((main_controller.get_context_dir()/main_model.path_variables["MODELS_FILES_DIR"])))
+            path =  (str((main_presenter.get_context_dir()/main_model.path_variables["MODELS_FILES_DIR"])))
 
             whole_path = (path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace("*", f"{int(score_i_j_tuple[2])}", 1)) 
 
@@ -187,6 +187,6 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
         main_view.sorted_model_list.setModel(model)
 
-        main_view.sorted_model_list.selectionModel().currentChanged.connect(main_controller.change_3d_model)
+        main_view.sorted_model_list.selectionModel().currentChanged.connect(main_presenter.change_3d_model)
  
 

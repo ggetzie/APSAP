@@ -18,13 +18,13 @@ import pathlib
 
 class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
-        # Notice this object is the controller, that which connects the view(GUI) and the model(data)
-        controller = self
-       # view.contextDisplay.setText(controller.get_context_string())
+        # Notice this object is the presenter, that which connects the view(GUI) and the model(data)
+        presenter = self
+       # view.contextDisplay.setText(presenter.get_context_string())
 
 
     def get_context_dir(self):
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         res = (
             main_model.file_root
@@ -40,9 +40,9 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         return res
 
     def get_easting_northing_context(self):
-        main_model, view, main_controller = self.get_model_view_controller()
+        main_model, view, main_presenter = self.get_model_view_presenter()
 
-        context_dir = main_controller.get_context_dir()
+        context_dir = main_presenter.get_context_dir()
         path_parts = pathlib.Path(context_dir).parts[-3:]
         easting = int(path_parts[0])
         northing = int(path_parts[1])
@@ -52,15 +52,15 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
     def populate_finds(self):
         # if self.splash:
         #    self.splash.showMessage("Loading finds")
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.finds_list.clear()
-        context_dir = main_controller.get_context_dir()
+        context_dir = main_presenter.get_context_dir()
         
         finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"] 
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query
-        easting_northing_context = main_controller.get_easting_northing_context()
+        easting_northing_context = main_presenter.get_easting_northing_context()
         finds.sort(key=lambda f: int(f))
 
         # Get a dictionary to get all
@@ -68,14 +68,14 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         for find in finds:
 
             first_jpg_path = (
-                main_controller.get_context_dir()
+                main_presenter.get_context_dir()
                 / main_model.path_variables["FINDS_SUBDIR"] 
                 / find
                 / main_model.path_variables["FINDS_PHOTO_DIR"]  
                 / "1.jpg"
             )
             second_jpg_path = (
-                main_controller.get_context_dir()
+                main_presenter.get_context_dir()
                 / main_model.path_variables["FINDS_SUBDIR"] 
                 / find
                 / main_model.path_variables["FINDS_PHOTO_DIR"]  
@@ -106,9 +106,9 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         import re
 
         # Populate all models and at the same time get the information of those models for comparison.
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        path = str((main_controller.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
+        path = str((main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
         all_model_paths = glob(path)
 
         if not all_model_paths:
@@ -187,20 +187,20 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
 
                     # Calculate the area of the current piece
 
-                    brightness_summary = main_controller.get_brightness_summary_from_3d(
+                    brightness_summary = main_presenter.get_brightness_summary_from_3d(
                         path
                     )
                     brightness_summary = list(brightness_summary)
 
                     # Calculate the color summary of the current piece
-                    colors_summary = main_controller.get_color_summary_from_3d(path)
+                    colors_summary = main_presenter.get_color_summary_from_3d(path)
                     colors_summary = list(colors_summary)
                     (
                         area,
                         width_length_summary,
-                    ) = main_controller.get_3d_object_area_and_width_length(path)
+                    ) = main_presenter.get_3d_object_area_and_width_length(path)
 
-                    cirlcle_area_ratio = main_controller.get_3d_area_circle_ratio(path)
+                    cirlcle_area_ratio = main_presenter.get_3d_area_circle_ratio(path)
                     width_length_summary = list(width_length_summary)
                     json_data = main_model.json_data
                     temp = {}
@@ -251,4 +251,4 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         main_view.all_3d_area_circle_ratios = all_3d_area_circle_ratios
         main_view.all_3d_colors_summaries = all_3d_colors_summaries
         main_view.modelList.setModel(model)
-        main_view.modelList.selectionModel().currentChanged.connect(main_controller.change_3d_model)
+        main_view.modelList.selectionModel().currentChanged.connect(main_presenter.change_3d_model)

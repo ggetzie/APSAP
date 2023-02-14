@@ -14,8 +14,8 @@ class LoadingSplash(QSplashScreen):
 class SelectPathMixin: #bridging the view(gui) and the model(data)
 
     def __init__(self, view, model):
-        #Notice this object is the controller, that which connects the view(GUI) and the model(data)
-        controller = self
+        #Notice this object is the presenter, that which connects the view(GUI) and the model(data)
+        presenter = self
         #self.populate_hemispheres()
 
 
@@ -25,13 +25,13 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
          
        
             #Getting m, v, c from to update the gui and get the data.
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
         
         #Clear the combox box
         main_view.hemisphere_cb.clear()
        
         #Get the hemispheres and add it to the combo box
-        res = main_controller.get_hemispheres()
+        res = main_presenter.get_hemispheres()
         print(res)
        
         main_view.hemisphere_cb.addItems(res)
@@ -43,7 +43,7 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
         #This is important. The hierarchy is hemispheres, zones, eastings, northings, contexts, finds/models
         #When the former one is populated, ther ones after that are populated one by one til the end of the chain.
          
-        main_controller.populate_zones()
+        main_presenter.populate_zones()
        
         
     
@@ -51,40 +51,40 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
 
     def populate_zones(self ):
         #Check populate_zones for explanations
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.zone_cb.clear()
 
         hemisphere = main_view.hemisphere_cb.currentText()
         zone_root = main_model.file_root / hemisphere
-        res = main_controller.get_options(zone_root)
+        res = main_presenter.get_options(zone_root)
         main_view.zone_cb.addItems(res)
 
         main_view.zone_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         main_view.zone_cb.setEnabled(len(res) > 1)
 
-        main_controller.populate_eastings()
+        main_presenter.populate_eastings()
  
     def populate_eastings(self):
         #Check populate_zones for explanations
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.easting_cb.clear()
 
         hemisphere = main_view.hemisphere_cb.currentText()
         zone = main_view.zone_cb.currentText()
         eastings_root = main_model.file_root / hemisphere / zone
-        res = main_controller.get_options(eastings_root)
+        res = main_presenter.get_options(eastings_root)
         main_view.easting_cb.addItems(res)
 
         main_view.easting_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         main_view.easting_cb.setEnabled(len(res) > 1)
 
-        main_controller.populate_northings()
+        main_presenter.populate_northings()
 
     def populate_northings(self):
         #Check populate_zones for explanations
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.northing_cb.clear()
 
@@ -94,16 +94,16 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
             / main_view.zone_cb.currentText()
             / main_view.easting_cb.currentText()
         )
-        res = main_controller.get_options(northings_root)
+        res = main_presenter.get_options(northings_root)
         main_view.northing_cb.addItems(res)
         main_view.northing_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         main_view.northing_cb.setEnabled(len(res) > 1)
 
-        main_controller.populate_contexts()
+        main_presenter.populate_contexts()
 
     def populate_contexts(self):
         #Check populate_zones for explanations,  except this "populate" function takes the final functions populate_finds and populate_models in a load_and_run mechanism that shows
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.context_cb.clear()
 
@@ -114,17 +114,17 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
             / main_view.easting_cb.currentText()
             / main_view.northing_cb.currentText()
         )
-        res = main_controller.get_options(contexts_root)  
+        res = main_presenter.get_options(contexts_root)  
         res.sort(key=int)
         main_view.context_cb.addItems(res)
 
         main_view.context_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         main_view.context_cb.setEnabled(len(res) > 1)
 
-        main_controller.contextChanged()
+        main_presenter.contextChanged()
 
     def contextChanged(self):
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.statusLabel.setText(f"")
         main_view.selected_find.setText(f"")
@@ -140,12 +140,12 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
         model = QStandardItemModel(main_view)
         main_view.sorted_model_list.setModel(model)
         funcs_to_run = [
-            ["Loading finds. It might take a while", main_controller.populate_finds],
-            ["Loading models. It might take a while", main_controller.populate_models],
+            ["Loading finds. It might take a while", main_presenter.populate_finds],
+            ["Loading models. It might take a while", main_presenter.populate_models],
         ]
 
         now = time.time()
-        main_controller.load_and_run(funcs_to_run)
+        main_presenter.load_and_run(funcs_to_run)
         print(f"Timed passed: {time.time() - now} seconds")
 
     def get_context_string(self):
@@ -155,7 +155,7 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
         Returns:
             str: The full designation of the currently selected context
         """
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         hzenc = [
             main_view.hemisphere_cb.currentText(),
@@ -183,7 +183,7 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
       
 
     def get_hemispheres(self):
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         hemispheres = [
             d.name

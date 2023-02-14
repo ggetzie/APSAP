@@ -8,7 +8,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
         pass
 
     def remove_match(self):
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         # This functions removes the match between the image and the 3d model
         selected_item = main_view.finds_list.currentItem()
@@ -22,7 +22,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 easting,
                 northing,
                 context,
-            ) = main_controller.get_easting_northing_context()
+            ) = main_presenter.get_easting_northing_context()
             main_model.update_match_info(easting, northing, context, num, None, None)
             # Unred the matched items in the 3d models list
             previous_current_batch_num = main_view.current_batch.text()
@@ -68,10 +68,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
 
     def add_match_confirm(self, e): 
-        main_model, main_view, main_controller = self.get_model_view_controller()
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         if e.text() == "OK":
-            easting, northing, context =  (main_controller.get_easting_northing_context())
+            easting, northing, context =  (main_presenter.get_easting_northing_context())
             find_num = main_view.selected_find.text()
             batch_num = main_view.new_batch.text()
             piece_num = main_view.new_piece.text()
@@ -125,7 +125,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
 
     def add_match(self):
-            main_model, main_view, main_controller = self.get_model_view_controller()
+            main_model, main_view, main_presenter = self.get_model_view_presenter()
  
             find_num = main_view.selected_find.text()
             batch_num = main_view.new_batch.text()
@@ -133,5 +133,5 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
             msg = QMessageBox()
             msg.setText(f"Find ({find_num}) will be updated to 3d Batch ({batch_num}) 3d Piece ({piece_num}). Proceed?")
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            msg.buttonClicked.connect(main_controller.add_match_confirm)
+            msg.buttonClicked.connect(main_presenter.add_match_confirm)
             msg.exec()

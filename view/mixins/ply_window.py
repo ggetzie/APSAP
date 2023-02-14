@@ -13,7 +13,9 @@ class PlyWindowMixin:
         #This creates a window that shows the 3d model in ply format
         self.ply_window = o3d.visualization.Visualizer()
         self.ply_window.create_window(visible=False)   
-      
+        self.ply_window.get_render_option().light_on = False
+        self.ply_window.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
+                                            #When we use our own field of view      
         #This fixes the ply window inside the mainWindow
         hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
         window = QWindow.fromWinId(hwnd)

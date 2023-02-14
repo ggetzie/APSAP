@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QTimer
 class PlyWindowMixin:
 
     def set_up_ply_window(self):
+        #Notice this model is a QTWidget instead of our model in the architecture
         widget = self.model
 
         #This creates a window that shows the 3d model in ply format

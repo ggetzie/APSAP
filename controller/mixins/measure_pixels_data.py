@@ -13,8 +13,8 @@ class MeasurePixelsDataMixin:  # bridging the view(gui) and the model(data)
      
         self.ceremic_predictor = MaskPredictor("./computation/ceremicsmask.pt")
         self.colorgrid_predictor = MaskPredictor("./computation/colorgridmask.pt")
-        view.ply_window.get_render_option().light_on = False
-        view.ply_window.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
+        #view.ply_window.get_render_option().light_on = False
+        #view.ply_window.get_render_option().point_size = 20 #If the point is too small, the picture taken will have a lot of holes
                                             #When we use our own field of view
     def get_ceremic_area(self, ceremic_mask, mm_per_pixel):
         #Turn the mask to an array

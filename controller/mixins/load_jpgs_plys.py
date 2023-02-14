@@ -20,7 +20,7 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
     def __init__(self, view, model):
         # Notice this object is the controller, that which connects the view(GUI) and the model(data)
         controller = self
-        view.contextDisplay.setText(controller.get_context_string())
+       # view.contextDisplay.setText(controller.get_context_string())
 
 
     def get_context_dir(self):
@@ -56,7 +56,7 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
 
         main_view.finds_list.clear()
         context_dir = main_controller.get_context_dir()
-
+        
         finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"] 
         finds = [d.name for d in finds_dir.iterdir() if d.name.isdigit()]
         # Getting easting, northing and context for getting doing the query

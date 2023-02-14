@@ -21,11 +21,20 @@ class MainController(
 
     # 2) calculation and application logic
 
-    def __init__(self, view, model):
+    def __init__(self,  model, view):
 
-        self.main_model = model
+        self.main_model= model
         self.main_view = view
+        self.main_model.prepare_data(self.main_view)
         MeasurePixelsDataMixin.__init__(self, self.main_view, self.main_model)
+
+
+        main_controller = self
+        self.populate_hemispheres()
+        self.main_view.set_up_view_controller_connection(main_controller)
+        
+        view.contextDisplay.setText(main_controller.get_context_string())
+        
         super().__init__(self.main_view, self.main_model)
 
     def get_model_view_controller(self):

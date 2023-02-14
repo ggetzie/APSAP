@@ -39,7 +39,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         
 
 
-        photos_dir = main_view.main_controller.get_context_dir() / main_model.path_variables["FINDS_SUBDIR"] / find_num / main_model.path_variables["FINDS_PHOTO_DIR"]  
+        photos_dir = main_controller.get_context_dir() / main_model.path_variables["FINDS_SUBDIR"] / find_num / main_model.path_variables["FINDS_PHOTO_DIR"]  
 
         main_view.path_2d_picture = photos_dir
         import time

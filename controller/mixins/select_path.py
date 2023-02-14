@@ -16,29 +16,37 @@ class SelectPathMixin: #bridging the view(gui) and the model(data)
     def __init__(self, view, model):
         #Notice this object is the controller, that which connects the view(GUI) and the model(data)
         controller = self
-        self.populate_hemispheres()
+        #self.populate_hemispheres()
 
 
 
 
     def populate_hemispheres(self): 
-        #Getting m, v, c from to update the gui and get the data.
+         
+       
+            #Getting m, v, c from to update the gui and get the data.
         main_model, main_view, main_controller = self.get_model_view_controller()
         
         #Clear the combox box
         main_view.hemisphere_cb.clear()
-        
+       
         #Get the hemispheres and add it to the combo box
         res = main_controller.get_hemispheres()
+        print(res)
+       
         main_view.hemisphere_cb.addItems(res)
-
+        
         #Set the index of the select as 0 by default and allow the select to be "selected"  if there are more than 1 elements 
         main_view.hemisphere_cb.setCurrentIndex(0 if len(res) > 0 else -1)
         main_view.hemisphere_cb.setEnabled(len(res) > 1)
 
         #This is important. The hierarchy is hemispheres, zones, eastings, northings, contexts, finds/models
         #When the former one is populated, ther ones after that are populated one by one til the end of the chain.
+         
         main_controller.populate_zones()
+       
+        
+    
 
 
     def populate_zones(self ):

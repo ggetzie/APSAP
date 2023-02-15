@@ -205,3 +205,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         del ctr
         return (float(r_mean), float(g_mean), float(b_mean))
  
+    def get_hamming_hash_from_3d(self, path):
+
+ 
+        return 0

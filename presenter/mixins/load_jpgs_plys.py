@@ -182,6 +182,7 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
                     cirlcle_area_ratio = main_model.calculuated_paths[path][
                         "cirlcle_area_ratio"
                     ]
+                    
 
                 else:
 
@@ -198,6 +199,8 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
                     brightness_summary = main_presenter.get_brightness_summary_from_3d(
                         path
                     )
+
+
                     brightness_summary = list(brightness_summary)
 
                     # Calculate the color summary of the current piece
@@ -216,7 +219,6 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
                     temp["index"] = index
                     temp["batch_num"] = batch_num
                     temp["piece_num"] = piece_num
-
                     temp["cirlcle_area_ratio"] = cirlcle_area_ratio
                     temp["brightness_summary"] = brightness_summary
                     temp["colors_summary"] = colors_summary

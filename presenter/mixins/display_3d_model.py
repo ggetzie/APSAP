@@ -4,8 +4,6 @@ import re
 
 
 class Display3dModelMixin:
-    def __init__(self):
-        pass
 
     def change_model(self, current_pcd, previous_pcd):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -23,7 +21,7 @@ class Display3dModelMixin:
         current_model_path = current.data(Qt.UserRole)
 
         if current_model_path:
-            main_view.path_3d_model = current_model_path
+            #main_view.path_3d_model = current_model_path
             current_pcd_load = o3d.io.read_point_cloud(current_model_path)
             if not hasattr(main_view, "current_pcd"):
                 main_view.current_pcd = None

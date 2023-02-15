@@ -5,7 +5,7 @@ from PyQt5.QtGui import (
 
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
 
-
+##potential view
 class LoadingSplash(QSplashScreen):
     def mousePressEvent(self, event):
 

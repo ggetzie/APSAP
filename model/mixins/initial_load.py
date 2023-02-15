@@ -43,17 +43,17 @@ class InitialLoadMixin:
         dlg.setWindowTitle(title)
         dlg.exec()
         return dlg.selectedFiles()[0]
+
     def request_path(self, main_view):  
         
         if not self.vali_path_exists():
             title = "Please enter the file path!"
             while True:
-                text = self.ask_for_path_to_files(main_view, title)
-                if (pathlib.Path(text).is_dir()):
-                    has_N_S = (any([pathlib.Path(path).stem == "N" or pathlib.Path(path).stem == "S" for path in glob(f"{text}/*")]))
+                true_path = self.ask_for_path_to_files(main_view, title)
+                if (pathlib.Path(true_path).is_dir()):
+                    has_N_S = (any([pathlib.Path(path).stem == "N" or pathlib.Path(path).stem == "S" for path in glob(f"{true_path}/*")]))
                     if has_N_S:
                         #This is when the path is actually nice enough that we can save it
-                        true_path = text
                         if not pathlib.Path("./configs/settings.json").is_file():
                             #In this case, we can make a settings from scratch
                             file_dict = {"FILE_ROOT": f"{true_path}"}

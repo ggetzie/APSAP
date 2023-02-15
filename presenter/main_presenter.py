@@ -3,8 +3,8 @@ from presenter.mixins.load_jpgs_plys import LoadJpgsPlysMixin
 from presenter.mixins.add_and_remove_match import AddAndRemoveMatchMixin
 from presenter.mixins.load_1_jpg_pair import Load1jpgPairMixin
 from presenter.mixins.display_3d_model import Display3dModelMixin
-from presenter.mixins.calculuate_similarity import CalculateSimilarityMixin
-from presenter.mixins.measure_pixels_data import MeasurePixelsDataMixin
+from presenter.mixins.main_calculuate_similarity import CalculateSimilarityMixin
+from presenter.mixins.main_measure_pixels_data import MeasurePixelsDataMixin
 
 
 class Mainpresenter(

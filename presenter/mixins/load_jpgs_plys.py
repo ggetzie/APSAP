@@ -39,6 +39,11 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         easting = int(path_parts[0])
         northing = int(path_parts[1])
         context = int(path_parts[2])
+        print("###")
+        print(path_parts)
+        print((easting, northing, context))
+        print("###")
+
         return (easting, northing, context)
 
     def populate_finds(self):

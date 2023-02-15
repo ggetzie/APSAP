@@ -7,10 +7,8 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
     def remove_match(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        # This functions removes the match between the image and the 3d model
         selected_item = main_view.finds_list.currentItem()
 
-        # Only remove model when an image is selected
         if selected_item:
             num = selected_item.text()
             selected_item.setForeground(QColor("black"))

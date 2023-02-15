@@ -74,22 +74,15 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 main_view.ply_window.remove_geometry(main_view.current_pcd)
                 main_view.current_pcd = None
 
-            # Here let's remove the 3d model
-        # We have an image chosen, we can get the simlarity scores against all 3d model's images
-
+ 
         _2d_image_path = photos_dir
 
-        # Previously, here is simply a list of (val, batch  piece))
-        # Now the value become area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity, batch, piece)
-
+ 
         old_flat_similairy_list = []
         flat_simllarity_list = main_presenter.get_similaritiy_scores(
             find_num, _2d_image_path
         )
-
-        # [area_similarity, brightness_similarity, brightness_std_similarity, width_length_similarity, area_circle_similarity]
-        # flat_simllarity_list = old_flat_similairy_list
-
+ 
         flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
             flat_simllarity_list
         )
@@ -101,7 +94,6 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             ):
                 all_matched_3d_models.add(main_view._3d_model_dict[key])
 
-        # python sort by first element of list by default
         model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Sorted models"])
         for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):

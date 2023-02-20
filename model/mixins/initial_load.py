@@ -12,16 +12,17 @@ class InitialLoadMixin:
         self.file_root = pathlib.Path(setting["FILE_ROOT"] )
         self.json_data = self.simple_get_json("./configs/cache.json")
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        self.calculuated_paths = self.get_path_object_dict(self.json_data["past_records"])
+        self.path_info_dict = self.get_path_info_dict(self.json_data["past_records"])
+        #Calculuaterd paths have "path" as the key to "the path's object;s calculuated area, brigthness extra "'s value
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
-    def get_path_object_dict(self, past_records):
-        calculuated_paths = dict()
+    def get_path_info_dict(self, past_records):
+        path_info_dict = dict()
         
         for obj in past_records:
-            calculuated_paths[obj["path"]] = obj
+            path_info_dict[obj["path"]] = obj
         
-        return calculuated_paths
+        return path_info_dict
 
 
     def vali_path_exists(self):

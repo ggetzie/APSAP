@@ -164,22 +164,22 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
 
                 path = item[1]
 
-                if path in main_model.calculuated_paths:
-                    batch_num = main_model.calculuated_paths[path]["batch_num"]
-                    piece_num = main_model.calculuated_paths[path]["piece_num"]
-                    brightness_summary = main_model.calculuated_paths[path][
+                if path in main_model.path_info_dict:
+                    batch_num = main_model.path_info_dict[path]["batch_num"]
+                    piece_num = main_model.path_info_dict[path]["piece_num"]
+                    brightness_summary = main_model.path_info_dict[path][
                         "brightness_summary"
                     ]
-                    colors_summary = main_model.calculuated_paths[path][
+                    colors_summary = main_model.path_info_dict[path][
                         "colors_summary"
                     ]
-                    width_length_summary = main_model.calculuated_paths[path][
+                    width_length_summary = main_model.path_info_dict[path][
                         "width_length_summary"
                     ]
-                    area = main_model.calculuated_paths[path]["area"]
-                    index = main_model.calculuated_paths[path]["index"]
-                    context = main_model.calculuated_paths[path]["context"]
-                    cirlcle_area_ratio = main_model.calculuated_paths[path][
+                    area = main_model.path_info_dict[path]["area"]
+                    index = main_model.path_info_dict[path]["index"]
+                    context = main_model.path_info_dict[path]["context"]
+                    cirlcle_area_ratio = main_model.path_info_dict[path][
                         "cirlcle_area_ratio"
                     ]
                     

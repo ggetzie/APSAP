@@ -34,9 +34,9 @@ class DebugFuncs():
             if key in _3d_object: #This means we have a 2d_pic matching a 3d model
                 res = ( self.file_root/ str(i[0])/ str(i[1])/  str(i[2])/ str(i[3])/  str(i[4]))
                 _2d_pic_id = i[5]
-                _2d_image_path_image_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
-                _2d_image_path_image_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
-                if pathlib.Path(_2d_image_path_image_1).is_file() and pathlib.Path(_2d_image_path_image_2).is_file():
+                img_1_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
+                img_2_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
+                if pathlib.Path(img_1_path).is_file() and pathlib.Path(img_2_path).is_file():
 
                     
                     
@@ -53,11 +53,11 @@ class DebugFuncs():
 
                     
                                     #Area based similiarity
-                    _2d_area_image_1 = self.comparator.get_2d_picture_area(_2d_image_path_image_1)
-                    _2d_area_image_2 = self.comparator.get_2d_picture_area(_2d_image_path_image_2)    
+                    area_img_1 = self.comparator.get_2d_area(img_1_path)
+                    area_img_2 = self.comparator.get_2d_area(img_2_path)    
                     #Brightness based simliarity
-                    _2d_brightness_summary_2 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
-                    _2d_brightness_summary_1 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)
+                    _2d_brightness_summary_2 = self.comparator.get_2d_light_summary(img_2_path)
+                    _2d_brightness_summary_1 = self.comparator.get_2d_light_summary(img_1_path)
                     
                     _2d_brightness_1 = _2d_brightness_summary_1[3]
                     _2d_brightness_2 = _2d_brightness_summary_2[3]
@@ -69,12 +69,12 @@ class DebugFuncs():
                     #Let's do the third one: color based similarity
                     #Prepare the colors summaries for these two pictures
                     #Not that useful we found out.
-                    front_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_1))
-                    back_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_2))  
+                    front_color = (self.comparator.get_color_summary_from_2d(img_1_path))
+                    back_color = (self.comparator.get_color_summary_from_2d(img_2_path))  
                     
 
-                    _2d_width_length_1 = (self.comparator.get_2d_width_length(_2d_image_path_image_1))
-                    _2d_width_length_2 = (self.comparator.get_2d_width_length(_2d_image_path_image_2)) 
+                    _2d_width_length_1 = (self.comparator.get_2d_width_length(img_1_path))
+                    _2d_width_length_2 = (self.comparator.get_2d_width_length(img_2_path)) 
                     
                     _3d_width = _3d_width_length[0]
                     _3d_length = _3d_width_length[1]
@@ -95,10 +95,10 @@ class DebugFuncs():
                     #1. area data
                     current_match = {}
                     current_match["_3d_area"] = _3d_area
-                    if(self.get_similarity_two_nums(_3d_area, _2d_area_image_1 ) >  self.get_similarity_two_nums(_3d_area, _2d_area_image_2 ) ): 
-                        current_match["_2d_area"] = _2d_area_image_2
+                    if(self.get_similarity_two_nums(_3d_area, area_img_1 ) >  self.get_similarity_two_nums(_3d_area, area_img_2 ) ): 
+                        current_match["_2d_area"] = area_img_2
                     else: 
-                        current_match["_2d_area"] = _2d_area_image_1
+                        current_match["_2d_area"] = area_img_1
                     
                     #2 brightness data
                     current_match["_3d_brightness"] = _3d_brightness      
@@ -130,8 +130,8 @@ class DebugFuncs():
                     for_ml["data"].append({"current_match": current_match, "path": str(res)})
 
  
-                    print(_2d_image_path_image_1)
-                    print(_2d_image_path_image_2)
+                    print(img_1_path)
+                    print(img_2_path)
                     print()
         simple_save_json(for_ml, "./for_ml.json")
         print(f"Timed passed: {time.time() - current} seconds")
@@ -171,22 +171,22 @@ class DebugFuncs():
                 #print(f"i: {i}")
                 res = ( self.file_root/ str(i[0])/ str(i[1])/  str(i[2])/ str(i[3])/  str(i[4]))
                 _2d_pic_id = i[5]
-                _2d_image_path_image_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
-                _2d_image_path_image_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
+                img_1_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
+                img_2_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
                 batch = i[11]
                 piece = i[12]
                 path =  (str((res/MODELS_FILES_DIR)))
                 _3d_model_path = (path.replace("*", f"{int(batch):03}", 1).replace("*", f"{int(piece)}", 1)) 
-                if pathlib.Path(_2d_image_path_image_1).is_file() and pathlib.Path(_2d_image_path_image_2).is_file() and pathlib.Path(_3d_model_path).is_file():
+                if pathlib.Path(img_1_path).is_file() and pathlib.Path(img_2_path).is_file() and pathlib.Path(_3d_model_path).is_file():
                     count += 1
              
                     current_data = {
 
                     }
-                    _2d_pixel_area_1 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_1, self.comparator.ceremic_predictor)
-                    _2d_pixel_area_2 = self.comparator.get_2d_area_by_pixels(_2d_image_path_image_2, self.comparator.ceremic_predictor)
-                    _2d_pixel_circle_1 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_1, self.comparator.ceremic_predictor)
-                    _2d_pixel_circle_2 = self.comparator.get_2d_enclosing_circle_area(_2d_image_path_image_2, self.comparator.ceremic_predictor)
+                    _2d_pixel_area_1 = self.comparator.get_2d_area_by_pixels(img_1_path, self.comparator.ceremic_predictor)
+                    _2d_pixel_area_2 = self.comparator.get_2d_area_by_pixels(img_2_path, self.comparator.ceremic_predictor)
+                    _2d_pixel_circle_1 = self.comparator.get_2d_enclosing_circle_area(img_1_path, self.comparator.ceremic_predictor)
+                    _2d_pixel_circle_2 = self.comparator.get_2d_enclosing_circle_area(img_2_path, self.comparator.ceremic_predictor)
                     _3d_pixel_area = self.comparator.get_3d_object_area_in_pixels(_3d_model_path )
                     _3d_pixel_circle = self.comparator.get_3d_object_circle_in_pixels(_3d_model_path)
                     _2d_ratio_1 = _2d_pixel_area_1/_2d_pixel_circle_1
@@ -244,9 +244,9 @@ class DebugFuncs():
             if key in _3d_object: #This means we have a 2d_pic matching a 3d model
                 res = ( self.file_root/ str(i[0])/ str(i[1])/  str(i[2])/ str(i[3])/  str(i[4]))
                 _2d_pic_id = i[5]
-                _2d_image_path_image_1 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
-                _2d_image_path_image_2 = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
-                if pathlib.Path(_2d_image_path_image_1).is_file() and pathlib.Path(_2d_image_path_image_2).is_file():
+                img_1_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
+                img_2_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
+                if pathlib.Path(img_1_path).is_file() and pathlib.Path(img_2_path).is_file():
 
                     
                     
@@ -263,11 +263,11 @@ class DebugFuncs():
 
                     
                                     #Area based similiarity
-                    _2d_area_1 = self.comparator.get_2d_picture_area(_2d_image_path_image_1)
-                    _2d_area_2 = self.comparator.get_2d_picture_area(_2d_image_path_image_2)    
+                    _2d_area_1 = self.comparator.get_2d_area(img_1_path)
+                    _2d_area_2 = self.comparator.get_2d_area(img_2_path)    
                     #Brightness based simliarity
-                    _2d_brightness_summary_2 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_2)
-                    _2d_brightness_summary_1 = self.comparator.get_brightness_summary_from_2d(_2d_image_path_image_1)
+                    _2d_brightness_summary_2 = self.comparator.get_2d_light_summary(img_2_path)
+                    _2d_brightness_summary_1 = self.comparator.get_2d_light_summary(img_1_path)
                     
                     _2d_brightness_1 = _2d_brightness_summary_1[3]
                     _2d_brightness_2 = _2d_brightness_summary_2[3]
@@ -279,12 +279,12 @@ class DebugFuncs():
                     #Let's do the third one: color based similarity
                     #Prepare the colors summaries for these two pictures
                     #Not that useful we found out.
-                    front_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_1))
-                    back_color = (self.comparator.get_color_summary_from_2d(_2d_image_path_image_2))  
+                    front_color = (self.comparator.get_color_summary_from_2d(img_1_path))
+                    back_color = (self.comparator.get_color_summary_from_2d(img_2_path))  
                     
 
-                    _2d_width_length_1 = (self.comparator.get_2d_width_length(_2d_image_path_image_1))
-                    _2d_width_length_2 = (self.comparator.get_2d_width_length(_2d_image_path_image_2)) 
+                    _2d_width_length_1 = (self.comparator.get_2d_width_length(img_1_path))
+                    _2d_width_length_2 = (self.comparator.get_2d_width_length(img_2_path)) 
                     
                     _3d_width = _3d_width_length[0]
                     _3d_length = _3d_width_length[1]

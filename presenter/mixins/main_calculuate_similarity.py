@@ -19,37 +19,37 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
     def get_similaritiy_scores(self, index, image_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        _2d_image_path_image_1 = image_path / "1.jpg"
-        _2d_image_path_image_2 = image_path / "2.jpg"
+        img_1_path = image_path / "1.jpg"
+        img_2_path = image_path / "2.jpg"
 
-        _2d_area_image_1,  _2d_area_image_2, color_brightness_2d_image_1, color_brightness_2d_image_2, _2d_width_length_image_1, _2d_width_length_image_2, _2d_area_circle_ratio_image_1,  _2d_area_circle_ratio_image_2 = self.get_pixels_measuring_results__2d(_2d_image_path_image_1, _2d_image_path_image_2)
+        area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length, img_1_circle_ratio,  img_2_circle_ratio = self.measure_pixels_2d(img_1_path, img_2_path)
 
         similarity_scores = []
 
         for i in range(len(main_view.all_3d_areas)):
-            _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.get_pixels_measuring_results__3d(i)
+            _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
            
             similairty = main_presenter.get_similarity(
                 _3d_area,
-                _2d_area_image_1,
-                _2d_area_image_2,
+                area_img_1,
+                area_img_2,
                 color_brightness_3d,
-                color_brightness_2d_image_1[3],
-                color_brightness_2d_image_2[3],
+                light_ima_1[3],
+                light_ima_2[3],
                 color_brightness_std_3d,
-                color_brightness_2d_image_1[-1],
-                color_brightness_2d_image_2[-1],
+                light_ima_1[-1],
+                light_ima_2[-1],
                 width_length_3d[0],
                 width_length_3d[1],
-                _2d_width_length_image_1[0],
-                _2d_width_length_image_1[1],
-                _2d_width_length_image_2[0],
-                _2d_width_length_image_2[1],
-                _2d_area_circle_ratio_image_1,
-                _2d_area_circle_ratio_image_2,
+                img_1_width_length[0],
+                img_1_width_length[1],
+                img_2_width_length[0],
+                img_2_width_length[1],
+                img_1_circle_ratio,
+                img_2_circle_ratio,
                 all_3d_area_circle_ratio,
             )
-            # similarity_scores.append([self.get_3d_2d_simi(color_brightness_3d, color_brightness_std_3d, _3d_area, _2d_area_image_2, _2d_area_image_1, color_brightness_2d_image_2, color_brightness_2d_image_1, front_color, back_color, _3d_color, width_length_3d, _2d_width_length_image_1, _2d_width_length_image_2  ), batch_num, piece_num])
+            # similarity_scores.append([self.get_3d_2d_simi(color_brightness_3d, color_brightness_std_3d, _3d_area, area_img_2, area_img_1, light_ima_2, light_ima_1, front_color, back_color, _3d_color, width_length_3d, img_1_width_length, img_2_width_length  ), batch_num, piece_num])
             similarity_scores.append([similairty, batch_num, piece_num])
         return similarity_scores
 
@@ -72,8 +72,8 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         _first_pic_side_2,
         _second_pic_side_1,
         _second_pic_side_2,
-        _2d_area_circle_ratio_image_1,
-        _2d_area_circle_ratio_image_2,
+        img_1_circle_ratio,
+        img_2_circle_ratio,
         all_3d_area_circle_ratio,
     ):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -113,8 +113,8 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             parameters["length"]["intercept"],
         )
         area_circle_similarity = main_presenter.get_area_circle_similarity(
-            _2d_area_circle_ratio_image_1,
-            _2d_area_circle_ratio_image_2,
+            img_1_circle_ratio,
+            img_2_circle_ratio,
             all_3d_area_circle_ratio,
             0.9055558282782922,
             0.03996414943733839,

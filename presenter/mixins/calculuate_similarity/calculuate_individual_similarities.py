@@ -7,25 +7,25 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
    
     def get_area_circle_similarity(
         self,
-        _2d_area_circle_ratio_image_1,
-        _2d_area_circle_ratio_image_2,
+        img_1_circle_ratio,
+        img_2_circle_ratio,
         all_3d_area_circle_ratio,
         a,
         b,
     ):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         if main_presenter.get_similarity_two_nums(
-            _2d_area_circle_ratio_image_1, all_3d_area_circle_ratio
+            img_1_circle_ratio, all_3d_area_circle_ratio
         ) > main_presenter.get_similarity_two_nums(
-            _2d_area_circle_ratio_image_2, all_3d_area_circle_ratio
+            img_2_circle_ratio, all_3d_area_circle_ratio
         ):
 
             return main_presenter.get_similarity_two_nums(
-                _2d_area_circle_ratio_image_2 * a + b, all_3d_area_circle_ratio
+                img_2_circle_ratio * a + b, all_3d_area_circle_ratio
             )
         else:
             return main_presenter.get_similarity_two_nums(
-                _2d_area_circle_ratio_image_1 * a + b, all_3d_area_circle_ratio
+                img_1_circle_ratio * a + b, all_3d_area_circle_ratio
             )
 
 

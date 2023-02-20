@@ -20,7 +20,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         cm_squared = mm_squared / 100 
         return cm_squared
         
-    def get_2d_area_circle_ratio(self, _2d_object_path) -> float:
+    def get_2d_circle_ratio(self, _2d_object_path) -> float:
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         area_in_pixels= main_presenter.get_2d_area_by_pixels(_2d_object_path, main_presenter.ceremic_predictor)
@@ -35,7 +35,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         return x_coordiantes_mask[-15] - x_coordiantes_mask[5]
 
 
-    def get_2d_picture_area(self, _2d_picture_path):
+    def get_2d_area(self, _2d_picture_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         image = main_model.open_image(_2d_picture_path, full_size=False)
@@ -68,7 +68,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
  
 
 
-    def get_brightness_summary_from_2d(self, image_path):
+    def get_2d_light_summary(self, image_path):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 

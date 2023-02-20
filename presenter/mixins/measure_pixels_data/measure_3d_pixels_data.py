@@ -25,7 +25,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         ctr.change_field_of_view(step=-9)
         object_image = main_view.ply_window.capture_screen_float_buffer(True)
         object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
-      
+  
         object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))    
         pixel_counts = (np.count_nonzero(object_image_array_object_locations))
    

@@ -6,7 +6,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
     def remove_match(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        
         selected_item = main_view.finds_list.currentItem()
 
         if selected_item:

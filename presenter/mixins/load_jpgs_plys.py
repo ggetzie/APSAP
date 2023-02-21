@@ -14,7 +14,7 @@ from glob import glob as glob
 import pathlib
 
 
-class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
+class LoadJpgsPlysMixin:   
     def get_context_dir(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -39,18 +39,16 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
         easting = int(path_parts[0])
         northing = int(path_parts[1])
         context = int(path_parts[2])
-        print("###")
-        print(path_parts)
-        print((easting, northing, context))
-        print("###")
 
-        return (easting, northing, context)
+        return  (easting, northing, context)
 
     def populate_finds(self):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.finds_list.clear()
+
+
         context_dir = main_presenter.get_context_dir()
 
         finds_dir = context_dir / main_model.path_variables["FINDS_SUBDIR"]
@@ -143,9 +141,6 @@ class LoadJpgsPlysMixin:  # bridging the view(gui) and the model(data)
             ):
                 all_matched_3d_models.add(main_view._3d_model_dict[key])
 
-        # Add all items onto the QTree
-
-        # We get all the information of all the 3d models, that we can use to rank them by similarity
         actual_index = 0
         all_3d_areas = []
         all_3d_brightness_summaries = []

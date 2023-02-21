@@ -15,7 +15,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         ceremic_array = (np.array(ceremic_mask))
         ceremic_pixel = (np.count_nonzero((ceremic_array >=170)))
         # Turn number of pixels(aka pixel area) into area in mm
-        mm_squared = (ceremic_pixel * (mm_per_pixel* mm_per_pixel)) 
+        mm_squared = (ceremic_pixel * (mm_per_pixel * mm_per_pixel)) 
         # mm to cm
         cm_squared = mm_squared / 100 
         return cm_squared
@@ -132,9 +132,6 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
 
     def get_color_summary_from_2d(self, image_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-
-
         image = main_model.open_image(image_path,full_size=False)
         masked = main_presenter.ceremic_predictor.predict(image)
         

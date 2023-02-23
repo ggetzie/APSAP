@@ -26,7 +26,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
 
         similarity_scores = []
 
-        for i in range(len(main_view.all_3d_areas)):
+        for i in range(len(main_view.areas_3d)):
             _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
            
             similairty = main_presenter.get_similarity(

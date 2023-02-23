@@ -1,8 +1,8 @@
 import psycopg2
 import environ
-import pathlib
+from pathlib import Path
 
-SRC_DIR = pathlib.Path(__file__).resolve(strict=True).parent
+SRC_DIR = Path(__file__).resolve(strict=True).parent
 print(SRC_DIR)
 env = environ.Env()
 
@@ -34,7 +34,8 @@ class DatabaseMixin:
     
     def __init__(self):
         self.conn = psycopg2.connect(**READ_SETTINGS)
-    def get_pottery_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
+
+    def get_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
         if(self.conn):
             conn = self.conn
         else:
@@ -43,7 +44,6 @@ class DatabaseMixin:
         try:
             
             cursor = conn.cursor()
-            print(cursor.execute("""select pg_backend_pid();"""))
             query = """
             SELECT "3d_batch_number", "3d_batch_piece" 
             FROM object.finds
@@ -70,8 +70,6 @@ class DatabaseMixin:
         finally:
             if conn:
                 cursor.close()
-                #conn.close()
-
 
 
     def update_match_info(

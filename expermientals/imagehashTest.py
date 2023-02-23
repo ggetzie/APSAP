@@ -17,7 +17,6 @@ np.set_printoptions(suppress=True)
 
 from debug_database import get_all_pottery_sherd_info
 
-from pathlib import Path
 
 
 print(len(get_all_pottery_sherd_info()))

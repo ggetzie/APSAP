@@ -1,5 +1,5 @@
 from presenter.mixins.select_path import SelectPathMixin
-from presenter.mixins.load_jpgs_plys import LoadJpgsPlysMixin
+from presenter.mixins.main_load_jpgs_plys import LoadJpgsPlysMixin
 from presenter.mixins.add_and_remove_match import AddAndRemoveMatchMixin
 from presenter.mixins.load_1_jpg_pair import Load1jpgPairMixin
 from presenter.mixins.display_3d_model import Display3dModelMixin

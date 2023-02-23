@@ -1,4 +1,4 @@
-import pathlib
+from pathlib import Path
 import json
 import time
 from  computation.nn_segmentation import MaskPredictor
@@ -36,7 +36,7 @@ class DebugFuncs():
                 _2d_pic_id = i[5]
                 img_1_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "1.jpg"
                 img_2_path = res/ FINDS_SUBDIR / str(_2d_pic_id) / FINDS_PHOTO_DIR / "2.jpg"
-                if pathlib.Path(img_1_path).is_file() and pathlib.Path(img_2_path).is_file():
+                if Path(img_1_path).is_file() and Path(img_2_path).is_file():
 
                     
                     
@@ -177,7 +177,7 @@ class DebugFuncs():
                 piece = i[12]
                 path =  (str((res/MODELS_FILES_DIR)))
                 _3d_model_path = (path.replace("*", f"{int(batch):03}", 1).replace("*", f"{int(piece)}", 1)) 
-                if pathlib.Path(img_1_path).is_file() and pathlib.Path(img_2_path).is_file() and pathlib.Path(_3d_model_path).is_file():
+                if Path(img_1_path).is_file() and Path(img_2_path).is_file() and Path(_3d_model_path).is_file():
                     count += 1
              
                     current_data = {

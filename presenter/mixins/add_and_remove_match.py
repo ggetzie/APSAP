@@ -25,6 +25,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
             mod = main_view.modelList.model()
             # Make the item Black in modelList
+            
             for i in range(mod.rowCount()):
                 for j in range(mod.item(i).rowCount()):
                     if (

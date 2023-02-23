@@ -142,7 +142,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         
         return  pixels_difference
 
-    def get_brightness_summary_from_3d (self, model_path):
+    def get_brightnesses_3d (self, model_path):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 

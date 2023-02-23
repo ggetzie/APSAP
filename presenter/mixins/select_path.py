@@ -12,11 +12,7 @@ class LoadingSplash(QSplashScreen):
         pass
 
 
-class SelectPathMixin:  # bridging the view(gui) and the model(data)
-    def __init__(self, view, model):
-        # Notice this object is the presenter, that which connects the view(GUI) and the model(data)
-        presenter = self
-        # self.populate_hemispheres()
+class SelectPathMixin: 
 
     def populate_hemispheres(self):
 
@@ -29,7 +25,6 @@ class SelectPathMixin:  # bridging the view(gui) and the model(data)
         # Get the hemispheres and add it to the combo box
         options = main_presenter.get_hemispheres()
         main_view.hemisphere_cb.addItems(options)
-        print(main_view.hemisphere_cb)
         # Set the index of the select as 0 by default and allow the select to be "selected"  if there are more than 1 elements
         main_view.hemisphere_cb.setCurrentIndex(0 if len(options) > 0 else -1)
         main_view.hemisphere_cb.setEnabled(len(options) > 1)

@@ -129,23 +129,4 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
                 new_li.append(indices_tuples[i])
         center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
         return (radius**2 ) * 3.1416
-
-    def get_color_summary_from_2d(self, image_path):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        image = main_model.open_image(image_path,full_size=False)
-        masked = main_presenter.ceremic_predictor.predict(image)
-        
-        masked_ravel = (((np.array(masked)).astype(bool)))
-    
-        image_np = np.array(image)
-        #These contains pixels with all the color in RGB
-        pixels_color = (image_np[masked_ravel==True] )
-        r = pixels_color[:, 0]
-        g = pixels_color[:, 1]
-        b = pixels_color[:, 2]
-        
-        r_mean = np.mean(r)
-        g_mean = np.mean(g)
-        b_mean = np.mean(b)
-
-        return (r_mean, g_mean, b_mean)
+ 

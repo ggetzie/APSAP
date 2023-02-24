@@ -29,108 +29,108 @@ class SelectPathMixin:
         main_view.hemisphere_cb.setCurrentIndex(0 if len(options) > 0 else -1)
         main_view.hemisphere_cb.setEnabled(len(options) > 1)
 
-        # This is important. The hierarchy is hemispheres, zones, eastings, northings, contexts, finds/models
-        # When the former one is populated, ther ones after that are populated one by one til the end of the chain.
-        main_presenter.populate_zones()
 
     def populate_zones(self):
         # Check populate_zones for explanations
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        if main_view.hemisphere_cb.count() > 0 :
+            
+            main_view.zone_cb.clear()
 
-        main_view.zone_cb.clear()
+            hemisphere = main_view.hemisphere_cb.currentText()
+            zone_root = main_model.file_root / hemisphere
+            options = main_presenter.get_options(zone_root)
+            main_view.zone_cb.addItems(options)
 
-        hemisphere = main_view.hemisphere_cb.currentText()
-        zone_root = main_model.file_root / hemisphere
-        options = main_presenter.get_options(zone_root)
-        main_view.zone_cb.addItems(options)
-
-        main_view.zone_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-        main_view.zone_cb.setEnabled(len(options) > 1)
-
-        main_presenter.populate_eastings()
+            main_view.zone_cb.setCurrentIndex(0 if len(options) > 0 else -1)
+            main_view.zone_cb.setEnabled(len(options) > 1)
 
     def populate_eastings(self):
         # Check populate_zones for explanations
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        if main_view.zone_cb.count() > 0:
+        
+            main_view.easting_cb.clear()
 
-        main_view.easting_cb.clear()
+            hemisphere = main_view.hemisphere_cb.currentText()
+            zone = main_view.zone_cb.currentText()
+            eastings_root = main_model.file_root / hemisphere / zone
+            options = main_presenter.get_options(eastings_root)
+            main_view.easting_cb.addItems(options)
 
-        hemisphere = main_view.hemisphere_cb.currentText()
-        zone = main_view.zone_cb.currentText()
-        eastings_root = main_model.file_root / hemisphere / zone
-        options = main_presenter.get_options(eastings_root)
-        main_view.easting_cb.addItems(options)
-
-        main_view.easting_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-        main_view.easting_cb.setEnabled(len(options) > 1)
-
-        main_presenter.populate_northings()
+            main_view.easting_cb.setCurrentIndex(0 if len(options) > 0 else -1)
+            main_view.easting_cb.setEnabled(len(options) > 1)
 
     def populate_northings(self):
         # Check populate_zones for explanations
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        main_view.northing_cb.clear()
-
-        northings_root = (
-            main_model.file_root
-            / main_view.hemisphere_cb.currentText()
-            / main_view.zone_cb.currentText()
-            / main_view.easting_cb.currentText()
-        )
-        options = main_presenter.get_options(northings_root)
-        main_view.northing_cb.addItems(options)
-        main_view.northing_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-        main_view.northing_cb.setEnabled(len(options) > 1)
-
-        main_presenter.populate_contexts()
-
+        #Make sure that we only populate if the current items if the previous items
+        if main_view.easting_cb.count() > 0:
+            main_view.northing_cb.clear()
+            
+            
+            northings_root = (
+                main_model.file_root
+                / main_view.hemisphere_cb.currentText()
+                / main_view.zone_cb.currentText()
+                / main_view.easting_cb.currentText()
+            )
+            options = main_presenter.get_options(northings_root)
+            
+            main_view.northing_cb.addItems(options)
+            main_view.northing_cb.setCurrentIndex(0 if len(options) > 0 else -1)
+            main_view.northing_cb.setEnabled(len(options) > 1)
+            
     def populate_contexts(self):
         # Check populate_zones for explanations,  except this "populate" function takes the final functions populate_finds and populate_models in a load_and_run mechanism that shows
+
+
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        if main_view.northing_cb.count() > 0:
+            main_view.context_cb.clear()
 
-        main_view.context_cb.clear()
+            contexts_root = (
+                main_model.file_root
+                / main_view.hemisphere_cb.currentText()
+                / main_view.zone_cb.currentText()
+                / main_view.easting_cb.currentText()
+                / main_view.northing_cb.currentText()
+            )
+            options = main_presenter.get_options(contexts_root)
+            options.sort(key=int)
+            main_view.context_cb.addItems(options)
 
-        contexts_root = (
-            main_model.file_root
-            / main_view.hemisphere_cb.currentText()
-            / main_view.zone_cb.currentText()
-            / main_view.easting_cb.currentText()
-            / main_view.northing_cb.currentText()
-        )
-        options = main_presenter.get_options(contexts_root)
-        options.sort(key=int)
-        main_view.context_cb.addItems(options)
+            main_view.context_cb.setCurrentIndex(0 if len(options) > 0 else -1)
+            main_view.context_cb.setEnabled(len(options) > 1)
+            
 
-        main_view.context_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-        main_view.context_cb.setEnabled(len(options) > 1)
-
-        main_presenter.contextChanged()
 
     def contextChanged(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        main_view.statusLabel.setText(f"")
-        main_view.selected_find.setText(f"")
-        main_view.current_batch.setText(f"")
-        main_view.current_piece.setText(f"")
-        main_view.new_batch.setText(f"")
-        main_view.new_piece.setText(f"")
-        main_view.contextDisplay.setText(self.get_context_string())
-        if hasattr(main_view, "current_pcd"):
-            main_view.ply_window.remove_geometry(main_view.current_pcd)
-            main_view.current_pcd = None
+        if main_view.context_cb.count() > 0:
 
-        model = QStandardItemModel(main_view)
-        main_view.sorted_model_list.setModel(model)
-        funcs_to_run = [
-            ["Loading finds. It might take a while", main_presenter.populate_finds],
-            ["Loading models. It might take a while", main_presenter.populate_models],
-        ]
+            main_view.statusLabel.setText(f"")
+            main_view.selected_find.setText(f"")
+            main_view.current_batch.setText(f"")
+            main_view.current_piece.setText(f"")
+            main_view.new_batch.setText(f"")
+            main_view.new_piece.setText(f"")
+            main_view.contextDisplay.setText(self.get_context_string())
+            if hasattr(main_view, "current_pcd"):
+                main_view.ply_window.remove_geometry(main_view.current_pcd)
+                main_view.current_pcd = None
 
-        now = time.time()
-        main_presenter.load_and_run(funcs_to_run)
-        print(f"Timed passed: {time.time() - now} seconds")
+            model = QStandardItemModel(main_view)
+            main_view.sorted_model_list.setModel(model)
+            funcs_to_run = [
+                ["Loading finds. It might take a while", main_presenter.populate_finds],
+                ["Loading models. It might take a while", main_presenter.populate_models],
+            ]
+
+            now = time.time()
+            main_presenter.load_and_run(funcs_to_run)
+            print(f"Timed passed: {time.time() - now} seconds")
 
     def get_context_string(self):
         """Return a string representing the full designation of the current context

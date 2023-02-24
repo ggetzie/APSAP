@@ -23,8 +23,9 @@ class Mainpresenter(
         main_presenter = self
 
         self.main_model.prepare_data(self.main_view)
-        self.populate_hemispheres()
+        #
         self.main_view.set_up_view_presenter_connection(main_presenter)
+        self.populate_hemispheres()
         view.contextDisplay.setText(main_presenter.get_context_string())
 
         MeasurePixelsDataMixin.__init__(self, self.main_view, self.main_model)

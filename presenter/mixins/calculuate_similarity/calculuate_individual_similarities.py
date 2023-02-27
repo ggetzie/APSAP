@@ -2,7 +2,7 @@ from PIL.ImageQt import ImageQt
 from scipy.stats import gmean, tmean
 import numpy as np
 
-
+import time
 class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the model(data)
    
     def get_area_circle_similarity(
@@ -19,11 +19,12 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
         ) > main_presenter.get_similarity_two_nums(
             img_2_circle_ratio, all_3d_area_circle_ratio
         ):
-
+ 
             return main_presenter.get_similarity_two_nums(
                 img_2_circle_ratio * a + b, all_3d_area_circle_ratio
             )
         else:
+ 
             return main_presenter.get_similarity_two_nums(
                 img_1_circle_ratio * a + b, all_3d_area_circle_ratio
             )
@@ -33,12 +34,12 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
 
         # A new similiarity function
         return abs(a - b) / (
-            a + b
+            a + b + 0.0000000001 # Add an extreme small amount to avoid divide by zero
         )  # If they are the same, it becomes zeros, if their difference approaches infinitry, it becomes 1.
 
     def get_area_similarity(self, _3d_area, _2d_area_1, _2d_area_2, a, b):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+       
         # Assumtion 1: there is a linear relation between the _3d_area and the _2d_area
         # The parameters a, b are found by running a linear regression between areas_3d and all the _2d_area(picked from the closer of the two)
         # We compare the 3d model's area with two pictures. Possible future improvement is to compare two 2d areas with two 3d areas.
@@ -50,8 +51,10 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
             smaller_area, _3d_area
         ) > main_presenter.get_similarity_two_nums(larger_area, _3d_area):
             # We use a and b to get a more accurate similarity.
+            
             return main_presenter.get_similarity_two_nums(larger_area * a + b, _3d_area)
         else:
+            
             return main_presenter.get_similarity_two_nums(
                 smaller_area * a + b, _3d_area
             )
@@ -61,18 +64,20 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
     ):
         # Similiar reasoning behind function get_area_similarity()
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+ 
         darker_brightness = min(_2d_brightness_1, _2d_brightness_2)
         brighter_brightness = max(_2d_brightness_1, _2d_brightness_2)
 
         if main_presenter.get_similarity_two_nums(
             darker_brightness, _3d_brightness
         ) > main_presenter.get_similarity_two_nums(brighter_brightness, _3d_brightness):
+         
 
             return main_presenter.get_similarity_two_nums(
                 brighter_brightness * a + b, _3d_brightness
             )
         else:
+        
             return main_presenter.get_similarity_two_nums(
                 darker_brightness * a + b, _3d_brightness
             )
@@ -82,7 +87,6 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
     ):
         # Similiar reasoning behind function get_area_similarity()
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
         smaller_brightness_std = min(_2d_brightness_std_1, _2d_brightness_std_2)
         larger_brightness_std = max(_2d_brightness_std_1, _2d_brightness_std_2)
 
@@ -91,12 +95,12 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
         ) > main_presenter.get_similarity_two_nums(
             larger_brightness_std, _3d_brightness_std
         ):
-
+ 
             return main_presenter.get_similarity_two_nums(
                 larger_brightness_std * a + b, _3d_brightness_std
             )
         else:
-            return main_presenter.get_similarity_two_nums(
+             return main_presenter.get_similarity_two_nums(
                 smaller_brightness_std * a + b, _3d_brightness_std
             )
 
@@ -114,8 +118,9 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
         d,
     ):
         # Similiar reasoning behind function get_area_similarity()
+  
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        
         longer_side_3d = max(_3d_pic_side_1, _3d_pic_side_2)
         shorter_side_3d = min(_3d_pic_side_1, _3d_pic_side_2)
 
@@ -155,5 +160,4 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
                     longer_side_pic_1 * c + d, longer_side_3d
                 )
             ) / 2
-
-        return result
+        return result   

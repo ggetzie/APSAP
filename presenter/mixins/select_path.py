@@ -130,7 +130,7 @@ class SelectPathMixin:
 
             now = time.time()
             main_presenter.load_and_run(funcs_to_run)
-            print(f"Timed passed: {time.time() - now} seconds")
+            print(f"Time for loading plys and models passed: {time.time() - now} seconds")
 
     def get_context_string(self):
         """Return a string representing the full designation of the current context

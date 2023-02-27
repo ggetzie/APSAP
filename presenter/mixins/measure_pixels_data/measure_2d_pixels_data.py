@@ -20,11 +20,11 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         cm_squared = mm_squared / 100 
         return cm_squared
         
-    def get_2d_circle_ratio(self, _2d_object_path) -> float:
+    def get_2d_circle_ratio(self, _2d_object_path , masked_ceremics = None) -> float:
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        area_in_pixels= main_presenter.get_2d_area_by_pixels(_2d_object_path, main_presenter.ceremic_predictor)
-        circle_in_pixels = main_presenter.get_2d_enclosing_circle_area(_2d_object_path, main_presenter.ceremic_predictor)
+        area_in_pixels= main_presenter.get_2d_area_by_pixels(_2d_object_path, main_presenter.ceremic_predictor, masked_ceremics )
+        circle_in_pixels = main_presenter.get_2d_enclosing_circle_area(_2d_object_path, main_presenter.ceremic_predictor, masked_ceremics)
         return area_in_pixels/circle_in_pixels
 
     def get_mask_pixel_width(self, image):
@@ -35,47 +35,48 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         return x_coordiantes_mask[-15] - x_coordiantes_mask[5]
 
 
-    def get_2d_area(self, _2d_picture_path):
+    def get_2d_area(self, _2d_picture_path, masked_ceremics = None, mask_grid = None):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        image = main_model.open_image(_2d_picture_path, full_size=False)
+        if not (masked_ceremics and  mask_grid):
+            image = main_model.open_image(_2d_picture_path, full_size=False)
         
-        mask_image = main_presenter.colorgrid_predictor.predict(image)
-        mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_image)  #53.98 is the width of the credit-card size color grid
-        ceremic_mask = main_presenter.ceremic_predictor.predict(image) 
-        tif_area =  self.get_ceremic_area(ceremic_mask, mm_per_pixel)
+            mask_grid = main_presenter.colorgrid_predictor.predict(image)
+            masked_ceremics = main_presenter.ceremic_predictor.predict(image) 
+        mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
+        tif_area =  self.get_ceremic_area(masked_ceremics, mm_per_pixel)
         return tif_area
     
-    def get_2d_width_length(self,path_2d):
+    def get_2d_width_length(self,path_2d , masked_ceremics = None, mask_grid = None):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-    
-        image = main_model.open_image(path_2d,full_size=False)
-        masked_ceremics = main_presenter.ceremic_predictor.predict(image)
+        if not (masked_ceremics and mask_grid):
+            image = main_model.open_image(path_2d,full_size=False)
+            masked_ceremics = main_presenter.ceremic_predictor.predict(image)
+            mask_grid = main_presenter.colorgrid_predictor.predict(image)
         masked_ceremics_bool = (((np.array(masked_ceremics)).astype(bool)))
-        mask_grid = main_presenter.colorgrid_predictor.predict(image)
+
         mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
         indices = (np.nonzero(masked_ceremics_bool))
-        sorted_y_indices = sorted(indices[0])
-        sorted_x_indices = sorted(indices [1])
-    
-        y_diff =  abs(sorted_y_indices[-1] - sorted_y_indices[0]) * mm_per_pixel
-        x_diff = abs(sorted_x_indices[-1] - sorted_x_indices[0] ) * mm_per_pixel 
+  
+
+        y_diff =  abs(max(indices[0]) - min(indices[0])) * mm_per_pixel
+        x_diff = abs(max(indices[1]) - min(indices[1])) * mm_per_pixel 
         width = min(y_diff, x_diff)
         length = max(y_diff,x_diff)
         return width , length 
  
 
 
-    def get_2d_light_summary(self, image_path):
+    def get_2d_light_summary(self, image_path , masked_ceremics = None):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
         image = main_model.open_image(image_path,full_size=False)
-        masked = main_presenter.ceremic_predictor.predict(image)
+        if not masked_ceremics:
+           
+            masked_ceremics = main_presenter.ceremic_predictor.predict(image)
         
-        masked_ravel = (((np.array(masked).ravel()).astype(bool)))
+        masked_ravel = (((np.array(masked_ceremics).ravel()).astype(bool)))
         np_image = np.array(image.convert('L')).ravel()
     
         np_image[masked_ravel==False] = 0
@@ -92,23 +93,24 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         std = np.std(pixels_sorted)
         return (int(max_),int(min_),int(median), (mean),int(upper_q), int(lower_q), (std))
     
-    def get_2d_area_by_pixels(self, image_path, predictor):
+    def get_2d_area_by_pixels(self, image_path, predictor, masked_ceremics = None):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        if not masked_ceremics:
+            image = main_model.open_image(image_path, full_size=False)
+            masked_ceremics = predictor.predict(image)
 
-        image = main_model.open_image(image_path, full_size=False)
-        mask = predictor.predict(image)
-        mask_array = np.array(mask)
+        mask_array = np.array(masked_ceremics)
         pixels = np.nonzero(mask_array)
         pixel_area = len(pixels[0])
         return pixel_area
 
         
-    def get_2d_enclosing_circle_area(self, image_path, predictor):
+    def get_2d_enclosing_circle_area(self, image_path, predictor, masked_ceremics):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        image = main_model.open_image(image_path, full_size=False)
-        mask = predictor.predict(image)
-        mask_array = np.array(mask)
+        if not masked_ceremics:
+            image = main_model.open_image(image_path, full_size=False)
+            masked_ceremics = predictor.predict(image)
+        mask_array = np.array(masked_ceremics)
         #Here using a technique to leave out only the points of the object consisting of the boundary, so that we have much fewer points to handle
         k = np.ones((3,3),dtype=int)
         boundary_array = binary_dilation(mask_array==0, k) & mask_array

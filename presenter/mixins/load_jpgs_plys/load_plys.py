@@ -173,7 +173,7 @@ class LoadPlys:
         main_view.colors_3d = []
         main_view.width_lengths_3d = []
         main_view.circle_ratios_3d = []
-        
+
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
         piece_num = current_item["piece_num"]

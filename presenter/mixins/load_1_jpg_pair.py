@@ -26,14 +26,14 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
 
         main_view.path_2d_picture = photos_dir
-        now = time.time()
+       
         front_photo = ImageQt(
             main_model.open_image(str(photos_dir / "1.jpg"), full_size=False)
         )
         back_photo = ImageQt(
             main_model.open_image(str(photos_dir / "2.jpg"), full_size=False)
         )
-        print(f"time passed: {time.time() - now}")
+      
         main_view.findFrontPhoto_l.setPixmap(
             QPixmap.fromImage(front_photo).scaledToWidth(
                 main_view.findFrontPhoto_l.width()
@@ -76,16 +76,17 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
  
         _2d_image_path = photos_dir
-
+      
  
         old_flat_similairy_list = []
         flat_simllarity_list = main_presenter.get_similaritiy_scores(
             find_num, _2d_image_path
         )
- 
+     
         flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
             flat_simllarity_list
         )
+        
         all_matched_3d_models = set()
         for key in main_view._3d_model_dict:
             if not (

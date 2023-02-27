@@ -2,13 +2,17 @@ from PIL.ImageQt import ImageQt
 from scipy.stats import gmean, tmean
 import numpy as np
 from presenter.mixins.calculuate_similarity.calculuate_individual_similarities import CalculateIndividualSimilaritiesMixin
-
+from glob import glob as glob
+import re
+import time
+from pathlib import Path as Path
 class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridging the view(gui) and the model(data)
 
 
     def genereate_similiarity_ranked_pieces(self, similarities_list):
 
         grand_similarity = []
+    
         for _threeple in similarities_list:
             vals = _threeple[0]
             grand_similarity.append(
@@ -16,19 +20,56 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             )
         return grand_similarity
 
+    def get_batch_details(self):
+        """
+            This function gets how many items are in each batches
+        """
+        main_model, main_view, main_presenter = self.get_model_view_presenter()    
+        all_model_paths = glob(str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
+      
+
+        batches_dict = dict()
+        for path in all_model_paths:
+            m = re.search(
+                main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
+            )
+            # This error happens when the relative path is different
+            batch_num = int(m.group(1))
+            if batch_num not in batches_dict:
+                batches_dict[batch_num] = 0 
+            else:
+                batches_dict[batch_num] += 1
+        return batches_dict
+
+    def get_ply_identifier(self, batch_num, piece_num):
+        batch_details = self.get_batch_details()
+        maximum = max(batch_details.keys())
+        minimum = min(batch_details.keys())
+        identifier = 0
+        for i in range(minimum, int(batch_num)):
+            if i in batch_details:
+                identifier += batch_details[i]
+        identifier += int(piece_num)
+        return identifier
+        
+
     def get_similaritiy_scores(self, index, image_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-
+        now = time.time()
         area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length, img_1_circle_ratio,  img_2_circle_ratio = self.measure_pixels_2d(img_1_path, img_2_path)
-
+        print(f"It takes {time.time()- now } to get measure")
         similarity_scores = []
+        img_identifier = 0 # (int(Path(image_path).parts[-2]) - 1)
+      
 
+        now = time.time()     
         for i in range(len(main_view.areas_3d)):
             _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
-           
+            ply_identifier = 0 # self.get_ply_identifier(batch_num, piece_num )
+        
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
@@ -48,8 +89,9 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 img_1_circle_ratio,
                 img_2_circle_ratio,
                 all_3d_area_circle_ratio,
+                img_identifier,
+                ply_identifier
             )
-            # similarity_scores.append([self.get_3d_2d_simi(color_brightness_3d, color_brightness_std_3d, _3d_area, area_img_2, area_img_1, light_ima_2, light_ima_1, front_color, back_color, _3d_color, width_length_3d, img_1_width_length, img_2_width_length  ), batch_num, piece_num])
             similarity_scores.append([similairty, batch_num, piece_num])
         return similarity_scores
 
@@ -75,10 +117,13 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         img_1_circle_ratio,
         img_2_circle_ratio,
         all_3d_area_circle_ratio,
+        img_identifier,
+        ply_identifier
     ):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+  
         parameters = main_model.parameters
+         
         area_similarity = main_presenter.get_area_similarity(
             _3d_area,
             _2d_area_1,
@@ -119,14 +164,8 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             0.9055558282782922,
             0.03996414943733839,
         )
-        total_similarity = (
-            area_similarity
-            + brightness_similarity
-            + brightness_std_similarity
-            + width_length_similarity
-        )
-        # weights = np.array([0.4, 0.38, 0.12, 0.1])
-        # weights = np.array([2.85877858e-01 ,7.14122142e-01 ,0.00000000e+00, 5.55111512e-17, 0.1])
+        extra_similarities = main_presenter.get_similarity_two_nums(img_identifier, ply_identifier)
+
         similarities = np.array(
             [
                 area_similarity,
@@ -134,9 +173,9 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 brightness_std_similarity,
                 width_length_similarity,
                 area_circle_similarity,
+                extra_similarities
             ]
         )
-        # return np.dot(weights, similarities)# total_similarity/4
+        
         return similarities
-        # return area_circle_similarity
-
+   

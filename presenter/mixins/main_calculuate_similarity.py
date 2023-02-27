@@ -12,7 +12,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         for _threeple in similarities_list:
             vals = _threeple[0]
             grand_similarity.append(
-                [[gmean(vals) + tmean(vals)], _threeple[1], _threeple[2]]
+                [[ tmean(vals)], _threeple[1], _threeple[2]]
             )
         return grand_similarity
 

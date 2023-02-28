@@ -883,8 +883,8 @@
    <widget class="QSlider" name="areaSlider">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>650</y>
+      <x>100</x>
+      <y>660</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -905,8 +905,8 @@
    <widget class="QSlider" name="brightnessSlider">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>650</y>
+      <x>170</x>
+      <y>660</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -930,8 +930,8 @@
    <widget class="QSlider" name="brightnessStdSlider">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>650</y>
+      <x>240</x>
+      <y>660</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -949,27 +949,8 @@
    <widget class="QSlider" name="widthLengthSlider">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>650</y>
-      <width>50</width>
-      <height>60</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>100</number>
-    </property>
-    <property name="value">
-     <number>100</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QSlider" name="areaCircleSlider">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>650</y>
+      <x>310</x>
+      <y>660</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -987,8 +968,8 @@
    <widget class="QSlider" name="identifierSlider">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>650</y>
+      <x>380</x>
+      <y>660</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -1006,8 +987,8 @@
    <widget class="QLabel" name="areaLabel">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>730</y>
+      <x>100</x>
+      <y>740</y>
       <width>50</width>
       <height>20</height>
      </rect>
@@ -1031,8 +1012,8 @@
    <widget class="QLabel" name="brightnessLabel">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>730</y>
+      <x>170</x>
+      <y>740</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1058,8 +1039,8 @@
    <widget class="QLabel" name="brightnessStdLabel">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>730</y>
+      <x>240</x>
+      <y>740</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1082,8 +1063,8 @@
    <widget class="QLabel" name="widthLengthLabel">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>730</y>
+      <x>310</x>
+      <y>740</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1109,41 +1090,11 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="areaCircleLabel">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>730</y>
-      <width>50</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>6</pointsize>
-     </font>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Sunken</enum>
-    </property>
-    <property name="text">
-     <string>Area Circle</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::PlainText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignHCenter|Qt::AlignTop</set>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="identifierLabel">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>730</y>
+      <x>380</x>
+      <y>740</y>
       <width>50</width>
       <height>20</height>
      </rect>
@@ -1173,7 +1124,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>770</y>
+      <y>790</y>
       <width>211</width>
       <height>51</height>
      </rect>
@@ -1214,25 +1165,13 @@
    <zorder>brightnessSlider</zorder>
    <zorder>brightnessStdSlider</zorder>
    <zorder>widthLengthSlider</zorder>
-   <zorder>areaCircleSlider</zorder>
    <zorder>identifierSlider</zorder>
    <zorder>areaLabel</zorder>
    <zorder>brightnessLabel</zorder>
    <zorder>brightnessStdLabel</zorder>
    <zorder>widthLengthLabel</zorder>
-   <zorder>areaCircleLabel</zorder>
    <zorder>identifierLabel</zorder>
    <zorder>update_weights_button</zorder>
-   <zorder>horizontalSpacer</zorder>
-   <zorder>horizontalSpacer_2</zorder>
-   <zorder>horizontalSpacer_3</zorder>
-   <zorder>horizontalSpacer_4</zorder>
-   <zorder>horizontalSpacer_5</zorder>
-   <zorder>horizontalSpacer_6</zorder>
-   <zorder>horizontalSpacer_7</zorder>
-   <zorder>horizontalSpacer_8</zorder>
-   <zorder>horizontalSpacer_9</zorder>
-   <zorder>horizontalSpacer_10</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

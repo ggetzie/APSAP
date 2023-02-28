@@ -50,12 +50,7 @@ class MeasurePixelsDataMixin(
       
         img_1_width_length = main_presenter.get_2d_width_length(img_1_path, masked_ceremics_1, mask_grid_1)
         img_2_width_length = main_presenter.get_2d_width_length(img_2_path,  masked_ceremics_2, mask_grid_2)
-      
-
-        # Getting the simlarity scores here
-        
-        img_1_circle_ratio = main_presenter.get_2d_circle_ratio(img_1_path, masked_ceremics_1)
-        img_2_circle_ratio = main_presenter.get_2d_circle_ratio(img_2_path,  masked_ceremics_2)
+    
       
 
 
@@ -66,8 +61,7 @@ class MeasurePixelsDataMixin(
             light_ima_2,
             img_1_width_length,
             img_2_width_length,
-            img_1_circle_ratio,
-            img_2_circle_ratio,
+
         )
 
     def measure_pixels_3d(self, i):
@@ -81,12 +75,12 @@ class MeasurePixelsDataMixin(
 
         color_brightness_3d = main_view.brightnesses_3d[i][0][3]
         color_brightness_std_3d = main_view.brightnesses_3d[i][0][-1]
-        all_3d_area_circle_ratio = main_view.circle_ratios_3d[i][0]
+   
 
         return (
             _3d_area,
             _3d_color,
-            all_3d_area_circle_ratio,
+            0,
             width_length_3d,
             color_brightness_3d,
             color_brightness_std_3d,

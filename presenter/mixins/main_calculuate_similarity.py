@@ -16,20 +16,12 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         print(main_view.weights)
         for _threeple in similarities_list:
             vals = _threeple[0]
-            """
-            
-                           "area_similarity": area_similarity,
-                "brightness_similarity": brightness_similarity,
-                "brightness_std_similarity": brightness_std_similarity,
-                "width_length_similarity": width_length_similarity,
-                "area_circle_similarity": area_circle_similarity,
-                "extra_similarities": extra_similarities
-            """
+ 
             weighted_mean =  (vals["area_similarity"] * main_view.weights["area_similarity"] +  
                             vals["brightness_similarity"] * main_view.weights["brightness_similarity"]  +  
                             vals["brightness_std_similarity"] * main_view.weights["brightness_std_similarity"]  + 
                              vals["width_length_similarity"] * main_view.weights["width_length_similarity"]+  
-                             vals["area_circle_similarity"] * main_view.weights["area_circle_similarity"] 
+                            
                          +  vals["extra_similarities"] * main_view.weights["extra_similarities"] 
                             )
 
@@ -76,7 +68,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-        area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length, img_1_circle_ratio,  img_2_circle_ratio = self.measure_pixels_2d(img_1_path, img_2_path)
+        area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length= self.measure_pixels_2d(img_1_path, img_2_path)
         similarity_scores = []
         
         img_identifier =  (int(Path(image_path).parts[-2]) - 1)
@@ -103,9 +95,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 img_1_width_length[1],
                 img_2_width_length[0],
                 img_2_width_length[1],
-                img_1_circle_ratio,
-                img_2_circle_ratio,
-                all_3d_area_circle_ratio,
+
                 img_identifier,
                 ply_identifier
             )
@@ -131,9 +121,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         _first_pic_side_2,
         _second_pic_side_1,
         _second_pic_side_2,
-        img_1_circle_ratio,
-        img_2_circle_ratio,
-        all_3d_area_circle_ratio,
+ 
         img_identifier,
         ply_identifier
     ):
@@ -174,13 +162,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             parameters["length"]["slope"],
             parameters["length"]["intercept"],
         )
-        area_circle_similarity = main_presenter.get_area_circle_similarity(
-            img_1_circle_ratio,
-            img_2_circle_ratio,
-            all_3d_area_circle_ratio,
-            0.9055558282782922,
-            0.03996414943733839,
-        )
+ 
         extra_similarities = main_presenter.get_similarity_two_nums(img_identifier, ply_identifier)
 
         similarities = {
@@ -188,7 +170,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 "brightness_similarity": brightness_similarity,
                 "brightness_std_similarity": brightness_std_similarity,
                 "width_length_similarity": width_length_similarity,
-                "area_circle_similarity": area_circle_similarity,
+             
                 "extra_similarities": extra_similarities
         } 
         return similarities

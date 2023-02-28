@@ -6,75 +6,7 @@ import numpy as np
 import smallestenclosingcircle
  
 class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
-
-    def get_3d_area_circle_ratio(self, _3d_object_path) -> float:
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        area_in_pixels= main_presenter.get_3d_object_area_in_pixels(_3d_object_path)
-        circle_in_pixels = main_presenter.get_3d_object_circle_in_pixels(_3d_object_path)
-        return area_in_pixels/circle_in_pixels
-
-        
-    def get_3d_object_area_in_pixels(self, _3d_object_path) -> int:
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        
-        current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        main_view.ply_window.add_geometry(current_pcd_load)
-        ctr = main_view.ply_window.get_view_control()
-        ctr.change_field_of_view(step=-9)
-        object_image = main_view.ply_window.capture_screen_float_buffer(True)
-        object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
-  
-        object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))    
-        pixel_counts = (np.count_nonzero(object_image_array_object_locations))
-   
-
-        main_view.ply_window.remove_geometry(current_pcd_load)
-        del ctr
-        
-        return pixel_counts
-
-
-
-    def get_3d_object_circle_in_pixels(self, _3d_object_path):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-      
-        current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
-        main_view.ply_window.add_geometry(current_pcd_load)
-        ctr = main_view.ply_window.get_view_control()
-        ctr.change_field_of_view(step=-9)
-        object_image = main_view.ply_window.capture_screen_float_buffer(True)
-        object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8) 
-     
-        _1_white_other_0 = (~((object_image_array[:, :, 0] == 255 ) & (object_image_array[:, :, 1] == 255 )& (object_image_array[:, :, 2] == 255))).astype(int)
-       
-        
-    
-        k = np.ones((3,3),dtype=int)
-        boundary_array = binary_dilation(_1_white_other_0==0, k) & _1_white_other_0
-        #Here we get the x, y coordinates of the boundary(which is the non zeros values of the 2d array)
-        nonzeros_x_ys = np.nonzero(boundary_array)
-        #Tuples of all indices of the boundary
-        indices_tuples = list(zip(nonzeros_x_ys[0], nonzeros_x_ys[1]))
-        #Below is a nested O(n^2) for loop that gets
-        new_li = []
-        threshold = 100
-        for i in range(len(indices_tuples)): #For each of the tuple, compared it to all the tuples added before, if they are close in distance, don't add to it.
-            addable = True
-            for pairs in new_li:
-                if( (pairs[0] - indices_tuples[i][0])**2  +  (pairs[1] - indices_tuples[i][1])**2  < threshold):
-                    addable = False
-                    break
-            if(addable == True):
-                new_li.append(indices_tuples[i])
-        center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
-        main_view.ply_window.remove_geometry(current_pcd_load)
-
-        del ctr
-        return (radius**2 ) * 3.1416
-   
+ 
 
     def get_3d_object_area_and_width_length(self, _3d_object_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -205,7 +137,4 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         del ctr
         return (float(r_mean), float(g_mean), float(b_mean))
  
-    def get_hamming_hash_from_3d(self, path):
-
  
-        return 0

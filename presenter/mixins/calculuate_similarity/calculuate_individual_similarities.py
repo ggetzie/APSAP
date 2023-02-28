@@ -5,30 +5,7 @@ import numpy as np
 import time
 class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the model(data)
    
-    def get_area_circle_similarity(
-        self,
-        img_1_circle_ratio,
-        img_2_circle_ratio,
-        all_3d_area_circle_ratio,
-        a,
-        b,
-    ):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if main_presenter.get_similarity_two_nums(
-            img_1_circle_ratio, all_3d_area_circle_ratio
-        ) > main_presenter.get_similarity_two_nums(
-            img_2_circle_ratio, all_3d_area_circle_ratio
-        ):
- 
-            return main_presenter.get_similarity_two_nums(
-                img_2_circle_ratio * a + b, all_3d_area_circle_ratio
-            )
-        else:
- 
-            return main_presenter.get_similarity_two_nums(
-                img_1_circle_ratio * a + b, all_3d_area_circle_ratio
-            )
-
+  
 
     def get_similarity_two_nums(self, a, b):  # a, b >
 

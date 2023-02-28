@@ -43,11 +43,10 @@ class LoadPlys:
                 path = piece[1]
                
                 #Either calculaute the info of the ply file or get it form cache
-                (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context, cirlcle_area_ratio) = self.load_ply_info_from_cache_or_calc(path, index)
+                (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context) = self.load_ply_info_from_cache_or_calc(path, index)
               
                 #Add all thosecalculuated data of rhe current piece into the lists so that it can, later, be used for similarity calculuation
                 main_view.colors_3d.append(colors_summary)    
-                main_view.circle_ratios_3d.append([cirlcle_area_ratio, batch_num, piece_num])
                 main_view.areas_3d.append([area, batch_num, piece_num])
                 main_view.brightnesses_3d.append([brightness_3d, batch_num, piece_num])
                 main_view.width_lengths_3d.append([width_length_summary, batch_num, piece_num])
@@ -92,7 +91,7 @@ class LoadPlys:
             current_item = main_model.path_info_dict[path]
             (
                 batch_num, piece_num, brightness_3d, colors_summary,
-                width_length_summary, area, index, context, cirlcle_area_ratio,
+                width_length_summary, area, index, context
             ) = self.get_3d_model_info(current_item)
 
         #calculuate the data of the ply, also saves it in to the json object
@@ -106,16 +105,19 @@ class LoadPlys:
             
             batch_num = m.group(1)
             piece_num = m.group(2)
-
-        
-            brightness_3d = list(main_presenter.get_brightnesses_3d(path))                
+            import time
+            now = time.time()
+            brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
+            print(f"It takes {time.time() - now} seconds to get brightness_3d")            
             colors_summary = list(main_presenter.get_color_summary_from_3d(path))
             (
                 area,
                 width_length_summary,
             ) = main_presenter.get_3d_object_area_and_width_length(path)
+            print(f"It takes {time.time() - now} seconds to get area and widthlength 3d")            
 
-            cirlcle_area_ratio = main_presenter.get_3d_area_circle_ratio(path)
+            
+
             width_length_summary = list(width_length_summary)
             context = main_view.context_cb.currentText()
             zone = main_view.zone_cb.currentText()
@@ -125,7 +127,7 @@ class LoadPlys:
             
             temp = {
                 "path": path, "index": index, "batch_num": batch_num, "piece_num": piece_num,
-                "cirlcle_area_ratio": cirlcle_area_ratio, "brightness_summary": brightness_3d,
+                 "brightness_summary": brightness_3d,
                 "colors_summary" : colors_summary, "area": area, "width_length_summary": width_length_summary,
                 "context":context, "zone":zone, "hemisphere": hemisphere, "utm_easting": utm_easting,"utm_northing": utm_northing
             }
@@ -133,7 +135,7 @@ class LoadPlys:
 
             main_model.json_data["past_records"].append(temp)
 
-        return (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context, cirlcle_area_ratio)
+        return (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context)
 
 
 
@@ -172,7 +174,6 @@ class LoadPlys:
         main_view.brightnesses_3d = []
         main_view.colors_3d = []
         main_view.width_lengths_3d = []
-        main_view.circle_ratios_3d = []
 
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
@@ -183,7 +184,7 @@ class LoadPlys:
         area = current_item["area"]
         index = current_item["index"]
         context = current_item["context"]
-        cirlcle_area_ratio = current_item["cirlcle_area_ratio"]
+       
         return (
             batch_num,
             piece_num,
@@ -193,7 +194,7 @@ class LoadPlys:
             area,
             index,
             context,
-            cirlcle_area_ratio,
+            
         )
 
     def get_matched_plys(self, _3d_model_dict):

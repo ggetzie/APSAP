@@ -20,13 +20,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         cm_squared = mm_squared / 100 
         return cm_squared
         
-    def get_2d_circle_ratio(self, _2d_object_path , masked_ceremics = None) -> float:
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        area_in_pixels= main_presenter.get_2d_area_by_pixels(_2d_object_path, main_presenter.ceremic_predictor, masked_ceremics )
-        circle_in_pixels = main_presenter.get_2d_enclosing_circle_area(_2d_object_path, main_presenter.ceremic_predictor, masked_ceremics)
-        return area_in_pixels/circle_in_pixels
-
+ 
     def get_mask_pixel_width(self, image):
         #Turned the color_grid mask into numpy array
         np_array = (np.array(image))
@@ -92,43 +86,5 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
         std = np.std(pixels_sorted)
         return (int(max_),int(min_),int(median), (mean),int(upper_q), int(lower_q), (std))
-    
-    def get_2d_area_by_pixels(self, image_path, predictor, masked_ceremics = None):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if not masked_ceremics:
-            image = main_model.open_image(image_path, full_size=False)
-            masked_ceremics = predictor.predict(image)
-
-        mask_array = np.array(masked_ceremics)
-        pixels = np.nonzero(mask_array)
-        pixel_area = len(pixels[0])
-        return pixel_area
-
-        
-    def get_2d_enclosing_circle_area(self, image_path, predictor, masked_ceremics):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if not masked_ceremics:
-            image = main_model.open_image(image_path, full_size=False)
-            masked_ceremics = predictor.predict(image)
-        mask_array = np.array(masked_ceremics)
-        #Here using a technique to leave out only the points of the object consisting of the boundary, so that we have much fewer points to handle
-        k = np.ones((3,3),dtype=int)
-        boundary_array = binary_dilation(mask_array==0, k) & mask_array
-        #Here we get the x, y coordinates of the boundary(which is the non zeros values of the 2d array)
-        nonzeros_x_ys = np.nonzero(boundary_array)
-        #Tuples of all indices of the boundary
-        indices_tuples = list(zip(nonzeros_x_ys[0], nonzeros_x_ys[1]))
-        #Below is a nested O(n^2) for loop that gets
-        new_li = []
-        threshold = 100
-        for i in range(len(indices_tuples)): #For each of the tuple, compared it to all the tuples added before, if they are close in distance, don't add to it.
-            addable = True
-            for pairs in new_li:
-                if( (pairs[0] - indices_tuples[i][0])**2  +  (pairs[1] - indices_tuples[i][1])**2  < threshold):
-                    addable = False
-                    break
-            if(addable == True):
-                new_li.append(indices_tuples[i])
-        center_x, center_y, radius = smallestenclosingcircle.make_circle(new_li)
-        return (radius**2 ) * 3.1416
+ 
  

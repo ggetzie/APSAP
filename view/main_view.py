@@ -42,26 +42,21 @@ class MainView(QMainWindow, PlyWindowMixin):
     def initialize_feature_weights(self):
         main_view = self
 
-        initial_weights = {'area_similarity': 1.0, 'brightness_similarity': 0.84, 'brightness_std_similarity': 0.21, 'width_length_similarity': 0.46, 'area_circle_similarity': 0.39, 'extra_similarities': 0.08}
+        initial_weights = {'area_similarity': 1.0, 'brightness_similarity': 0.84, 'brightness_std_similarity': 0.21, 'width_length_similarity': 0.46,   'extra_similarities': 0.08}
         main_view.areaSlider.setValue(initial_weights["area_similarity"]*100)
         main_view.brightnessSlider.setValue(initial_weights["brightness_similarity"]*100)
         main_view.brightnessStdSlider.setValue(initial_weights["brightness_std_similarity"]*100)
         main_view.widthLengthSlider.setValue(initial_weights["width_length_similarity"]*100)
-        main_view.areaCircleSlider.setValue(initial_weights["area_circle_similarity"]*100)
         main_view.identifierSlider.setValue(initial_weights["extra_similarities"]*100)
     def get_features_weights(self):
         main_view = self
-        """
-        {'area_similarity': 1.0, 'brightness_similarity': 0.84, 'brightness_std_similarity': 0.21, 'width_length_similarity': 0.46, 'area_circle_similarity': 0.39, 'extra_similarities': 0.08}
-        
-        
-        """
+ 
         weights = {
                 "area_similarity": int(main_view.areaSlider.value())/100 ,
                 "brightness_similarity": int(main_view.brightnessSlider.value())/100,
                 "brightness_std_similarity": int(main_view.brightnessStdSlider.value())/100,
                 "width_length_similarity" : int(main_view.widthLengthSlider.value())/100,
-                "area_circle_similarity": int(main_view.areaCircleSlider.value())/100,
+                
                 "extra_similarities": int(main_view.identifierSlider.value())/100
         }
         main_view.weights = weights

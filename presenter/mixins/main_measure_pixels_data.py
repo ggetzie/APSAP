@@ -28,7 +28,6 @@ class MeasurePixelsDataMixin(
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         #Here let's get the ceremic and color grid here at once, that takes
-        now = time.time()
         image_1 = main_model.open_image(img_1_path, full_size=False)
 
         masked_ceremics_1 = main_presenter.ceremic_predictor.predict(image_1)
@@ -38,7 +37,6 @@ class MeasurePixelsDataMixin(
         masked_ceremics_2 = main_presenter.ceremic_predictor.predict(image_2)
         mask_grid_2 = main_presenter.colorgrid_predictor.predict(image_2)
 
-        print(f"nn works: {time.time() - now}")
         area_img_1 = main_presenter.get_2d_area(img_1_path, masked_ceremics_1, mask_grid_1)
         area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)
        

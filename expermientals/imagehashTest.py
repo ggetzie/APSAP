@@ -184,7 +184,6 @@ for item in packed_2d_3d:
     "model_summa" : get_lumance_summary_3d(item["model"])
     }
     summaries_rows.append(summaries)
-    print(f"It takes {time.time() - now} seconds for this row")
     print(summaries)
     print()
 with open('summaries.json', 'w') as f:

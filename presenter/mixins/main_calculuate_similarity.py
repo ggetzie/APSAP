@@ -10,13 +10,31 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
 
 
     def genereate_similiarity_ranked_pieces(self, similarities_list):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()    
 
         grand_similarity = []
-    
+        print(main_view.weights)
         for _threeple in similarities_list:
             vals = _threeple[0]
+            """
+            
+                           "area_similarity": area_similarity,
+                "brightness_similarity": brightness_similarity,
+                "brightness_std_similarity": brightness_std_similarity,
+                "width_length_similarity": width_length_similarity,
+                "area_circle_similarity": area_circle_similarity,
+                "extra_similarities": extra_similarities
+            """
+            weighted_mean =  (vals["area_similarity"] * main_view.weights["area_similarity"] +  
+                            vals["brightness_similarity"] * main_view.weights["brightness_similarity"]  +  
+                            vals["brightness_std_similarity"] * main_view.weights["brightness_std_similarity"]  + 
+                             vals["width_length_similarity"] * main_view.weights["width_length_similarity"]+  
+                             vals["area_circle_similarity"] * main_view.weights["area_circle_similarity"] 
+                         +  vals["extra_similarities"] * main_view.weights["extra_similarities"] 
+                            )
+
             grand_similarity.append(
-                [[ tmean(vals)], _threeple[1], _threeple[2]]
+                [[ weighted_mean], _threeple[1], _threeple[2]]
             )
         return grand_similarity
 
@@ -41,8 +59,8 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 batches_dict[batch_num] += 1
         return batches_dict
 
-    def get_ply_identifier(self, batch_num, piece_num):
-        batch_details = self.get_batch_details()
+    def get_ply_identifier(self, batch_num, piece_num, batch_details):
+        
         maximum = max(batch_details.keys())
         minimum = min(batch_details.keys())
         identifier = 0
@@ -58,18 +76,17 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-        now = time.time()
         area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length, img_1_circle_ratio,  img_2_circle_ratio = self.measure_pixels_2d(img_1_path, img_2_path)
-        print(f"It takes {time.time()- now } to get measure")
         similarity_scores = []
-        img_identifier = 0 # (int(Path(image_path).parts[-2]) - 1)
+        
+        img_identifier =  (int(Path(image_path).parts[-2]) - 1)
       
-
-        now = time.time()     
+        batch_details = self.get_batch_details()
         for i in range(len(main_view.areas_3d)):
             _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
-            ply_identifier = 0 # self.get_ply_identifier(batch_num, piece_num )
-        
+
+            ply_identifier =  self.get_ply_identifier(batch_num, piece_num, batch_details )
+
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
@@ -166,16 +183,13 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         )
         extra_similarities = main_presenter.get_similarity_two_nums(img_identifier, ply_identifier)
 
-        similarities = np.array(
-            [
-                area_similarity,
-                brightness_similarity,
-                brightness_std_similarity,
-                width_length_similarity,
-                area_circle_similarity,
-                extra_similarities
-            ]
-        )
-        
+        similarities = {
+                "area_similarity": area_similarity,
+                "brightness_similarity": brightness_similarity,
+                "brightness_std_similarity": brightness_std_similarity,
+                "width_length_similarity": width_length_similarity,
+                "area_circle_similarity": area_circle_similarity,
+                "extra_similarities": extra_similarities
+        } 
         return similarities
    

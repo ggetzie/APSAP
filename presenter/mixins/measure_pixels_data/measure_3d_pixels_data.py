@@ -60,8 +60,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
                 
         ply_window.get_render_option().point_size = 5
         red_box_image = ply_window.capture_screen_float_buffer(True)
- 
-
+  
         red_box_image_array = np.multiply(np.array(red_box_image), 255).astype(np.uint8)
         red_box_mid_y = red_box_image_array.shape[0]
 
@@ -70,8 +69,11 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         red_box_middle_row_red_locations = ~((red_box_middle_row[:,0] == 255) & (red_box_middle_row[:,1] == 255)  & (red_box_middle_row[:,2] == 255))
         red_box_red_locations = np.where(red_box_middle_row_red_locations)[0]
         #Here we get the pixel to cm ratio
-        pixels_difference = (red_box_red_locations[2] - red_box_red_locations[1] ) #* 0.9
-        
+        if(len(red_box_red_locations)>=4):
+
+            pixels_difference = (red_box_red_locations[2] - red_box_red_locations[1] ) #* 0.9
+        else :
+            pixels_difference = (red_box_red_locations[1] - red_box_red_locations[0] ) #* 0.9
         return  pixels_difference
 
     def get_brightnesses_3d (self, model_path):
@@ -102,39 +104,4 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         del ctr
         std = np.std(pixels_sorted)
         return (max_,min_,median, mean,upper_q, lower_q, std)
-        
-    def get_color_summary_from_3d (self, model_path):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        
-        ply_window = main_view.ply_window
-        current_pcd_load = o3d.io.read_point_cloud(model_path) 
-        
-        ply_window.add_geometry(current_pcd_load)
-        ctr = ply_window.get_view_control()
-            
-        ply_window.get_render_option().point_size = 5
-
-        ctr.change_field_of_view(step=-9)
-        object_image = ply_window.capture_screen_float_buffer(True)
-        
-        pic =  np.multiply(np.array(object_image), 255) 
-        
-    
-        all_channels_not_255 =~ (( pic[:, :, 0] == 255. ) &  (pic[:, :, 1 ] == 255. )  & (pic[:, :, 2] == 255. ) )
-        pixels_color =  pic[all_channels_not_255] 
-    
-    
-        r = pixels_color[:, 0]
-        g = pixels_color[:, 1]
-        b = pixels_color[:, 2]
-        
-        r_mean = np.mean(r)
-        g_mean = np.mean(g)
-        b_mean = np.mean(b)
-    
-        ply_window.remove_geometry(current_pcd_load)
-        del ctr
-        return (float(r_mean), float(g_mean), float(b_mean))
- 
  

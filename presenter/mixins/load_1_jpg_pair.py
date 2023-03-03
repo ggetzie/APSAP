@@ -80,7 +80,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
  
         old_flat_similairy_list = []
         flat_simllarity_list = main_presenter.get_similaritiy_scores(
-            find_num, _2d_image_path
+             _2d_image_path
         )
      
         flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(

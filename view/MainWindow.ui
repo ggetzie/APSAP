@@ -1138,6 +1138,44 @@
      <string>Update Weights</string>
     </property>
    </widget>
+   <widget class="QLabel" name="statusLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>671</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Status</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="operationLabel">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>30</y>
+      <width>251</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Not doing operation</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
    <zorder>tabWidget</zorder>
    <zorder>frame</zorder>
    <zorder>layoutWidget</zorder>
@@ -1172,6 +1210,8 @@
    <zorder>widthLengthLabel</zorder>
    <zorder>identifierLabel</zorder>
    <zorder>update_weights_button</zorder>
+   <zorder>statusLabel_2</zorder>
+   <zorder>operationLabel</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

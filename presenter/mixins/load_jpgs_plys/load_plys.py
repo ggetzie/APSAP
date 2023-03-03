@@ -39,20 +39,19 @@ class LoadPlys:
             pieces = batched_models[batch]
             #Go through each piece of the current batch
             for piece in pieces:
-                index = piece[0]
+                piece_num = piece[0]
                 path = piece[1]
                
                 #Either calculaute the info of the ply file or get it form cache
-                (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context) = self.load_ply_info_from_cache_or_calc(path, index)
+                (batch_num, piece_num, brightness_3d, width_length_summary, area,   context) = self.load_ply_info_from_cache_or_calc(path)
               
                 #Add all thosecalculuated data of rhe current piece into the lists so that it can, later, be used for similarity calculuation
-                main_view.colors_3d.append(colors_summary)    
                 main_view.areas_3d.append([area, batch_num, piece_num])
                 main_view.brightnesses_3d.append([brightness_3d, batch_num, piece_num])
                 main_view.width_lengths_3d.append([width_length_summary, batch_num, piece_num])
                
                 #Create a piece q item later for use
-                modelPiece = QStandardItem(f"{index}")
+                modelPiece = QStandardItem(f"{piece_num}")
                 modelPiece.setData(f"{path}", Qt.UserRole)
                
                 #Set the color of the item to be red if it already had a match before
@@ -82,7 +81,7 @@ class LoadPlys:
 
 
  
-    def load_ply_info_from_cache_or_calc(self, path, index):
+    def load_ply_info_from_cache_or_calc(self, path):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
         #If we have the data in cache, we don't need to calculuate it
@@ -90,8 +89,8 @@ class LoadPlys:
             print(path)
             current_item = main_model.path_info_dict[path]
             (
-                batch_num, piece_num, brightness_3d, colors_summary,
-                width_length_summary, area, index, context
+                batch_num, piece_num, brightness_3d, 
+                width_length_summary, area,  context
             ) = self.get_3d_model_info(current_item)
 
         #calculuate the data of the ply, also saves it in to the json object
@@ -109,7 +108,7 @@ class LoadPlys:
             now = time.time()
             brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
             print(f"It takes {time.time() - now} seconds to get brightness_3d")            
-            colors_summary = list(main_presenter.get_color_summary_from_3d(path))
+        
             (
                 area,
                 width_length_summary,
@@ -126,16 +125,16 @@ class LoadPlys:
             utm_northing = main_view.northing_cb.currentText()
             
             temp = {
-                "path": path, "index": index, "batch_num": batch_num, "piece_num": piece_num,
+                "path": path,  "batch_num": batch_num, "piece_num": piece_num,
                  "brightness_summary": brightness_3d,
-                "colors_summary" : colors_summary, "area": area, "width_length_summary": width_length_summary,
+                  "area": area, "width_length_summary": width_length_summary,
                 "context":context, "zone":zone, "hemisphere": hemisphere, "utm_easting": utm_easting,"utm_northing": utm_northing
             }
     
 
             main_model.json_data["past_records"].append(temp)
 
-        return (batch_num, piece_num, brightness_3d, colors_summary, width_length_summary, area, index, context)
+        return (batch_num, piece_num, brightness_3d,  width_length_summary, area, context)
 
 
 
@@ -172,27 +171,24 @@ class LoadPlys:
 
         main_view.areas_3d = []
         main_view.brightnesses_3d = []
-        main_view.colors_3d = []
         main_view.width_lengths_3d = []
 
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
         piece_num = current_item["piece_num"]
         brightness_3d = current_item["brightness_summary"]
-        colors_summary = current_item["colors_summary"]
         width_length_summary = current_item["width_length_summary"]
         area = current_item["area"]
-        index = current_item["index"]
+        
         context = current_item["context"]
        
         return (
             batch_num,
             piece_num,
             brightness_3d,
-            colors_summary,
             width_length_summary,
             area,
-            index,
+        
             context,
             
         )

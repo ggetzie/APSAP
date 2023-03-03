@@ -21,7 +21,7 @@ class PlyWindowMixin:
 
         timer = QTimer(self)
         timer.timeout.connect(self.update_ply_window)
-        timer.start(10)
+        timer.start(1)
 
     def update_ply_window(self):
 

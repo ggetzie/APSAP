@@ -13,7 +13,8 @@ class InitialLoadMixin:
         self.file_root = Path(setting["FILE_ROOT"] )
         self.json_data = self.simple_get_json("./configs/cache.json")
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        self.path_info_dict = self.get_path_info_dict(self.json_data["past_records"])
+        temp = self.simple_get_json("saved__measurement_ply_data.json")
+        self.path_info_dict = self.get_path_info_dict(temp)
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
 

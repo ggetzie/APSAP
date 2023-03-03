@@ -63,7 +63,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         return identifier
         
 
-    def get_similaritiy_scores(self, index, image_path):
+    def get_similaritiy_scores(self,  image_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         img_1_path = image_path / "1.jpg"
@@ -75,7 +75,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
       
         batch_details = self.get_batch_details()
         for i in range(len(main_view.areas_3d)):
-            _3d_area, _3d_color, all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
+            _3d_area,  all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num = self.measure_pixels_3d(i)
 
             ply_identifier =  self.get_ply_identifier(batch_num, piece_num, batch_details )
 

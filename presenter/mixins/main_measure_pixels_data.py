@@ -70,7 +70,6 @@ class MeasurePixelsDataMixin(
         _3d_area = main_view.areas_3d[i][0]
         batch_num = main_view.areas_3d[i][1]
         piece_num = main_view.areas_3d[i][2]
-        _3d_color = main_view.colors_3d[i]
         width_length_3d = main_view.width_lengths_3d[i][0]
 
         color_brightness_3d = main_view.brightnesses_3d[i][0][3]
@@ -79,7 +78,7 @@ class MeasurePixelsDataMixin(
 
         return (
             _3d_area,
-            _3d_color,
+            
             0,
             width_length_3d,
             color_brightness_3d,

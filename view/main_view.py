@@ -24,7 +24,7 @@ class MainView(QMainWindow, PlyWindowMixin):
         main_view = self
         main_view.finds_list.currentItemChanged.connect(main_presenter.load_find_images)
         main_view.update_button.clicked.connect(main_presenter.add_match)
-        main_view.remove_button.clicked.connect(main_presenter.remove_match)
+        main_view.remove_button.clicked.connect(main_presenter.calculuate_all_jpgs)
         main_view.update_weights_button.clicked.connect(main_view.get_features_weights)
 
         main_view.hemisphere_cb.currentIndexChanged.connect(

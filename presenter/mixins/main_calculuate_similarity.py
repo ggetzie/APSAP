@@ -68,7 +68,19 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-        area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length= self.measure_pixels_2d(img_1_path, img_2_path)
+        if str(img_1_path) in main_model.path_info_dict and str(img_2_path) in main_model.path_info_dict:
+            print("Getting the jpg data from cache, skip calculating")
+            obj_img_1 =  main_model.path_info_dict[str(img_1_path)]
+            obj_img_2 =  main_model.path_info_dict[str(img_2_path)]
+            area_img_1 = obj_img_1["area_img_1"]
+            light_ima_1 = obj_img_1["light_ima_1"]
+            img_1_width_length = obj_img_1["img_1_width_length"]
+            area_img_2 = obj_img_2["area_img_2"]
+            light_ima_2 = obj_img_2["light_ima_2"]
+            img_2_width_length = obj_img_2["img_2_width_length"]   
+        else:
+            print("Calculuate the jpg data")
+            area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length= self.measure_pixels_2d(img_1_path, img_2_path)
         similarity_scores = []
         
         img_identifier =  (int(Path(image_path).parts[-2]) - 1)

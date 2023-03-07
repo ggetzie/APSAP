@@ -13,8 +13,10 @@ class InitialLoadMixin:
         self.file_root = Path(setting["FILE_ROOT"] )
         self.json_data = self.simple_get_json("./configs/cache.json")
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        temp = self.simple_get_json("saved__measurement_ply_data.json")
-        self.path_info_dict = self.get_path_info_dict(temp)
+        temp_ply= self.simple_get_json("./computation/saved__measurement_ply_data.json")
+        temp_jpg= self.simple_get_json("./computation/saved__measurement_jpg_data.json")
+
+        self.path_info_dict = self.get_path_info_dict(temp_ply, temp_jpg)
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
 
@@ -69,11 +71,27 @@ class InitialLoadMixin:
                 
         return False
 
-    def get_path_info_dict(self, past_records):
+    def get_path_info_dict(self, past_ply_records, past_jpg_records):
         #Calculuaterd paths have "path" as the key to "the path's object;s calculuated area, brigthness extra "'s value
         path_info_dict = dict()
         
-        for obj in past_records:
+        for obj in past_ply_records:
             path_info_dict[obj["path"]] = obj
-        
+        for obj in past_jpg_records:
+            if "img_1_path" in obj:
+
+                path_info_dict[obj["img_1_path"]] = {
+                    "area_img_1": obj["area_img_1"],
+                    "light_ima_1": obj["light_ima_1"],
+                    "img_1_width_length": obj["img_1_width_length"],
+                    "img_1_path": obj["img_1_path"]
+                }
+            elif "img_2_path" in obj:
+               
+                path_info_dict[obj["img_2_path"]] = {
+                    "area_img_2": obj["area_img_2"],
+                    "light_ima_2": obj["light_ima_2"],
+                    "img_2_width_length": obj["img_2_width_length"],
+                    "img_2_path": obj["img_2_path"]
+                } 
         return path_info_dict

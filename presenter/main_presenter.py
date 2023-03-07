@@ -18,6 +18,50 @@ class Mainpresenter(
     Display3dModelMixin,
 ):
 
+
+    def calculuate_all_jpgs(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        jpg_path_pairs = main_model.get_all_jpgs()
+        count = 0
+        validCount = 0
+        all_jpgs_measurements = []
+        for pair in jpg_path_pairs:
+            print(f"count: {count}")
+            print(f"validCount: {validCount}")
+            img_1_path = pair[0]
+            img_2_path = pair[1]
+            #
+            if count % 100 == 0:
+                print("saving")
+                self.main_model.simple_save_json(all_jpgs_measurements, f"saved__measurement_jpg_data.json")
+
+               
+            try:
+                area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length= self.measure_pixels_2d(img_1_path, img_2_path)
+
+                img_1_data = {
+                    "area_img_1": area_img_1,
+                    "light_ima_1": light_ima_1,
+                    "img_1_width_length": img_1_width_length,
+                    "img_1_path" : img_1_path,
+                }
+                all_jpgs_measurements.append(img_1_data)
+                img_2_data = {
+                    "area_img_2": area_img_2,
+                    "light_ima_2": light_ima_2,
+                    "img_2_width_length": img_2_width_length,
+                    "img_2_path" : img_2_path,
+                }
+                all_jpgs_measurements.append(img_2_data)
+                print(f"img_1_path: {img_1_path}")
+                print(f"img_2_path: {img_2_path}")
+                validCount += 1
+            except:
+                print("We faced an error!")
+            count +=1
+        self.main_model.simple_save_json(all_jpgs_measurements, f"saved__measurement_jpg_data{time.time()}.json")
+
     def calculuate_all_plys(self):
     
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -27,7 +71,7 @@ class Mainpresenter(
         pls_measurement = []
         actualConut = 0
         count = 0
-        tempjson = main_model.simple_get_json("saved__measurement_ply_data.json")
+        tempjson = main_model.simple_get_json("./computation/saved__measurement_ply_data.json")
         tempSet = set()
         for row in tempjson:
             if not row["path"] in tempSet:
@@ -87,7 +131,7 @@ class Mainpresenter(
                 except:
                     print(F"The path {path} doesn't work")
             count += 1
-        self.main_model.simple_save_json(pls_measurement, f"saved__measurement_ply_data{time.time()}.json")
+        self.main_model.simple_save_json(pls_measurement, f"./computation/saved__measurement_ply_data{time.time()}.json")
         print(path)
     def __init__(self, model, view):
 

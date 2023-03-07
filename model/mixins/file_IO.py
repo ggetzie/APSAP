@@ -67,3 +67,39 @@ class FileIOMixin:
                                         ply_paths.append(ply)
         return ply_paths
 
+    def get_all_jpgs(self):
+ 
+
+        jpg_paths = []
+        count = 0
+        for hemisphere_path in hemisphere_paths:
+            zone_paths = glob(str(PurePath(hemisphere_path)/"*"))
+        
+            for zone_path in zone_paths:
+                easting_paths = glob(str(PurePath(zone_path)/"*"))
+
+        
+                for easting_path in easting_paths:
+                    northing_paths = glob(str(PurePath(easting_path)/"*"))
+                    
+                    for northing_path in northing_paths:
+                        context_paths = glob(str(PurePath(northing_path)/"*"))
+                        
+                        for context_path in context_paths:
+                            finds_folder = PurePath(context_path)/"finds"
+                            individual_folder = finds_folder/"individual"
+                            individual_folders = glob(str(individual_folder/"*"))
+                            for indi_folder in individual_folders:
+                                photos_folder = (PurePath(indi_folder)/"photos")
+                                jpg_1 = photos_folder/"1.jpg"
+                                jpg_2 = photos_folder/"2.jpg"
+                                if glob(str(jpg_1)) and glob(str(jpg_2)):
+
+                                    jpg_paths.append([str(jpg_1), str(jpg_2)] )
+                                    if count % 100 == 0:
+                                        print(f"Got {count} jpg paths")
+                                    count += 1
+        return jpg_paths
+                                     
+                                    
+

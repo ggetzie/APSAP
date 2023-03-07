@@ -19,12 +19,24 @@ class MainView(QMainWindow, PlyWindowMixin):
         self.initialize_feature_weights()
         self.set_up_ply_window()
         self.get_features_weights()
+        self.findFrontPhoto_l.mousePressEvent = self.getPos
+      
+
+
+    def getPos(self , event):
+        x = event.pos().x()
+        y = event.pos().y() 
+        if self.findFrontPhoto_l.pixmap():
+            print(self.findFrontPhoto_l.pixmap().rect())
+        print(f"x is {x}")
+        print(f"y is {y}")
+
     def set_up_view_presenter_connection(self, main_presenter):
 
         main_view = self
         main_view.finds_list.currentItemChanged.connect(main_presenter.load_find_images)
         main_view.update_button.clicked.connect(main_presenter.add_match)
-        main_view.remove_button.clicked.connect(main_presenter.calculuate_all_jpgs)
+        main_view.remove_button.clicked.connect(main_presenter.remove_match)
         main_view.update_weights_button.clicked.connect(main_view.get_features_weights)
 
         main_view.hemisphere_cb.currentIndexChanged.connect(

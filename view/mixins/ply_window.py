@@ -22,7 +22,7 @@ class PlyWindowMixin:
         timer = QTimer(self)
         timer.timeout.connect(self.update_ply_window)
         timer.start(1)
-
+        
     def update_ply_window(self):
 
         self.ply_window.poll_events()

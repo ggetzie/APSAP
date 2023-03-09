@@ -101,12 +101,10 @@ class Mainpresenter(
             
                     now = time.time()
                     brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
-                    print(f"It takes {time.time() - now} seconds to get brightness_3d")            
                     (
                         area,
                         width_length_summary,
                     ) = main_presenter.get_3d_object_area_and_width_length(path)
-                    print(f"It takes {time.time() - now} seconds to get area and widthlength 3d")            
 
                     
 

@@ -7,7 +7,31 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow
 from view.mixins.ply_window import PlyWindowMixin
 from presenter.main_presenter import Mainpresenter
+from PIL import Image
+from random import randint
 
+from PyQt5.QtWidgets import (
+    QLabel,
+    QMainWindow,
+    QVBoxLayout,
+    QWidget,
+)
+from PyQt5.QtGui import QPixmap
+
+class AnotherWindow(QWidget):
+    """
+    This "window" is a QWidget. If it has no parent,
+    it will appear as a free-floating window.
+    """
+
+    def __init__(self, current_image_front):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.label = QLabel("Another Window % d" % randint(0, 100))
+        pixmap = QPixmap(current_image_front)
+        self.label.setPixmap(pixmap)
+        layout.addWidget(self.label)
+        self.setLayout(layout)
 
 class MainView(QMainWindow, PlyWindowMixin):
     """View (GUI)."""
@@ -19,8 +43,24 @@ class MainView(QMainWindow, PlyWindowMixin):
         self.initialize_feature_weights()
         self.set_up_ply_window()
         self.get_features_weights()
- 
+        self.wid = None
+        self.findFrontPhoto_l.mousePressEvent = self.open_image
+        self.findBackPhoto_l.mousePressEvent = self.open_image_back
 
+
+
+    def open_image(self , event):
+   
+        if self.findFrontPhoto_l.pixmap():
+            self.wid = AnotherWindow(self.current_image_front)
+            self.wid.show()
+    def open_image_back(self , event):
+   
+        if self.findBackPhoto_l.pixmap():
+            self.wid = AnotherWindow(self.current_image_back)
+            self.wid.show()
+    def start_window(self):
+        pass
     def set_up_view_presenter_connection(self, main_presenter):
 
         main_view = self

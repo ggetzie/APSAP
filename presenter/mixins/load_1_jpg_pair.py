@@ -9,6 +9,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
     def load_find_images(self, selected_item):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        now  = time.time()
         main_view.selected_find_widget = selected_item
         try:
             find_num = main_view.finds_list.currentItem().text()
@@ -39,11 +40,13 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 main_view.findFrontPhoto_l.width()
             )
         )
+        
         main_view.findBackPhoto_l.setPixmap(
             QPixmap.fromImage(back_photo).scaledToWidth(
                 main_view.findBackPhoto_l.width()
             )
         )
+        print(f"{time.time() - now} seconds have passed for setting picture")
         main_view.selected_find.setText(find_num)
         easting_northing_context = main_presenter.get_easting_northing_context()
         _3d_locations = main_view._3d_model_dict[
@@ -74,7 +77,8 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 main_view.ply_window.remove_geometry(main_view.current_pcd)
                 main_view.current_pcd = None
 
- 
+        print(f"{time.time() - now} seconds have passed for loading ply and miscs")
+
         _2d_image_path = photos_dir
       
  
@@ -121,9 +125,11 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             ply.setData(f"{whole_path}", Qt.UserRole)
 
             model.appendRow(ply)
+        print(f"{time.time() - now} seconds have passed for calculuating similarities")
 
         main_view.sorted_model_list.setModel(model)
 
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             main_presenter.change_3d_model
         )
+        print(f"{time.time() -  now } seconds have passed.")

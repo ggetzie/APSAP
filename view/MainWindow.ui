@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1100</width>
-    <height>910</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -29,12 +29,15 @@
    <iconset>
     <normaloff>../assets/icon.png</normaloff>../assets/icon.png</iconset>
   </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>0</y>
+      <y>20</y>
       <width>656</width>
       <height>68</height>
      </rect>
@@ -247,7 +250,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>70</y>
+      <y>100</y>
       <width>641</width>
       <height>30</height>
      </rect>
@@ -277,9 +280,9 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>120</y>
-      <width>71</width>
-      <height>431</height>
+      <y>140</y>
+      <width>70</width>
+      <height>390</height>
      </rect>
     </property>
     <property name="sizeIncrement">
@@ -330,7 +333,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>850</y>
+      <y>910</y>
       <width>671</width>
       <height>20</height>
      </rect>
@@ -349,14 +352,20 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>120</y>
+      <y>140</y>
       <width>258</width>
-      <height>431</height>
+      <height>391</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="findPhotosLayout">
      <item>
       <widget class="QLabel" name="findFrontPhoto_l">
+       <property name="maximumSize">
+        <size>
+         <width>256</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -375,7 +384,7 @@
     <property name="geometry">
      <rect>
       <x>630</x>
-      <y>120</y>
+      <y>140</y>
       <width>430</width>
       <height>390</height>
      </rect>
@@ -387,8 +396,8 @@
    <widget class="QLabel" name="selected_find">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>570</y>
+      <x>230</x>
+      <y>600</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -411,8 +420,8 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>570</y>
+      <x>100</x>
+      <y>600</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -457,8 +466,8 @@
    <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>570</y>
+      <x>330</x>
+      <y>600</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -497,8 +506,8 @@
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>570</y>
+      <x>540</x>
+      <y>600</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -535,7 +544,7 @@
     <property name="geometry">
      <rect>
       <x>680</x>
-      <y>540</y>
+      <y>580</y>
       <width>47</width>
       <height>14</height>
      </rect>
@@ -547,8 +556,8 @@
    <widget class="QFrame" name="frame_4">
     <property name="geometry">
      <rect>
-      <x>730</x>
-      <y>570</y>
+      <x>720</x>
+      <y>600</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -584,8 +593,8 @@
    <widget class="QLabel" name="current_piece">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>570</y>
+      <x>850</x>
+      <y>600</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -602,8 +611,8 @@
    <widget class="QFrame" name="frame_5">
     <property name="geometry">
      <rect>
-      <x>920</x>
-      <y>570</y>
+      <x>910</x>
+      <y>600</y>
       <width>161</width>
       <height>51</height>
      </rect>
@@ -639,8 +648,8 @@
    <widget class="QFrame" name="frame_6">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>670</y>
+      <x>540</x>
+      <y>700</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -676,8 +685,8 @@
    <widget class="QLabel" name="current_batch">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>570</y>
+      <x>660</x>
+      <y>600</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -694,8 +703,8 @@
    <widget class="QFrame" name="frame_7">
     <property name="geometry">
      <rect>
-      <x>730</x>
-      <y>670</y>
+      <x>720</x>
+      <y>700</y>
       <width>91</width>
       <height>51</height>
      </rect>
@@ -731,8 +740,8 @@
    <widget class="QLabel" name="new_batch">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>670</y>
+      <x>660</x>
+      <y>700</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -749,8 +758,8 @@
    <widget class="QLabel" name="new_piece">
     <property name="geometry">
      <rect>
-      <x>860</x>
-      <y>670</y>
+      <x>850</x>
+      <y>700</y>
       <width>31</width>
       <height>51</height>
      </rect>
@@ -767,8 +776,8 @@
    <widget class="QFrame" name="frame_8">
     <property name="geometry">
      <rect>
-      <x>920</x>
-      <y>670</y>
+      <x>910</x>
+      <y>700</y>
       <width>161</width>
       <height>51</height>
      </rect>
@@ -804,8 +813,8 @@
    <widget class="QPushButton" name="update_button">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>770</y>
+      <x>820</x>
+      <y>820</y>
       <width>221</width>
       <height>51</height>
      </rect>
@@ -823,13 +832,13 @@
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>100</y>
+      <y>140</y>
       <width>251</width>
-      <height>451</height>
+      <height>390</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -840,8 +849,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>251</width>
-        <height>431</height>
+        <width>250</width>
+        <height>360</height>
        </rect>
       </property>
      </widget>
@@ -855,8 +864,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>251</width>
-        <height>441</height>
+        <width>250</width>
+        <height>360</height>
        </rect>
       </property>
      </widget>
@@ -865,8 +874,8 @@
    <widget class="QPushButton" name="remove_button">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>770</y>
+      <x>550</x>
+      <y>820</y>
       <width>211</width>
       <height>51</height>
      </rect>
@@ -883,8 +892,8 @@
    <widget class="QSlider" name="areaSlider">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>660</y>
+      <x>90</x>
+      <y>690</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -905,8 +914,8 @@
    <widget class="QSlider" name="brightnessSlider">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>660</y>
+      <x>160</x>
+      <y>690</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -930,8 +939,8 @@
    <widget class="QSlider" name="brightnessStdSlider">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>660</y>
+      <x>230</x>
+      <y>690</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -949,8 +958,8 @@
    <widget class="QSlider" name="widthLengthSlider">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>660</y>
+      <x>300</x>
+      <y>690</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -968,8 +977,8 @@
    <widget class="QSlider" name="identifierSlider">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>660</y>
+      <x>370</x>
+      <y>690</y>
       <width>50</width>
       <height>60</height>
      </rect>
@@ -987,8 +996,8 @@
    <widget class="QLabel" name="areaLabel">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>740</y>
+      <x>90</x>
+      <y>770</y>
       <width>50</width>
       <height>20</height>
      </rect>
@@ -1012,8 +1021,8 @@
    <widget class="QLabel" name="brightnessLabel">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>740</y>
+      <x>160</x>
+      <y>770</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1039,8 +1048,8 @@
    <widget class="QLabel" name="brightnessStdLabel">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>740</y>
+      <x>230</x>
+      <y>770</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1063,8 +1072,8 @@
    <widget class="QLabel" name="widthLengthLabel">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>740</y>
+      <x>300</x>
+      <y>770</y>
       <width>50</width>
       <height>30</height>
      </rect>
@@ -1093,8 +1102,8 @@
    <widget class="QLabel" name="identifierLabel">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>740</y>
+      <x>370</x>
+      <y>770</y>
       <width>50</width>
       <height>20</height>
      </rect>
@@ -1123,8 +1132,8 @@
    <widget class="QPushButton" name="update_weights_button">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>790</y>
+      <x>140</x>
+      <y>820</y>
       <width>211</width>
       <height>51</height>
      </rect>
@@ -1136,44 +1145,6 @@
     </property>
     <property name="text">
      <string>Update Weights</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="statusLabel_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>671</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Status</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="operationLabel">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>30</y>
-      <width>251</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Not doing operation</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
     </property>
    </widget>
    <zorder>tabWidget</zorder>
@@ -1210,8 +1181,6 @@
    <zorder>widthLengthLabel</zorder>
    <zorder>identifierLabel</zorder>
    <zorder>update_weights_button</zorder>
-   <zorder>statusLabel_2</zorder>
-   <zorder>operationLabel</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -13,10 +13,10 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
 
         grand_similarity = []
-        print(main_view.weights)
+        
         for _threeple in similarities_list:
             vals = _threeple[0]
- 
+            main_view.weights = main_view.get_features_weights()
             weighted_mean =  (vals["area_similarity"] * main_view.weights["area_similarity"] +  
                             vals["brightness_similarity"] * main_view.weights["brightness_similarity"]  +  
                             vals["brightness_std_similarity"] * main_view.weights["brightness_std_similarity"]  + 

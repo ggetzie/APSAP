@@ -11,7 +11,6 @@ class InitialLoadMixin:
         self.request_path(main_view)
         setting = self.simple_get_json("./configs/settings.json")
         self.file_root = Path(setting["FILE_ROOT"] )
-        self.json_data = self.simple_get_json("./configs/cache.json")
         self.parameters = self.simple_get_json("./configs/parameters.json")
         temp_ply= self.simple_get_json("./computation/saved__measurement_ply_data.json")
         temp_jpg= self.simple_get_json("./computation/saved__measurement_jpg_data.json")

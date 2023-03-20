@@ -717,7 +717,7 @@
             </font>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab">
             <attribute name="title">
@@ -1074,8 +1074,8 @@
         <widget class="QLabel" name="contextDisplay">
          <property name="minimumSize">
           <size>
-           <width>300</width>
-           <height>15</height>
+           <width>0</width>
+           <height>30</height>
           </size>
          </property>
          <property name="sizeIncrement">
@@ -1184,7 +1184,6 @@
      <string>Settings</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionColor_Calibration"/>
     <addaction name="actionWeights_Adjustments"/>
    </widget>
    <addaction name="menuSettings"/>

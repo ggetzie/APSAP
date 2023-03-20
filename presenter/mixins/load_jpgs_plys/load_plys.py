@@ -65,7 +65,6 @@ class LoadPlys:
             main_view.modelList.selectionModel().model().appendRow(model_batch)
        
     
-        main_model.simple_save_json(main_model.json_data, "./configs/cache.json")
  
     def reset_ply_selection_model(self):
         #Either create a model for the selection model instance, or remove all the rows in it
@@ -130,7 +129,6 @@ class LoadPlys:
             }
     
 
-            main_model.json_data["past_records"].append(temp)
 
         return (batch_num, piece_num, brightness_3d,  width_length_summary, area, context)
 

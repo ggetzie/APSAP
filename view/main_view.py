@@ -1,6 +1,6 @@
 import ctypes
 
-opengl_path = "./computation/opengl32.dll"
+opengl_path = r".\computation\opengl32.dll"
 ctypes.cdll.LoadLibrary(opengl_path)
  
 from view.mixins.ply_window import PlyWindowMixin

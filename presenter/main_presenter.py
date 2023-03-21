@@ -71,7 +71,7 @@ class Mainpresenter(
         pls_measurement = []
         actualConut = 0
         count = 0
-        tempjson = main_model.simple_get_json("./computation/saved__measurement_ply_data.json")
+        tempjson = main_model.simple_get_json(r".\computation\saved__measurement_ply_data.json")
         tempSet = set()
         for row in tempjson:
             if not row["path"] in tempSet:
@@ -129,7 +129,7 @@ class Mainpresenter(
                 except:
                     print(F"The path {path} doesn't work")
             count += 1
-        self.main_model.simple_save_json(pls_measurement, f"./computation/saved__measurement_ply_data{time.time()}.json")
+        self.main_model.simple_save_json(pls_measurement, rf".\computation\saved__measurement_ply_data{time.time()}.json")
         print(path)
     def __init__(self, model, view):
 

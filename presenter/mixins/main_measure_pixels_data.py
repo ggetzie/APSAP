@@ -17,8 +17,8 @@ class MeasurePixelsDataMixin(
 ):  
     def __init__(self, view, model):
 
-        self.ceremic_predictor = MaskPredictor("./computation/ceremicsmask.pt")
-        self.colorgrid_predictor = MaskPredictor("./computation/colorgridmask.pt")
+        self.ceremic_predictor = MaskPredictor(r".\computation\ceremicsmask.pt")
+        self.colorgrid_predictor = MaskPredictor(r".\computation\colorgridmask.pt")
  
         img = model.open_image("assets/reference_placeholder.png", full_size=False).convert('RGB')
 

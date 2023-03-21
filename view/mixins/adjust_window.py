@@ -1,24 +1,15 @@
-import sys
 from PyQt5 import uic, QtGui, QtCore
-from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow
  
 from presenter.main_presenter import Mainpresenter
-from PIL import Image
-from random import randint
-from PyQt5.QtWidgets import QMessageBox
-import sys
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+ 
 from PyQt5.QtWidgets import (
     QLabel,
     QMainWindow,
     QVBoxLayout,
     QWidget,
 )
-from PyQt5.QtGui import QPixmap
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtWidgets 
 
 class Adjust(QtWidgets.QWidget):
     def __init__(self):

@@ -8,20 +8,7 @@ This document clarifies the terms and methodology used in the ceramic sherd matc
 &nbsp;
 **Performance improvement**
 
-A provisional assessment of the performance of our matching algorithm has the following results:
-
->1.) We considered a total of 109 pairs of ceramic sherd jpegs. A total of 104 are valid(i.e. they have corresponding 3d models.\
->2.) In 64 out of 104 cases, the correct 3d model is on the top of the similarity list.\
->3.) In 85 out of 104 cases, the correct 3d model is on the top 3 of the similarity list.\
->4.) In 93 out of 104 cases, the correct 3d model is on the top 5 of the similarity list.\
->5.) In 100 out of 104 cases, the correct 3d model is on the top 10 of the similarity list.
-
-
-We consider this as significant improvement. as the chance of a random matching algorithm having a correct prediction is 1/104 = 0.96% of matching when our method yields 64 /104 = 61.5%, a dramatic improvement of performance. The performance increase is similarly significant when we consider the top-n similarity list.
-
-Consider the case of matching 100 pairs of sherd jpegs with 100 3d models. Without a similarity list, one has to go through the 3d models randomly to find the 3d model matched for a certain pair of jpegs. A naive estimate of the number of models one has to go through to find the correct one is 100/2 = 50 on average. With 100 jpegs, one has to check models for a 50 * 100 = 5000 times. Using our method, a naive estimation of the number of times of going through the model is 64 * 1 + (85-64 ) * 3 + (93 - 85) * 5 + (100 - 93) * 10 + (104 - 100) * 20 = 317 (assuming it takes 20 times of checking the models on average for the worst cases). 
-
-In order to achieve this performance, the most important thing is to get the information of the ceramic sherds from the 3d models or 2d jpegs. But to do that, one has to isolate the sherd pixels from the images so that we can analyze the information of the pixels. To isolate the sherd pixels, we need to use neural networks.  
+Initially, we just optimised the application
 
 &nbsp;
 **Using neural network to get sherd pixels in a 2d jpg**
@@ -146,14 +133,7 @@ Last but not least, we calculate the difference between the color pixels of the 
 
 **Putting the things together**
 
-Given all the information, we calculate a total similarity score between a ceramic sherd’s jpegs with a 3d model by using this linear formula.
-
-> **Total similarity** = 90 \* area\_similarity + 65 \* brightness\_similarity + 40 \* bounding\_box\_similarity + 5 \*
-
-brightness\_std\_similarity + 0.15 \* color\_similarity
-
-The lower the total similarity score is, the more similar the 3d model is to the jpegs. Thus we have a sorted list of 3d models from the most likely to the least likely. This is the key to the acceleration afforded by this application.
-
+ 
 ![image](https://user-images.githubusercontent.com/90679381/209052074-ea76298f-1b5e-4e29-97ed-00b7318bcb54.png)
 
 <sub>
@@ -161,5 +141,4 @@ Figure 7.
 The 3d models are sorted for each set of jpegs. Notice exactly the first model in the list is the one matching the 2d jpegs, on this occasion, it takes simply 5 seconds to confirm this model then we can check the next ceramic sherd. If we don’t have this sorted list, we may need to check 50 models before we find it.
 </sub>
 &nbsp;
-
-It is highly unlikely the underlying relationship between the individual similarity scores and actual similarity score is a linear one. But this formula is easy to understand and tweak. It also offers really good results. Currently, the factors by which the individual similarities multiply are tested by hand. As a result, an possible improvement in the future is to use machine learning or linear regressions to gauge a set of more accurate values.
+ 

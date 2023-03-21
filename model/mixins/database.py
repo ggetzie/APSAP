@@ -111,8 +111,8 @@ class DatabaseMixin:
                 if batch_number == new_batch_num and sherd_number == new_sherd_num:
                     pass
                 else:
-                    # print("updating...")
-                    # print(batch_number, batch_number)
+                    print("Updating...")
+                    print(batch_number, batch_number)
                     cursor.execute(
                         query_update,
                         (
@@ -125,7 +125,7 @@ class DatabaseMixin:
                         ),
                     )
                     updated_rows = cursor.rowcount
-                    # print(updated_rows)
+                    print("Updated")
                     if updated_rows <= 1:
                         conn.commit()
 
@@ -134,6 +134,5 @@ class DatabaseMixin:
         finally:
             if conn:
                 cursor.close()
-                #conn.close()
-                # print("PostgreSQL connection is closed")
+
     

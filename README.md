@@ -1,8 +1,13 @@
 # Ceramic Sherd Matcher
 
 ## Getting Started
+As the program is now situated in the directory "E:\tools\APSAP", a separation installation is not necessary.
 
- 
+To run the program, simply click the "run.bat" file in "E:\tools\APSAP". 
+
+You can right click to send the file as a shortcut to the desktop to save time.
+
+## (Optional) Installation from scratch
 Create a conda environment installed with Python 3.9 and activate it
 ```
 conda create -n APSAP python=3.9

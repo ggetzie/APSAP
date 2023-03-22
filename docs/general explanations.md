@@ -5,18 +5,22 @@
 
 This document clarifies the terms and methodology used in the ceramic sherd matching application. Our ceramic matching algorithm works in the following way. 
 
-- 0: A picture, whether it is 2d or 3d, contains information. This application considers area, brightness, brightness std, width length and identifier as the necessary information for a decent matching result.
-- 1: In advance, the application already calculuated such information for a considerable number of jpgs and plys. 
-- 2: Given each set of jpegs(front and back), we can compare it with all the plys at the current  
- 
+- A picture, whether it is 2d or 3d, contains information. This application considers area, brightness, brightness std, width length and identifier as the necessary information for a decent matching result.
+- In advance, the application already calculuated such information for a considerable number of jpgs and plys. 
+- Given each set of jpegs(front and back), we can compare it with all the plys of the current batch, referencing their information. 
+- Each 3d model, then, will have a score, signifiying its similaritiy with the sherd detected in the pair of jpgs. 
+- By sorting the 3d models using this score, the more similiar the 3d model is to the current jpegs, the higher it is on the list. 
+
+By finding the 3d models one by one from the sorted list, the speed of matching drastically increased. To understand how the software works, we need to understand open3d and mask-rcnn, which are used to get information of jpgs and plys.
 
 &nbsp;
-**Using neural network to get sherd pixels in a 2d jpg**
+
+**Using neural network to get information from a jpg**
 
 Mask-rcnn is a neural network framework used to create neural networks that can detect 'masks' for objects in a picture. Suppose you have a picture of sheep in a farm, a trained Mask-rcnn neural network can highlight all the sheep as red in the picture, thus detecting where the sheep are in the picture. We trained a sherd-detector with around 200 training samples, that is able to accurately estimate the pixel locations of the ceramic sherd. Our application relies on the deep learning library Pytorch. 
 
 
-With our sherd-detector, we can detect the pixels within a jpg that belongs to the ceramic sherd, thus we will be able to get its info. In each comparison, we calculate the information of two jpegs belonging to one ceramic sherds, with hundred(s) of 3d models. To save time, neural networks are only used to analyze the two jpegs.
+With our sherd-detector, we can detect the pixels within a jpg that belongs to the ceramic sherd, thus extra the pixels location of the ceremic shard located in the image, whose information will be later used for making comparisons.
 
 ![image](https://user-images.githubusercontent.com/90679381/209050517-59ecbcc2-77bf-4864-9028-55fbddff2c68.png)
 <sub>
@@ -51,9 +55,9 @@ In short, we can get the pixel information for both the 2d jpegs and the 3d mode
 &nbsp;
 **Pixel Information**
 
-In the current version of the application, we have a total of five types of pixel information we consider. The main criteria of our choice of information we extract from the information depends on two things. First, how costly it is to compute. If it is too costly, the user experience would be bad. This is the reason neural networks are not used to extract the information from the pixels(otherwise, with hundreds of models, our application would be extremely slow). Second, how much the type of information contributes to a more accurate matching result. 
+In the current version of the application, we have a total of five types of pixel information we consider. The main criteria of our choice of information we extract from the information depends on two things. First, how costly it is to compute. If it is too costly, the user experience would be bad. Second, how much the type of information contributes to a more accurate matching result. 
 
-Our pixel information includes: area, intensity, intensity standard deviation, bounding-box and color. We shall explain more details for each of these.
+Our pixel information includes: area, brigthness, brightness standard deviation, width_length and identifier. We shall explain more details for each of these.
 
 &nbsp;
 
@@ -94,9 +98,9 @@ For each 3d model, we can get its bounding box. As the 3d models record the leng
 &nbsp;
 
 
-**Bounding box**
+**Width and length**
 
-Similar to the area approach, this time we calculate the width and length for the 2d jpegs and the screenshots of the 3d models. Similarly, we get the mm-to-pixel_length using the similar method and we can get the actual length and width of the bounding box surrounding the ceramics. Although the orientations between the models and the jpegs are often the same for the ceramic sherds because of the stable-resting principle, the sherd may have rotations. For instance you can rotate a can of Coke Cola along the y axis, and it still stands. As a result, the bounding box is a less accurate measure to calculate the similarity.
+Similar to the area approach, this time we calculate the width and length for the 2d jpegs and the screenshots of the 3d models. Similarly, we get the mm-to-pixel_length using the similar method and we can get the actual length and width of the bounding box surrounding the ceramics. The bounding box is a less accurate measure to calculate the similarity.
 
 
 ![image](https://user-images.githubusercontent.com/90679381/209051673-5d74135c-bec6-4a2f-8a79-3528f2b5b0be.png)
@@ -123,22 +127,26 @@ But turning the sherd’s pixels black and white, we get pixels with a 3-element
 </sub>
 &nbsp;
 
-&nbsp;
-
-**Color**
-
-Last but not least, we calculate the difference between the color pixels of the 3d models and the 2d jpegs using a formula(https://en.wikipedia.org/wiki/Color_difference#sRGB). We noticed that this criterion is not that important for calculating the actual similarity. Perhaps the formula itself is flawed for our application.
 
 &nbsp;
+
+**Identifier**
+
+It is more likely for a pair of jpegs with a larger identifier(e.g. 142) to be associated with a larger batch number and piece number(e.g. batch 12, piece 10). This idea gave us an extra piece of information to calculuate the similarity with.
 
 **Putting the things together**
 
+Previously, we were able to tinkle the weightings to make a really accurate prediction in a certain context. We have done two adjustments in our approach.
+First, using results of matching, we calculuated the linear relations in the criteria between the 3d models and 2d models. As a result, given a certain value of a criterion(e.g. brightness), we use that calculauted linear relations to get the predicted brightness of the 3d model it will match. By doing this, for each criterion, we can compare its similarity. Next, we combine similarity scores with a weighing. This weighing can be adjusted in the application by clicking settings, then weights adjustment. Figure 7. shows the application interface, where the 3d models are ranked by the calculated similarities.
+
+
  
-![image](https://user-images.githubusercontent.com/90679381/209052074-ea76298f-1b5e-4e29-97ed-00b7318bcb54.png)
+![image](https://user-images.githubusercontent.com/90679381/226826461-aba4a8f5-3545-4c8a-94af-173f8b9a73ce.png)
 
 <sub>
 Figure 7.
 The 3d models are sorted for each set of jpegs. Notice exactly the first model in the list is the one matching the 2d jpegs, on this occasion, it takes simply 5 seconds to confirm this model then we can check the next ceramic sherd. If we don’t have this sorted list, we may need to check 50 models before we find it.
 </sub>
 &nbsp;
+
  

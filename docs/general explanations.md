@@ -3,12 +3,12 @@
 
 **Introduction**
 
-This document clarifies the terms and methodology used in the ceramic sherd matching application. Our ceramic matching algorithm works in the following way. First, we find the information of a ceramic sherd in its 2d jpeg file, including area, average brightness, standard deviation of the average brightness, and the width and length of its bounding box. Second, we find the same set of information from all of the 3d models, by setting up the camera with an appropriate distance from the 3d models and a suitable field of view, taking a screenshot, and analyzing the pixels of the screenshot. Thirdly, by comparing the information of that ceramic sherd jpg, and that of all the ceramic sherd 3d models, we can assess how similar our jpg is to all those 3d models, and generate a sorted list ordered by similarity. In practice, we have a set of 2 jpegs for each ceramic sherd to be compared with all 3d models to make the accuracy higher. Our method yields a significant better performance than matching without a sorted similarity list.
+This document clarifies the terms and methodology used in the ceramic sherd matching application. Our ceramic matching algorithm works in the following way. 
 
-&nbsp;
-**Performance improvement**
-
-Initially, we just optimised the application
+- 0: A picture, whether it is 2d or 3d, contains information. This application considers area, brightness, brightness std, width length and identifier as the necessary information for a decent matching result.
+- 1: In advance, the application already calculuated such information for a considerable number of jpgs and plys. 
+- 2: Given each set of jpegs(front and back), we can compare it with all the plys at the current  
+ 
 
 &nbsp;
 **Using neural network to get sherd pixels in a 2d jpg**

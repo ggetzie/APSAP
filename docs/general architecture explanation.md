@@ -61,9 +61,35 @@ ui_files:
 
 **Presenter**
 
-The model governs the data while the view determines the GUI interface
+The model governs the data while the view determines the GUI interface. The presenter acts as a middleman between the two. It(presenter) connects buttons in the GUI(view) and the data(Model), thus allowing the program to update the shred, change parameters, remove matching, so on and so forth.
 
 ![image](https://user-images.githubusercontent.com/90679381/226854424-0952e321-f224-4f0a-9188-9986dfdb828e.png)
+
+As you can see, there are way more folders and files within the mixin folders, what is going on here?
+
+We can group them into two categories:
+
+- similarity calculation
+- loading files and images
+- updating matching info
+
+Similarity calculation
+
+- main_measure_pixels_data.py: it contains the code related to getting the pixels' information. To minimise code per file, we have a measure_pixels_data folder to contain more code for the same purpose.
+- main_calculuate_similarity.py: it contains the code related to calculuate the similarity between 3d models and 2d jpegs. Similarly, we have a extra folder called calculuate_similarity to reduce code per file
+- calculuate_all_features.py: to speed up the application, I already calculuated a lot of data of the 3d models and 2d jpegs and ran the functions inside this mixin. For now this part of code is not in use.
+
+Loading Files and Images
+
+- select_path.py: it contains the code related to set up the current context directory to work on.
+- main_load_jpgs_plys.py: it contains the code related to loading the jpegs and plys in the current path. Extra folder is used to reduce code size per file.
+- load_1_jpg_pair.jpg: it contains the code related to loading the current pair of jpegs we want to consider
+- display_3d_model.py: it contains the code related to displaying the 3d model we want to consider
+
+Updating matching info
+
+- add_and_remove_match.py it contains the code related to add a new match or remove an existent match from the database.
+
 
 
 

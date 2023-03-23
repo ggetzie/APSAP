@@ -19,7 +19,7 @@ class Adjust(QtWidgets.QWidget):
 
 class AdjustWindow(QWidget):
  
-    def __init__(self, sliders):
+    def __init__(self, sliders,  sliders_values):
         super().__init__()
         layout = QVBoxLayout()
         self.label = QLabel("something something")
@@ -31,8 +31,12 @@ class AdjustWindow(QWidget):
         sliders["widthLengthSlider"] = adj.width_length_similarity
         sliders["identifierSlider"] = adj.extra_similarities
          
-
-        layout.addWidget( adj)
+        sliders_values["area_value"] = adj.area_value
+        sliders_values["brightness_value"] = adj.brightness_value
+        sliders_values["brightness_std_value"] = adj.brightness_std_value
+        sliders_values["width_length_value"] = adj.width_length_value
+        sliders_values["identifier_value"] = adj.identifier_value
+        layout.addWidget(adj)
         
         self.setLayout(layout)
 
@@ -40,10 +44,13 @@ class AdjustWindowMixin:
 
     def set_up_weight_adjustment_widget(self):
         self.sliders = {}
-        self.sliders_window = AdjustWindow(self.sliders) 
+        self.sliders_values ={}
+        self.sliders_window = AdjustWindow(self.sliders, self.sliders_values) 
         self.initialize_feature_weights()
         self.get_features_weights()
         
+
+    
     def initialize_feature_weights(self):
         main_view = self
 
@@ -55,6 +62,13 @@ class AdjustWindowMixin:
         main_view.sliders["widthLengthSlider"].setValue(initial_weights["width_length_similarity"]*100)
         main_view.sliders["identifierSlider"].setValue(initial_weights["extra_similarities"]*100)
 
+        main_view.sliders_values["area_value"].setText(str(int(initial_weights["area_similarity"]*100)) + "%")
+        main_view.sliders_values["brightness_value"].setText(str(int(initial_weights["brightness_similarity"]*100)) + "%")
+        main_view.sliders_values["brightness_std_value"] .setText(str(int(initial_weights["brightness_std_similarity"]*100)) + "%")
+        main_view.sliders_values["width_length_value"].setText(str(int(initial_weights["width_length_similarity"]*100)) + "%")
+        main_view.sliders_values["identifier_value"].setText(str(int(initial_weights["extra_similarities"]*100)) + "%")
+
+        self.set_sliders_to_displayed_values()
 
     def get_features_weights(self):
         main_view = self
@@ -72,3 +86,13 @@ class AdjustWindowMixin:
     def show_popup(self):
         self.sliders_window.show()
  
+    def set_sliders_to_displayed_values(self):
+        main_view = self
+
+        main_view.sliders["areaSlider"].valueChanged.connect(lambda val:  main_view.sliders_values["area_value"].setText(str(int(val)) + "%")) #.setValue(initial_weights["area_similarity"]*100)
+        main_view.sliders["brightnessSlider"].valueChanged.connect(lambda val:  main_view.sliders_values["brightness_value"].setText(str(int(val)) + "%")) 
+        main_view.sliders["brightnessStdSlider"].valueChanged.connect(lambda val:  main_view.sliders_values["brightness_std_value"].setText(str(int(val)) + "%")) 
+        main_view.sliders["widthLengthSlider"].valueChanged.connect(lambda val:  main_view.sliders_values["width_length_value"].setText(str(int(val)) + "%")) 
+        main_view.sliders["identifierSlider"].valueChanged.connect(lambda val:  main_view.sliders_values["identifier_value"].setText(str(int(val)) + "%")) 
+ 
+       

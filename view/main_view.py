@@ -1,7 +1,7 @@
 import ctypes
 
-opengl_path = r".\computation\opengl32.dll"
-ctypes.cdll.LoadLibrary(opengl_path)
+#opengl_path = r".\computation\opengl32.dll"
+#ctypes.cdll.LoadLibrary(opengl_path)
  
 from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
@@ -30,7 +30,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, A
         self.set_up_weight_adjustment_widget()
         self.set_up_ply_window()
         self.set_up_images_pop_up()
-
+        self.menubar.setVisible(False)
  
 
 
@@ -54,4 +54,11 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, A
         main_view.context_cb.currentIndexChanged.connect(main_presenter.contextChanged)
         main_view.actionWeights_Adjustments.triggered.connect(self.show_popup)
         main_view.actionAbout.triggered.connect(self.showAbout)
+        main_view.batch_start.valueChanged.connect(self.setUpBatchFilter) 
+        main_view.batch_end.valueChanged.connect(self.setUpBatchFilter) 
+
+    def setUpBatchFilter(self):
+        main_view = self
+        print("Whatsu[]")
+
 

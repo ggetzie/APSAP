@@ -25,34 +25,40 @@ class MeasurePixelsDataMixin(
         self.ceremic_predictor.predict(img)
        # self.colorgrid_predictor.predict(img)
     def measure_pixels_2d(self, img_1_path, img_2_path):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        try:
+            main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        #Here let's get the ceremic and color grid here at once, that takes
-        image_1 = main_model.open_image(img_1_path, full_size=False)
+            #Here let's get the ceremic and color grid here at once, that takes
+            image_1 = main_model.open_image(img_1_path, full_size=False)
 
-        masked_ceremics_1 = main_presenter.ceremic_predictor.predict(image_1)
-        mask_grid_1 = main_presenter.colorgrid_predictor.predict(image_1)
+            masked_ceremics_1 = main_presenter.ceremic_predictor.predict(image_1)
+            mask_grid_1 = main_presenter.colorgrid_predictor.predict(image_1)
 
-        image_2 = main_model.open_image(img_2_path, full_size=False)
-        masked_ceremics_2 = main_presenter.ceremic_predictor.predict(image_2)
-        mask_grid_2 = main_presenter.colorgrid_predictor.predict(image_2)
+            image_2 = main_model.open_image(img_2_path, full_size=False)
+            masked_ceremics_2 = main_presenter.ceremic_predictor.predict(image_2)
+            mask_grid_2 = main_presenter.colorgrid_predictor.predict(image_2)
 
-        area_img_1 = main_presenter.get_2d_area(img_1_path, masked_ceremics_1, mask_grid_1)
-        area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)
-       
-        # Brightness based simliarity
-   
-        light_ima_1 = main_presenter.get_2d_light_summary(img_1_path, masked_ceremics_1 )
-        light_ima_2 = main_presenter.get_2d_light_summary(img_2_path, masked_ceremics_2)
+            #For now wrapping them in try and except, will fix later.
+            #  
+        
+            area_img_1 = main_presenter.get_2d_area(img_1_path, masked_ceremics_1, mask_grid_1)
+            area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)
+            light_ima_1 = main_presenter.get_2d_light_summary(img_1_path, masked_ceremics_1 )
+            light_ima_2 = main_presenter.get_2d_light_summary(img_2_path, masked_ceremics_2)       
+            img_1_width_length = main_presenter.get_2d_width_length(img_1_path, masked_ceremics_1, mask_grid_1)
+            img_2_width_length = main_presenter.get_2d_width_length(img_2_path,  masked_ceremics_2, mask_grid_2)
+            
+        
         
 
-        # Fourth one, width length
-      
-        img_1_width_length = main_presenter.get_2d_width_length(img_1_path, masked_ceremics_1, mask_grid_1)
-        img_2_width_length = main_presenter.get_2d_width_length(img_2_path,  masked_ceremics_2, mask_grid_2)
-    
-      
 
+        except:
+            area_img_1 = 1
+            area_img_2 = 1
+            light_ima_1 = (1,1,1,1,1,1)
+            light_ima_2 = (1,1,1,1,1,1)
+            img_1_width_length = (1,1)
+            img_2_width_length = (1,1)
 
         return (
             area_img_1,
@@ -64,6 +70,7 @@ class MeasurePixelsDataMixin(
 
         )
 
+
     def measure_pixels_3d(self, i):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -74,7 +81,7 @@ class MeasurePixelsDataMixin(
 
         color_brightness_3d = main_view.brightnesses_3d[i][0][3]
         color_brightness_std_3d = main_view.brightnesses_3d[i][0][-1]
-   
+        contour_3d = main_view.contour_3d[i][0]
 
         return (
             _3d_area,
@@ -85,4 +92,5 @@ class MeasurePixelsDataMixin(
             color_brightness_std_3d,
             batch_num,
             piece_num,
+            contour_3d
         )

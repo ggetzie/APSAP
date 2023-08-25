@@ -13,6 +13,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
 
         #Loading a bounding box to get the actual width length in cm and the pixel, we got the 
         ply_window = main_view.ply_window
+        
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
         bounding_box = current_pcd_load.get_axis_aligned_bounding_box() 
         bounding_box.color = (1,0,0)
@@ -56,8 +57,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         ply_window = main_view.ply_window
-      
-                
+     
         ply_window.get_render_option().point_size = 5
         red_box_image = ply_window.capture_screen_float_buffer(True)
   
@@ -81,6 +81,7 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         ply_window = main_view.ply_window
+        ply_window.clear_geometries()
         current_pcd_load = o3d.io.read_point_cloud(model_path) 
         
         ply_window.add_geometry(current_pcd_load)

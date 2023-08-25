@@ -31,13 +31,16 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
 
     def get_2d_area(self, _2d_picture_path, masked_ceremics = None, mask_grid = None):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if not (masked_ceremics and  mask_grid):
-            image = main_model.open_image(_2d_picture_path, full_size=False)
-        
-            mask_grid = main_presenter.colorgrid_predictor.predict(image)
-            masked_ceremics = main_presenter.ceremic_predictor.predict(image) 
-        mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
-        tif_area =  self.get_ceremic_area(masked_ceremics, mm_per_pixel)
+        try:
+            if not (masked_ceremics and  mask_grid):
+                image = main_model.open_image(_2d_picture_path, full_size=False)
+            
+                mask_grid = main_presenter.colorgrid_predictor.predict(image)
+                masked_ceremics = main_presenter.ceremic_predictor.predict(image) 
+            mm_per_pixel =  53.98 /self.get_mask_pixel_width(mask_grid)  #53.98 is the width of the credit-card size color grid
+            tif_area =  self.get_ceremic_area(masked_ceremics, mm_per_pixel)
+        except:
+            tif_area = 1 
         return tif_area
     
     def get_2d_width_length(self,path_2d , masked_ceremics = None, mask_grid = None):

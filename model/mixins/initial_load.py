@@ -12,8 +12,8 @@ class InitialLoadMixin:
         setting = self.simple_get_json("./configs/settings.json")
         self.file_root = Path(setting["FILE_ROOT"] )
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        temp_ply= self.simple_get_json(r".\computation\saved__measurement_ply_data.json")
-        temp_jpg= self.simple_get_json(r".\computation\saved__measurement_jpg_data.json")
+        temp_ply=  self.simple_get_json(r".\computation\saved__measurement_ply_data.json")
+        temp_jpg=  self.simple_get_json(r".\computation\saved__measurement_jpg_data.json")
 
         self.path_info_dict = self.get_path_info_dict(temp_ply, temp_jpg)
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
@@ -73,7 +73,7 @@ class InitialLoadMixin:
     def get_path_info_dict(self, past_ply_records, past_jpg_records):
         #Calculuaterd paths have "path" as the key to "the path's object;s calculuated area, brigthness extra "'s value
         path_info_dict = dict()
-        
+        return path_info_dict
         for obj in past_ply_records:
             path_info_dict[obj["path"]] = obj
         for obj in past_jpg_records:

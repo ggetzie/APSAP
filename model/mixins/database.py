@@ -1,7 +1,8 @@
 import psycopg2
 import environ
 from pathlib import Path
-
+import apsw
+import ast
 SRC_DIR = Path(__file__).resolve(strict=True).parent
 print(SRC_DIR)
 env = environ.Env()
@@ -34,6 +35,57 @@ class DatabaseMixin:
     
     def __init__(self):
         self.conn = psycopg2.connect(**READ_SETTINGS)
+        self.sqliteConnection = apsw.Connection("E:/tools/APSAPHelper/production/dbfile.db")
+
+    def get_img1_data_from_sqlite(self, path):
+           
+          
+          path = (str(path).replace("\\", "/"))
+         
+
+          data = None
+          for i in self.sqliteConnection.execute(f"""
+                SELECT area_img_1, light_ima_1, img_1_width_length from Image1 WHERE img_1_path = '{path}'
+            """):
+            data = (i)
+            break
+
+          if data == None:
+            return None
+          area_img = ast.literal_eval(data[0])
+          
+          light_ima = ast.literal_eval(data[1])
+          
+          width_length = ast.literal_eval(data[2])
+         
+
+          return (area_img, light_ima, width_length )
+     
+    def get_img2_data_from_sqlite(self, path):
+           
+          
+          path = (str(path).replace("\\", "/"))
+      
+
+          data = None
+          for i in self.sqliteConnection.execute(f"""
+                SELECT area_img_2, light_ima_2, img_2_width_length from Image2 WHERE img_2_path = '{path}'
+            """):
+            data = (i)
+            break
+
+          if data == None:
+            return None
+          area_img = ast.literal_eval(data[0])
+          
+          light_ima = ast.literal_eval(data[1])
+          
+          width_length = ast.literal_eval(data[2])
+         
+
+          return (area_img, light_ima, width_length )
+     
+
 
     def get_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
         if(self.conn):
@@ -134,5 +186,7 @@ class DatabaseMixin:
         finally:
             if conn:
                 cursor.close()
+
+    
 
     

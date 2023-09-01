@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>856</height>
+    <width>1105</width>
+    <height>928</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1090,30 +1090,6 @@
     <item row="5" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QLabel" name="contextDisplay">
-        <property name="minimumSize">
-         <size>
-          <width>800</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="sizeIncrement">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QFrame" name="frame_12">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -1123,18 +1099,69 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
+          <widget class="QLabel" name="contextDisplay">
+           <property name="minimumSize">
+            <size>
+             <width>700</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="sizeIncrement">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
-            <widget class="QLabel" name="label_3">
-             <property name="font">
-              <font>
-               <pointsize>10</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Batch Filter</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_23">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Batch Filter</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="error_message">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color : red</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1142,6 +1169,13 @@
               <layout class="QVBoxLayout" name="verticalLayout_8">
                <item>
                 <widget class="QLabel" name="label">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Batch Start</string>
                  </property>
@@ -1174,6 +1208,13 @@
               <layout class="QVBoxLayout" name="verticalLayout_9">
                <item>
                 <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Batch End</string>
                  </property>
@@ -1255,7 +1296,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1100</width>
+     <width>1105</width>
      <height>27</height>
     </rect>
    </property>

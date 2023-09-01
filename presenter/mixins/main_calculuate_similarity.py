@@ -162,7 +162,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             ret1 = cv2.matchShapes(ct1,ct_3d,1,0.0)
             ret2 = cv2.matchShapes(ct2,ct_3d,1,0.0)
             sim = min(ret1, ret2)
-            print(sim)
+            
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
@@ -184,6 +184,7 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 ply_identifier
             )
             similarity_scores.append([similairty, batch_num, piece_num,  sim])#_#similairty, batch_num, piece_num])
+       
         return similarity_scores
 
 

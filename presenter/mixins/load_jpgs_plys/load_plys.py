@@ -32,9 +32,13 @@ class LoadPlys:
         #We must know the 3d models that were matched with a pair of jpgs, 
         matched_plys = self.get_matched_plys(main_view._3d_model_dict)
 
+        #Stoing the min and max match
+        batches_nums = []
+        
         #Go through each batch
+
         for batch in batched_models:
-           
+            batches_nums.append(int(re.sub(r'[^0-9]', '', batch )))
             model_batch = QStandardItem(f"{batch}")
             pieces = batched_models[batch]
             #Go through each piece of the current batch
@@ -64,9 +68,19 @@ class LoadPlys:
            
            
             main_view.modelList.selectionModel().model().appendRow(model_batch)
-       
-    
- 
+        if batches_nums:
+            batch_min = min(batches_nums)
+            batch_max = max(batches_nums)
+        else:
+            batch_min = 0
+            batch_max = 0
+            
+        main_view.batch_start.setMinimum(batch_min)
+        main_view.batch_start.setMaximum(batch_max)
+        main_view.batch_start.setValue(batch_min)
+        main_view.batch_end.setMinimum(batch_min)
+        main_view.batch_end.setMaximum(batch_max)
+        main_view.batch_end.setValue(batch_max)
     def reset_ply_selection_model(self):
         #Either create a model for the selection model instance, or remove all the rows in it
         main_model, main_view, main_presenter = self.get_model_view_presenter()    

@@ -10,6 +10,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         main_view.selected_find_widget = selected_item
+        #Setting the images to be shown
         try:
             find_num = main_view.finds_list.currentItem().text()
 
@@ -52,7 +53,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         _3d_locations = main_view._3d_model_dict[
             f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
         ]
-
+        #Loading the 3d model already matched before
         if _3d_locations[0] != None and _3d_locations[1] != None:
             main_view.current_batch.setText(str(_3d_locations[0]))
             main_view.current_piece.setText(str(_3d_locations[1]))
@@ -82,7 +83,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
  
         _2d_image_path = photos_dir
-      
+        #Generate a list of 3d models sorted by similarity. 
  
         old_flat_similairy_list = []
         flat_simllarity_list = main_presenter.get_similaritiy_scores(
@@ -92,7 +93,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
             flat_simllarity_list
         )
-        
+        #Generate a dictionary to mark if a certain 3d model is matched to other images already
         all_matched_3d_models = set()
         for key in main_view._3d_model_dict:
             if not (
@@ -104,6 +105,14 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Sorted models"])
         for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):
+            
+            #In case the filter range is valid, we may have to skip adding the current item to the list
+            if main_view.checkValid():
+                #We consider the next if batch_number is not  in the range
+                if (not (int(score_i_j_tuple[1]) >= self.main_view.batch_start.value() and int(score_i_j_tuple[1])  <= self.main_view.batch_end.value())):
+                    continue
+            
+
             ply = QStandardItem(
                 f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}"
             )
@@ -117,6 +126,8 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 "*", f"{int(score_i_j_tuple[2])}", 1
             )
 
+            
+            
             if (
                 int(score_i_j_tuple[1]),
                 int(score_i_j_tuple[2]),

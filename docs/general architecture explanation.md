@@ -1,3 +1,6 @@
+
+This is not updated as there are some temporary changes.
+
 **Explanations of the architecture**
 
 The application consists of two parts, the main part and the subsidary part.

@@ -54,11 +54,23 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, A
         main_view.context_cb.currentIndexChanged.connect(main_presenter.contextChanged)
         main_view.actionWeights_Adjustments.triggered.connect(self.show_popup)
         main_view.actionAbout.triggered.connect(self.showAbout)
-        main_view.batch_start.valueChanged.connect(self.setUpBatchFilter) 
-        main_view.batch_end.valueChanged.connect(self.setUpBatchFilter) 
+        main_view.batch_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
+        main_view.batch_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
 
-    def setUpBatchFilter(self):
+    def checkValid(self):
         main_view = self
-        print("Whatsu[]")
+        if main_view.batch_start.value() > main_view.batch_end.value():
+            return False
+        return True
 
+    def setUpBatchFilter(self, main_presenter):
+        main_view = self
+        if self.checkValid():
+            main_view.error_message.setText("")
+            
+        else:
+            main_view.error_message.setText("Start should be smaller than End")
+        if  main_view.finds_list.currentItem():
+                main_presenter.load_find_images(main_view.finds_list.currentItem())   
+        
 

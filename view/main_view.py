@@ -51,11 +51,13 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, A
         main_view.northing_cb.currentIndexChanged.connect(
             main_presenter.populate_contexts
         )
-        main_view.context_cb.currentIndexChanged.connect(main_presenter.contextChanged)
+       # main_view.context_cb.currentIndexChanged.connect(main_presenter.contextChanged)
         main_view.actionWeights_Adjustments.triggered.connect(self.show_popup)
         main_view.actionAbout.triggered.connect(self.showAbout)
         main_view.batch_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
         main_view.batch_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
+        main_view.loadAll.clicked.connect(main_presenter.contextChanged)
+
 
     def checkValid(self):
         main_view = self

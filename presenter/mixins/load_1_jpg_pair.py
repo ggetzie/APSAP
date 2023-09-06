@@ -84,16 +84,15 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
  
         _2d_image_path = photos_dir
         #Generate a list of 3d models sorted by similarity. 
- 
-        old_flat_similairy_list = []
-        flat_simllarity_list = main_presenter.get_similaritiy_scores(
+  
+   
+        flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
+            main_presenter.get_similaritiy_scores(
              _2d_image_path
         )
-     
-        flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
-            flat_simllarity_list
         )
         #Generate a dictionary to mark if a certain 3d model is matched to other images already
+        #This dictionary will be used in the later stage, when we have to the list item of 3d models already matched before to red
         all_matched_3d_models = set()
         for key in main_view._3d_model_dict:
             if not (

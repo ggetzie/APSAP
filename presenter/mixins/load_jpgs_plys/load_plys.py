@@ -24,7 +24,7 @@ class LoadPlys:
         self.reset_ply_selection_model()
 
         #Measurements are used for similaritiy calculuation
-        self.reset_ply_measurements()
+        # self.reset_ply_measurements()
     
         #models of the current folder are grouped by batches they belong to
         batched_models = self.get_batched_models()
@@ -38,22 +38,26 @@ class LoadPlys:
         #Go through each batch
 
         for batch in batched_models:
+            
             batches_nums.append(int(re.sub(r'[^0-9]', '', batch )))
+
             model_batch = QStandardItem(f"{batch}")
             pieces = batched_models[batch]
+            batch_num = int(batch)
             #Go through each piece of the current batch
             for piece in pieces:
                 piece_num = piece[0]
                 path = piece[1]
                
+                # 
                 #Either calculaute the info of the ply file or get it form cache
-                (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour) = self.load_ply_info_from_cache_or_calc(path)
+                # (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour) = self.load_ply_info_from_cache_or_calc(path)
               
                 #Add all thosecalculuated data of rhe current piece into the lists so that it can, later, be used for similarity calculuation
-                main_view.areas_3d.append([area, batch_num, piece_num])
-                main_view.brightnesses_3d.append([brightness_3d, batch_num, piece_num])
-                main_view.width_lengths_3d.append([width_length_summary, batch_num, piece_num])
-                main_view.contour_3d.append([contour, batch_num, piece_num])
+                # main_view.areas_3d.append([area, batch_num, piece_num])
+                # main_view.brightnesses_3d.append([brightness_3d, batch_num, piece_num])
+                # main_view.width_lengths_3d.append([width_length_summary, batch_num, piece_num])
+                # main_view.contour_3d.append([contour, batch_num, piece_num])
 
                 #Create a piece q item later for use
                 modelPiece = QStandardItem(f"{piece_num}")
@@ -134,49 +138,40 @@ class LoadPlys:
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
         #If we have the data in cache, we don't need to calculuate it
-        if path in main_model.path_info_dict:
-            print(path)
-            current_item = main_model.path_info_dict[path]
-            (
-                batch_num, piece_num, brightness_3d, 
-                width_length_summary, area,  context
-            ) = self.get_3d_model_info(current_item)
+ 
+        print(f"Loading 3d model: {path}")
+        #Extra the batch and piece number from the path
+        m = re.search(
+                main_model.path_variables["MODELS_FILES_RE"],
+            path.replace("\\", "/"),
+        )
+        
+        batch_num = m.group(1)
+        piece_num = m.group(2)
+        import time
+        now = time.time()
+        brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
+        
+        (
+            area,
+            width_length_summary,
+        ) = main_presenter.get_3d_object_area_and_width_length(path)
+        
+        #As area and width_length depend on the size of grid, which we have no control. We disable area and width_length in other parts of the code and here
+        area = 1
+        width_length_summary = [1, 1]
 
-        #calculuate the data of the ply, also saves it in to the json object
-        else:
-            print(f"Loading 3d model: {path}")
-            #Extra the batch and piece number from the path
-            m = re.search(
-                    main_model.path_variables["MODELS_FILES_RE"],
-                path.replace("\\", "/"),
-            )
-            
-            batch_num = m.group(1)
-            piece_num = m.group(2)
-            import time
-            now = time.time()
-            brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
-         
-            # (
-            #     area,
-            #     width_length_summary,
-            # ) = main_presenter.get_3d_object_area_and_width_length(path)
-            
-            #As area and width_length depend on the size of grid, which we have no control. We disable area and width_length in other parts of the code and here
-            area = 1
-            width_length_summary = [1, 1]
-
-            width_length_summary = list(width_length_summary)
-            context = main_view.context_cb.currentText()
-            zone = main_view.zone_cb.currentText()
-            hemisphere = main_view.hemisphere_cb.currentText()
-            utm_easting = main_view.easting_cb.currentText()
-            utm_northing = main_view.northing_cb.currentText()
-            
-            contour = self.get_contour_3d(path)
+        width_length_summary = list(width_length_summary)
+        context = main_view.context_cb.currentText()
+        zone = main_view.zone_cb.currentText()
+        hemisphere = main_view.hemisphere_cb.currentText()
+        utm_easting = main_view.easting_cb.currentText()
+        utm_northing = main_view.northing_cb.currentText()
+        
+        contour = self.get_contour_3d(path)
 
 
-       
+    
 
 
         return (batch_num, piece_num, brightness_3d,  width_length_summary, area, context, contour)
@@ -211,13 +206,13 @@ class LoadPlys:
         return batches_dict
 
 
-    def reset_ply_measurements(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()    
+    # def reset_ply_measurements(self):
+    #     main_model, main_view, main_presenter = self.get_model_view_presenter()    
 
-        main_view.areas_3d = []
-        main_view.brightnesses_3d = []
-        main_view.width_lengths_3d = []
-        main_view.contour_3d = []
+    #     main_view.areas_3d = []
+    #     main_view.brightnesses_3d = []
+    #     main_view.width_lengths_3d = []
+    #     main_view.contour_3d = []
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
         piece_num = current_item["piece_num"]

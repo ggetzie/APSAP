@@ -4,6 +4,8 @@ from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QTimer
 
+
+
 class PlyWindowMixin:
 
     def set_up_ply_window(self):

@@ -94,3 +94,27 @@ class MeasurePixelsDataMixin(
             piece_num,
             contour_3d
         )
+    
+    def measure_pixels_3d_new(self, path_3d):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour) = self.load_ply_info_from_cache_or_calc(path_3d)
+        _3d_area = area
+        batch_num = batch_num
+        piece_num = piece_num
+        width_length_3d = width_length_summary
+
+        color_brightness_3d = brightness_3d[3]
+        color_brightness_std_3d = brightness_3d[-1]
+        contour_3d = contour
+        return (
+            _3d_area,
+            
+            0,
+            width_length_3d,
+            color_brightness_3d,
+            color_brightness_std_3d,
+            batch_num,
+            piece_num,
+            contour_3d
+        )

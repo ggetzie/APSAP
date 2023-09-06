@@ -5,7 +5,6 @@ import ctypes
  
 from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
-from view.mixins.adjust_window import AdjustWindowMixin, AdjustWindow
 from view.mixins.about_window import AboutMixin
 
 from PyQt5.QtWidgets import (
@@ -20,14 +19,15 @@ from PyQt5 import  uic
 
 
 
-class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, AboutMixin):
+class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
     """View (GUI)."""
 
     def __init__(self):
         """View initializer."""
         super(MainView, self).__init__()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
-        self.set_up_weight_adjustment_widget()
+         
+        # self.set_up_weight_adjustment_widget()
         self.set_up_ply_window()
         self.set_up_images_pop_up()
         self.menubar.setVisible(False)
@@ -50,10 +50,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AdjustWindowMixin, A
         )
         main_view.northing_cb.currentIndexChanged.connect(
             main_presenter.populate_contexts
-        )
-       # main_view.context_cb.currentIndexChanged.connect(main_presenter.contextChanged)
-        main_view.actionWeights_Adjustments.triggered.connect(self.show_popup)
-        main_view.actionAbout.triggered.connect(self.showAbout)
+        )       
         main_view.batch_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
         main_view.batch_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
         main_view.loadAll.clicked.connect(main_presenter.contextChanged)

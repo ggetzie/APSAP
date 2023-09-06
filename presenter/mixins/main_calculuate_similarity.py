@@ -16,13 +16,13 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         
         for _threeple in similarities_list:
             vals = _threeple[0]
-            main_view.weights = main_view.get_features_weights()
-            weighted_mean =  (vals["area_similarity"] * main_view.weights["area_similarity"] +  
-                            vals["brightness_similarity"] * main_view.weights["brightness_similarity"]  +  
-                            vals["brightness_std_similarity"] * main_view.weights["brightness_std_similarity"]  + 
-                             vals["width_length_similarity"] * main_view.weights["width_length_similarity"]+  
+             
+            weighted_mean =  (vals["area_similarity"]  +  
+                            vals["brightness_similarity"]  +  
+                            vals["brightness_std_similarity"]  + 
+                             vals["width_length_similarity"] +  
                             
-                         +  vals["extra_similarities"] * main_view.weights["extra_similarities"] 
+                         +  vals["extra_similarities"]  
                             )
 
             grand_similarity.append(
@@ -127,17 +127,6 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
             area_img_2, light_ima_2, img_2_width_length = img_2_data
             print("We get the data from db")
          
-
-        # if str(img_1_path) in main_model.path_info_dict and str(img_2_path) in main_model.path_info_dict:
-        #     print("Getting the jpg data from cache, skip calculating")
-        #     obj_img_1 =  main_model.path_info_dict[str(img_1_path)]
-        #     obj_img_2 =  main_model.path_info_dict[str(img_2_path)]
-        #     area_img_1 = obj_img_1["area_img_1"]
-        #     light_ima_1 = obj_img_1["light_ima_1"]
-        #     img_1_width_length = obj_img_1["img_1_width_length"]
-        #     area_img_2 = obj_img_2["area_img_2"]
-        #     light_ima_2 = obj_img_2["light_ima_2"]
-        #     img_2_width_length = obj_img_2["img_2_width_length"]   
         else:
             print("Calculuate the jpg data")
             area_img_1,  area_img_2, light_ima_1, light_ima_2, img_1_width_length, img_2_width_length= self.measure_pixels_2d(img_1_path, img_2_path)
@@ -150,14 +139,18 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
         ct1 = (self.get_contour_2d(img_1_path))
         ct2 = (self.get_contour_2d(img_2_path))
         batch_details = self.get_batch_details()
-        for i in range(len(main_view.areas_3d)):
-            _3d_area,  all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num, contour = self.measure_pixels_3d(i)
 
+        #Getting all 3d models from the image paths and get them
+        from glob import glob
+        all_3d_models_paths = glob(str(
+                    (
+                        main_presenter.get_context_dir()
+                        / main_model.path_variables["MODELS_FILES_DIR"]
+                    )
+                ))
+        for path_3d in all_3d_models_paths:
+            _3d_area,  all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num, contour = self.measure_pixels_3d_new(path_3d)
             ply_identifier =  self.get_ply_identifier(batch_num, piece_num, batch_details )
-            # model_3d_path = (str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]).replace("*", f"{int(batch_num):03}", 1).replace(
-            #     "*", f"{int(piece_num)}", 1
-            # ))
-     
             ct_3d = contour
             ret1 = cv2.matchShapes(ct1,ct_3d,1,0.0)
             ret2 = cv2.matchShapes(ct2,ct_3d,1,0.0)
@@ -184,8 +177,46 @@ class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):  # bridgin
                 ply_identifier
             )
             similarity_scores.append([similairty, batch_num, piece_num,  sim])#_#similairty, batch_num, piece_num])
-       
+    
         return similarity_scores
+
+
+        # for i in range(len(main_view.areas_3d)):
+        #     _3d_area,  all_3d_area_circle_ratio, width_length_3d, color_brightness_3d, color_brightness_std_3d, batch_num, piece_num, contour = self.measure_pixels_3d(i)
+            
+        #     ply_identifier =  self.get_ply_identifier(batch_num, piece_num, batch_details )
+        #     # model_3d_path = (str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]).replace("*", f"{int(batch_num):03}", 1).replace(
+        #     #     "*", f"{int(piece_num)}", 1
+        #     # ))
+     
+        #     ct_3d = contour
+        #     ret1 = cv2.matchShapes(ct1,ct_3d,1,0.0)
+        #     ret2 = cv2.matchShapes(ct2,ct_3d,1,0.0)
+        #     sim = min(ret1, ret2)
+            
+        #     similairty = main_presenter.get_similarity(
+        #         _3d_area,
+        #         area_img_1,
+        #         area_img_2,
+        #         color_brightness_3d,
+        #         light_ima_1[3],
+        #         light_ima_2[3],
+        #         color_brightness_std_3d,
+        #         light_ima_1[-1],
+        #         light_ima_2[-1],
+        #         width_length_3d[0],
+        #         width_length_3d[1],
+        #         img_1_width_length[0],
+        #         img_1_width_length[1],
+        #         img_2_width_length[0],
+        #         img_2_width_length[1],
+
+        #         img_identifier,
+        #         ply_identifier
+        #     )
+        #     similarity_scores.append([similairty, batch_num, piece_num,  sim])#_#similairty, batch_num, piece_num])
+       
+        # return similarity_scores
 
 
 

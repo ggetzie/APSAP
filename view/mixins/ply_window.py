@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QTimer
 class PlyWindowMixin:
 
     def set_up_ply_window(self):
+        
         widget = self.model
 
         self.ply_window = o3d.visualization.Visualizer()

@@ -8,16 +8,17 @@ from glob import glob as glob
 class InitialLoadMixin:
  
     def prepare_data(self, main_view):
+        
         self.request_path(main_view)
         setting = self.simple_get_json("./configs/settings.json")
         self.file_root = Path(setting["FILE_ROOT"] )
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        temp_ply=  self.simple_get_json(r".\computation\saved__measurement_ply_data.json")
-        temp_jpg=  self.simple_get_json(r".\computation\saved__measurement_jpg_data.json")
+        temp_ply= {} #self.simple_get_json(r".\computation\saved__measurement_ply_data.json")
+        temp_jpg= {} #self.simple_get_json(r".\computation\saved__measurement_jpg_data.json")
 
         self.path_info_dict = self.get_path_info_dict(temp_ply, temp_jpg)
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
-
+       
 
 
 

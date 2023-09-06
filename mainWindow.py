@@ -10,7 +10,9 @@ def main():
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-
+    import time
+    now = time.time()
+    
     main_model = MainModel()
     main_view = MainView()
     main_presenter = Mainpresenter(main_model, main_view)

@@ -49,16 +49,7 @@ class LoadPlys:
                 piece_num = piece[0]
                 path = piece[1]
                
-                # 
-                #Either calculaute the info of the ply file or get it form cache
-                # (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour) = self.load_ply_info_from_cache_or_calc(path)
-              
-                #Add all thosecalculuated data of rhe current piece into the lists so that it can, later, be used for similarity calculuation
-                # main_view.areas_3d.append([area, batch_num, piece_num])
-                # main_view.brightnesses_3d.append([brightness_3d, batch_num, piece_num])
-                # main_view.width_lengths_3d.append([width_length_summary, batch_num, piece_num])
-                # main_view.contour_3d.append([contour, batch_num, piece_num])
-
+ 
                 #Create a piece q item later for use
                 modelPiece = QStandardItem(f"{piece_num}")
                 modelPiece.setData(f"{path}", Qt.UserRole)
@@ -135,46 +126,54 @@ class LoadPlys:
         return cnt1
  
     def load_ply_info_from_cache_or_calc(self, path):
-
-        main_model, main_view, main_presenter = self.get_model_view_presenter()    
-        #If we have the data in cache, we don't need to calculuate it
- 
-        print(f"Loading 3d model: {path}")
-        #Extra the batch and piece number from the path
-        m = re.search(
-                main_model.path_variables["MODELS_FILES_RE"],
-            path.replace("\\", "/"),
-        )
         
-        batch_num = m.group(1)
-        piece_num = m.group(2)
-        import time
-        now = time.time()
-        brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
-        
-        (
-            area,
-            width_length_summary,
-        ) = main_presenter.get_3d_object_area_and_width_length(path)
-        
-        #As area and width_length depend on the size of grid, which we have no control. We disable area and width_length in other parts of the code and here
-        area = 1
-        width_length_summary = [1, 1]
+        main_model, main_view, main_presenter = self.get_model_view_presenter() 
+        import diskcache
+         
+  
+        cache_result = main_model.cache_3d.get(path)
+  
+        if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 7 :
+            print(f"Point cloud's data has been stored. Loading {path} directly from library")
+            return cache_result
+        else:
+            print(f"Loading 3d model: {path}")
+            #Extra the batch and piece number from the path
+            m = re.search(
+                    main_model.path_variables["MODELS_FILES_RE"],
+                path.replace("\\", "/"),
+            )
+            
+            batch_num = m.group(1)
+            piece_num = m.group(2)
+            import time
+            now = time.time()
+            brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
+            
+            (
+                area,
+                width_length_summary,
+            ) = main_presenter.get_3d_object_area_and_width_length(path)
+            
+            #As area and width_length depend on the size of grid, which we have no control. We disable area and width_length in other parts of the code and here
+           
 
-        width_length_summary = list(width_length_summary)
-        context = main_view.context_cb.currentText()
-        zone = main_view.zone_cb.currentText()
-        hemisphere = main_view.hemisphere_cb.currentText()
-        utm_easting = main_view.easting_cb.currentText()
-        utm_northing = main_view.northing_cb.currentText()
-        
-        contour = self.get_contour_3d(path)
+            width_length_summary = list(width_length_summary)
+            context = main_view.context_cb.currentText()
+            zone = main_view.zone_cb.currentText()
+            hemisphere = main_view.hemisphere_cb.currentText()
+            utm_easting = main_view.easting_cb.currentText()
+            utm_northing = main_view.northing_cb.currentText()
+            
+            contour = self.get_contour_3d(path)
 
 
-    
 
+            return_values = (batch_num, piece_num, brightness_3d,  width_length_summary, area, context, contour)
 
-        return (batch_num, piece_num, brightness_3d,  width_length_summary, area, context, contour)
+            main_model.cache_3d.set(path, return_values)
+             
+            return return_values
 
 
 
@@ -204,15 +203,7 @@ class LoadPlys:
         for key in batches_dict:
             batches_dict[key] = sorted(batches_dict[key])
         return batches_dict
-
-
-    # def reset_ply_measurements(self):
-    #     main_model, main_view, main_presenter = self.get_model_view_presenter()    
-
-    #     main_view.areas_3d = []
-    #     main_view.brightnesses_3d = []
-    #     main_view.width_lengths_3d = []
-    #     main_view.contour_3d = []
+ 
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
         piece_num = current_item["piece_num"]

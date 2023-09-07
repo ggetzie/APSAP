@@ -1,7 +1,7 @@
 from PIL.ImageQt import ImageQt
 from scipy.stats import gmean, tmean
 import numpy as np
-
+import cv2
 import time
 class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the model(data)
    
@@ -138,3 +138,9 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
                 )
             ) / 2
         return result   
+
+    def get_contour_simlarity(self, contour1_2d, contour2_2d, contour_3d):
+            closeness_1 = cv2.matchShapes(contour1_2d,contour_3d,1,0.0)
+            closeness_2 = cv2.matchShapes(contour2_2d,contour_3d,1,0.0)
+            sim = min(closeness_1, closeness_2)
+            return sim

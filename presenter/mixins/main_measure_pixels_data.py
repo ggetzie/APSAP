@@ -70,47 +70,22 @@ class MeasurePixelsDataMixin(
 
         )
 
-
-    def measure_pixels_3d(self, i):
+ 
+    def measure_pixels_3d(self, path_3d):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        _3d_area = main_view.areas_3d[i][0]
-        batch_num = main_view.areas_3d[i][1]
-        piece_num = main_view.areas_3d[i][2]
-        width_length_3d = main_view.width_lengths_3d[i][0]
-
-        color_brightness_3d = main_view.brightnesses_3d[i][0][3]
-        color_brightness_std_3d = main_view.brightnesses_3d[i][0][-1]
-        contour_3d = main_view.contour_3d[i][0]
-
-        return (
-            _3d_area,
-            
-            0,
-            width_length_3d,
-            color_brightness_3d,
-            color_brightness_std_3d,
-            batch_num,
-            piece_num,
-            contour_3d
-        )
-    
-    def measure_pixels_3d_new(self, path_3d):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        
         (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour) = self.load_ply_info_from_cache_or_calc(path_3d)
+        
         _3d_area = area
         batch_num = batch_num
         piece_num = piece_num
         width_length_3d = width_length_summary
-
+    
         color_brightness_3d = brightness_3d[3]
         color_brightness_std_3d = brightness_3d[-1]
         contour_3d = contour
         return (
             _3d_area,
-            
-            0,
             width_length_3d,
             color_brightness_3d,
             color_brightness_std_3d,

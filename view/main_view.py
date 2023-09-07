@@ -30,8 +30,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         # self.set_up_weight_adjustment_widget()
         self.set_up_ply_window()
         self.set_up_images_pop_up()
-        self.menubar.setVisible(False)
- 
+        
 
 
     def set_up_view_presenter_connection(self, main_presenter):

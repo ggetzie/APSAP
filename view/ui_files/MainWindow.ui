@@ -1192,11 +1192,14 @@
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
                  <property name="minimum">
-                  <number>2022</number>
+                  <number>0</number>
                  </property>
                  <property name="maximum">
-                  <number>2023</number>
+                  <number>0</number>
                  </property>
                 </widget>
                </item>

@@ -28,7 +28,7 @@ class Mainpresenter(
         
         self.main_model.prepare_data(self.main_view)
         
-        self.main_view.set_up_view_presenter_connection(main_presenter)
+        self.main_view.set_up_view_presenter_connection(main_presenter, self.main_model )
         self.populate_hemispheres()
         view.contextDisplay.setText(main_presenter.get_context_string())
 

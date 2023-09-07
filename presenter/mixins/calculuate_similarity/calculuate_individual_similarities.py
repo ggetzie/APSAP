@@ -17,9 +17,7 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
     def get_area_similarity(self, _3d_area, _2d_area_1, _2d_area_2, a, b):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
        
-        # Assumtion 1: there is a linear relation between the _3d_area and the _2d_area
-        # The parameters a, b are found by running a linear regression between areas_3d and all the _2d_area(picked from the closer of the two)
-        # We compare the 3d model's area with two pictures. Possible future improvement is to compare two 2d areas with two 3d areas.
+      
         smaller_area = min(_2d_area_1, _2d_area_2)
         larger_area = max(_2d_area_1, _2d_area_2)
 

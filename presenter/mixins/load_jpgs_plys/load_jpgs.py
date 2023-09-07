@@ -39,3 +39,4 @@ class LoadJpgs:
                     item.setForeground(QColor("red"))
                 main_view.finds_list.addItem(item)
                 main_view._3d_model_dict[f"{easting},{northing},{context},{int(find)}"] = _3d_locations
+        

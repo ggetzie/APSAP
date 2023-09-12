@@ -7,3 +7,5 @@ from model.mixins.initial_load import InitialLoadMixin
 
 class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin):
     pass
+    
+     

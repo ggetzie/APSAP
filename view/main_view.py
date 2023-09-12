@@ -72,10 +72,17 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         else:
             main_view.error_message.setText("Start should be smaller than End")
         if  main_view.finds_list.currentItem():
+               
                 main_presenter.load_find_images(main_view.finds_list.currentItem())   
-        
+    
+
+
     def set_filter(self, main_model, main_presenter):
         main_view = self
+        #Deselect finds list
+        main_view.finds_list.setCurrentItem(None)
+        main_view.finds_list.clear()
+
         #When we load finds, we also know the years the 3d models belong to 
         from glob import glob
         context_dir = main_presenter.get_context_dir()
@@ -117,7 +124,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
             batch_min = 0
             batch_max = 0
             main_view.year.setReadOnly(True)
-            
+        
         main_view.batch_start.setMinimum(batch_min)
         main_view.batch_start.setMaximum(batch_max)
         main_view.batch_start.setValue(batch_min)

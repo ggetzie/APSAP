@@ -11,8 +11,11 @@ class LoadJpgs:
     def populate_finds(self):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        print("###")
          
+         
+       
+        print("###") 
         main_view.finds_list.clear()
 
         context_dir = main_presenter.get_context_dir()
@@ -39,4 +42,4 @@ class LoadJpgs:
                     item.setForeground(QColor("red"))
                 main_view.finds_list.addItem(item)
                 main_view._3d_model_dict[f"{easting},{northing},{context},{int(find)}"] = _3d_locations
-        
+            

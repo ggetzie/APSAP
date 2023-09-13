@@ -3,7 +3,7 @@
     "BATCH_3D_SUBDIR": "finds/3dbatch",
     "FINDS_PHOTO_DIR": "photos",
     "MODELS_FILES_DIR": "finds/3dbatch/2022/batch_*/registration_reso1_maskthres242/final_output/piece_*_world.ply",
-    "MODELS_FILES_RE": "finds/3dbatch/2022/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply",
+    "MODELS_FILES_RE": "finds/3dbatch/(.+?)/batch_(.+?)/registration_reso1_maskthres242/final_output/piece_(.+?)_world.ply",
     "HEMISPHERES": [
         "N",
         "S"

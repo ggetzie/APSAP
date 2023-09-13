@@ -50,21 +50,30 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_view.current_image_back= str(photos_dir / "2.jpg")
         main_view.selected_find.setText(find_num)
         easting_northing_context = main_presenter.get_easting_northing_context()
+
+        
+
         _3d_locations = main_view._3d_model_dict[
             f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
         ]
+        find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
+        ply_str = main_view.dict_find_2_ply[find_str] 
+         
+         
         #Loading the 3d model already matched before
-        if _3d_locations[0] != None and _3d_locations[1] != None:
-            main_view.current_batch.setText(str(_3d_locations[0]))
-            main_view.current_piece.setText(str(_3d_locations[1]))
+        if  find_str in main_view.dict_find_2_ply:#_3d_locations[0] != None and _3d_locations[1] != None:
+            (batch_year, batch_num, batch_piece) = ply_str.split(",")
+            main_view.current_year.setText(str(batch_year))
+            main_view.current_batch.setText(str(batch_num))
+            main_view.current_piece.setText(str(batch_piece))
             path = str(
                 (
                     main_presenter.get_context_dir()
                     / main_model.path_variables["MODELS_FILES_DIR"]
                 )
             )
-            whole_path = path.replace("*", f"{int(_3d_locations[0]):03}", 1).replace(
-                "*", f"{int(_3d_locations[1])}", 1
+            whole_path = path.replace("*", f"{int(batch_num):03}", 1).replace(
+                "*", f"{int(batch_piece)}", 1
             )
             now = time.time()
             current_pcd_load = o3d.io.read_point_cloud(whole_path, remove_nan_points=True, remove_infinite_points=True)
@@ -75,6 +84,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 main_presenter.change_model(current_pcd_load, None)
  
         else:
+            main_view.current_year.setText("NS")
             main_view.current_batch.setText("NS")
             main_view.current_piece.setText("NS")
             if hasattr(main_view, "current_pcd"):
@@ -93,27 +103,27 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
         #Generate a dictionary to mark if a certain 3d model is matched to other images already
         #This dictionary will be used in the later stage, when we have to the list item of 3d models already matched before to red
-        all_matched_3d_models = set()
-        for key in main_view._3d_model_dict:
-            if not (
-                main_view._3d_model_dict[key][0] == None
-                and main_view._3d_model_dict[key][1] == None
-            ):
-                all_matched_3d_models.add(main_view._3d_model_dict[key])
+        # all_matched_3d_models = set()
+        # for key in main_view._3d_model_dict:
+        #     if not (
+        #         main_view._3d_model_dict[key][0] == None
+        #         and main_view._3d_model_dict[key][1] == None
+        #     ):
+        #         all_matched_3d_models.add(main_view._3d_model_dict[key])
 
         model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Sorted models"])
-        for i, score_i_j_tuple in enumerate(sorted(flat_simllarity_list)):
+        for weighted_mean, batch_num, piece_num, year in (sorted(flat_simllarity_list)):
             
             #In case the filter range is valid, we may have to skip adding the current item to the list
             if main_view.checkValid():
                 #We consider the next if batch_number is not  in the range
-                if (not (int(score_i_j_tuple[1]) >= self.main_view.batch_start.value() and int(score_i_j_tuple[1])  <= self.main_view.batch_end.value())):
+                if (not (int(batch_num ) >= self.main_view.batch_start.value() and int(batch_num )  <= self.main_view.batch_end.value())):
                     continue
             
 
             ply = QStandardItem(
-                f"Batch {score_i_j_tuple[1]}, model: {score_i_j_tuple[2]}"
+                f"Year: {year}, Batch {batch_num}, model: {piece_num}"
             )
             path = str(
                 (
@@ -121,17 +131,18 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                     / main_model.path_variables["MODELS_FILES_DIR"]
                 )
             )
-            whole_path = path.replace("*", f"{int(score_i_j_tuple[1]):03}", 1).replace(
-                "*", f"{int(score_i_j_tuple[2])}", 1
+            whole_path = path.replace("*", f"{int(batch_num):03}", 1).replace(
+                "*", f"{int(piece_num)}", 1
             )
 
-            
-            
-            if (
-                int(score_i_j_tuple[1]),
-                int(score_i_j_tuple[2]),
-            ) in all_matched_3d_models:
+            ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
 
+            
+            # if (
+            #     int(batch_num),
+            #     int(piece_num),
+            # ) in all_matched_3d_models:
+            if ply_str in main_view.dict_ply_2_find:
                 ply.setForeground(QColor("red"))
 
             ply.setData(f"{whole_path}", Qt.UserRole)

@@ -103,9 +103,7 @@ class SelectPathMixin:
             main_view.context_cb.setCurrentIndex(0 if len(options) > 0 else -1)
             main_view.context_cb.setEnabled(len(options) > 1)
             
-
-
-    def contextChanged(self):
+    def clearInterface(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         if main_view.context_cb.count() > 0:
@@ -113,9 +111,11 @@ class SelectPathMixin:
             main_view.statusLabel.setText(f"")
             main_view.selected_find.setText(f"")
             main_view.current_batch.setText(f"")
+            main_view.current_year.setText(f"")
             main_view.current_piece.setText(f"")
             main_view.new_batch.setText(f"")
             main_view.new_piece.setText(f"")
+            main_view.new_year.setText(f"")
             main_view.contextDisplay.setText(self.get_context_string())
             if hasattr(main_view, "current_pcd"):
                 main_view.ply_window.remove_geometry(main_view.current_pcd)
@@ -123,6 +123,16 @@ class SelectPathMixin:
 
             model = QStandardItemModel(main_view)
             main_view.sorted_model_list.setModel(model)
+            main_presenter.reset_ply_selection_model()
+
+            
+
+    def contextChanged(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        
+        if main_view.context_cb.count() > 0:
+
+
             funcs_to_run = [
                 ["Loading finds. It might take a while", main_presenter.populate_finds],
                 ["Loading models. It might take a while", main_presenter.populate_models],

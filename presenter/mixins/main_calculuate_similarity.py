@@ -18,19 +18,19 @@ class CalculateSimilarityMixin(
 
         grand_similarity = []
 
-        for _threeple in similarities_list:
-            vals = _threeple[0]
+        for similairty, batch_num, piece_num, year in similarities_list:
+            
          
             weighted_mean = (
-                 vals["area_similarity"]  * 1.2
-                #  + vals["brightness_similarity"] * 0.3   Not usable at this stage
-                #  + vals["brightness_std_similarity"] * 0.1
-                  + vals["width_length_similarity"] * 0.2
+                 similairty["area_similarity"]  * 1.2
+                #  + similairty["brightness_similarity"] * 0.3   Not usable at this stage
+                #  + similairty["brightness_std_similarity"] * 0.1
+                  + similairty["width_length_similarity"] * 0.2
              
-                 + vals["contour_simlarity"] * 0.7
+                 + similairty["contour_simlarity"] * 0.7
             )
 
-            grand_similarity.append([weighted_mean, _threeple[1], _threeple[2]])
+            grand_similarity.append([weighted_mean, batch_num, piece_num, year])
         return grand_similarity
 
     def get_batch_details(self):
@@ -51,7 +51,8 @@ class CalculateSimilarityMixin(
                 main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
             )
             # This error happens when the relative path is different
-            batch_num = int(m.group(1))
+            print(m.group(1))
+            batch_num = int(m.group(2))
             if batch_num not in batches_dict:
                 batches_dict[batch_num] = 0
             else:
@@ -121,16 +122,19 @@ class CalculateSimilarityMixin(
                 )
             )
         )
+      
+
         for path_3d in all_3d_models_paths:
             (
-                _3d_area,
-                width_length_3d,
-                color_brightness_3d,
-                color_brightness_std_3d,
-                batch_num,
-                piece_num,
-                contour_3d,
-            ) = self.measure_pixels_3d(path_3d)
+                    _3d_area,
+                    width_length_3d,
+                    color_brightness_3d,
+                    color_brightness_std_3d,
+                    contour_3d,
+                    batch_num,
+                    piece_num,
+                    year
+            )= self.measure_pixels_3d(path_3d)
             
             similairty = main_presenter.get_similarity(
                 _3d_area,
@@ -153,7 +157,7 @@ class CalculateSimilarityMixin(
                 contour_3d,
             )
             similarity_scores.append(
-                [similairty, batch_num, piece_num]
+                [similairty, batch_num, piece_num, year]
             )  # _#similairty, batch_num, piece_num])
 
         return similarity_scores

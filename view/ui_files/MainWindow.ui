@@ -1096,17 +1096,20 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="current_year">
+          <widget class="QLabel" name="current_year">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
            </property>
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
@@ -1150,17 +1153,20 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="new_year">
+          <widget class="QLabel" name="new_year">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <pointsize>11</pointsize>
             </font>
            </property>
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

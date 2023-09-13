@@ -83,6 +83,10 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         main_view.finds_list.setCurrentItem(None)
         main_view.finds_list.clear()
 
+        # #Remove all 3d models from 
+        # main_view.sorted_model_list.clear()
+
+        main_presenter.clearInterface()
         #When we load finds, we also know the years the 3d models belong to 
         from glob import glob
         context_dir = main_presenter.get_context_dir()

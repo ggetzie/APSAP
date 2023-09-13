@@ -47,7 +47,7 @@ class DatabaseMixin:
             
             cursor = conn.cursor()
             query = """
-            SELECT "3d_batch_number", "3d_batch_piece" 
+            SELECT "3d_batch_number", "3d_batch_piece", "3d_batch_year"
             FROM object.finds
             WHERE
             finds.area_utm_easting_meters=%s  AND

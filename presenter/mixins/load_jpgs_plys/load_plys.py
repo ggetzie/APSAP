@@ -29,17 +29,22 @@ class LoadPlys:
         #models of the current folder are grouped by batches they belong to
         batched_models = self.get_batched_models()
 
+
+        years_models = (self.get_year_models())
         #We must know the 3d models that were matched with a pair of jpgs, 
         matched_plys = self.get_matched_plys(main_view._3d_model_dict)
 
-        #Stoing the min and max match
-        batches_nums = []
         
-        #Go through each batch
+        for year in sorted(years_models.keys()):
+            year_item = QStandardItem(f"{year}")
+            for batch in sorted(years_models[year].keys()):
+                batch_item =  QStandardItem(f"{batch}")
+                for piece in sorted(years_models[year][batch].keys()):
+                   modelPiece = QStandardItem(f"{piece}")
+        # Go through each batch
 
         for batch in batched_models:
             
-            batches_nums.append(int(re.sub(r'[^0-9]', '', batch )))
 
             model_batch = QStandardItem(f"{batch}")
             pieces = batched_models[batch]
@@ -48,7 +53,8 @@ class LoadPlys:
             for piece in pieces:
                 piece_num = piece[0]
                 path = piece[1]
-               
+                year = piece[2]
+                
  
                 #Create a piece q item later for use
                 modelPiece = QStandardItem(f"{piece_num}")
@@ -120,20 +126,22 @@ class LoadPlys:
          
   
         cache_result = main_model.cache_3d.get(path)
-  
+        m = re.search(
+                main_model.path_variables["MODELS_FILES_RE"],
+            path.replace("\\", "/"),
+        )
+        year = (m.group(1))
+        batch_num = m.group(2)
+        piece_num = m.group(3)
         if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 7 :
             print(f"Point cloud's data has been stored. Loading {path} directly from library")
-            return cache_result
+            cache_result = list(cache_result)
+            cache_result.append(year)
+            return tuple(cache_result)
         else:
             print(f"Loading 3d model: {path}")
             #Extra the batch and piece number from the path
-            m = re.search(
-                    main_model.path_variables["MODELS_FILES_RE"],
-                path.replace("\\", "/"),
-            )
-            
-            batch_num = m.group(1)
-            piece_num = m.group(2)
+
             import time
             now = time.time()
             brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
@@ -160,10 +168,45 @@ class LoadPlys:
             return_values = (batch_num, piece_num, brightness_3d,  width_length_summary, area, context, contour)
 
             main_model.cache_3d.set(path, return_values)
-             
+            return_values = list(return_values)
+            return_values.append(year)
+            return_values = tuple(return_values)
             return return_values
 
 
+    def get_year_models(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()    
+        all_model_paths = glob(str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
+        if not all_model_paths:
+            main_view.statusLabel.setText(f"No models were found")
+
+
+        models_dict = dict()
+        for path in all_model_paths:
+            m = re.search(
+                main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
+            )
+            # This error happens when the relative path is different
+            year = m.group(1)
+           
+            if year.isnumeric():
+                year = int(year)
+                batch_num = int(m.group(2))
+                piece_num = int(m.group(3))
+                if year in models_dict:
+                    if batch_num in models_dict[year]:
+                        if not (piece_num in  models_dict[year][batch_num]):
+                            models_dict[year][batch_num][piece_num] = path
+                    else:
+                        models_dict[year][batch_num] = dict()
+                        models_dict[year][batch_num][piece_num] = path
+                else:
+                    models_dict[year] = dict()
+                    models_dict[year][batch_num] = dict()
+                    models_dict[year][batch_num][piece_num] = path
+        return models_dict
+        # Sort the items
+ 
 
 
     def get_batched_models(self):
@@ -179,12 +222,14 @@ class LoadPlys:
                 main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
             )
             # This error happens when the relative path is different
-            batch_num = m.group(1)
-            piece_num = m.group(2)
+            year = m.group(1)
+             
+            batch_num = m.group(2)
+            piece_num = m.group(3)
             if batch_num not in batches_dict:
-                batches_dict[batch_num] = [[int(piece_num), path]]
+                batches_dict[batch_num] = [[int(piece_num), path, year]]
             else:
-                batches_dict[batch_num].append([int(piece_num), path])
+                batches_dict[batch_num].append([int(piece_num), path, year])
 
         # Sort the items
 

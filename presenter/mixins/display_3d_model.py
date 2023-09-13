@@ -34,10 +34,11 @@ class Display3dModelMixin:
             )
             # This error happens when the relative path is different
             if m:
-
+                batch_year = str(m.group(1))
                 batch_num = str(
-                    int(m.group(1))
-                )  # int("006") -> int(6). We remove leading 0
-                piece_num = m.group(2)
+                    int(m.group(2))
+                )   
+                piece_num = m.group(3)
                 main_view.new_batch.setText(batch_num)
                 main_view.new_piece.setText(piece_num)
+                main_view.new_year.setText(batch_year)

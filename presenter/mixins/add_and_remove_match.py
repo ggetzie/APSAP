@@ -47,10 +47,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     previous_current_batch_num != "NS"
                     and previous_current_piece_num != "NS"
                 ):
-
+                    year = #Notice that you have to change this 
                     if (
                         sorted_mod.item(i).text()
-                        == f"Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                        == f"Year: {year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
                     ):
 
                         (sorted_mod.item(i)).setForeground(QColor("black"))
@@ -70,6 +70,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
             find_num = main_view.selected_find.text()
             batch_num = main_view.new_batch.text()
             piece_num = main_view.new_piece.text()
+            
             previous_current_batch_num = main_view.current_batch.text()
             previous_current_piece_num = main_view.current_piece.text()
 
@@ -123,10 +124,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 # Make the item red in sorted_model_list
                 sorted_mod = main_view.sorted_model_list.model()
                 for i in range(sorted_mod.rowCount()):
-
+                    year = #Notice that you have to change this 
                     if (
                         sorted_mod.item(i).text()
-                        == f"Batch {int(batch_num):03}, model: {int(piece_num)}"
+                        == f"Year: {year}, Batch {int(batch_num):03}, model: {int(piece_num)}"
                     ):
                         (sorted_mod.item(i)).setForeground(QColor("red"))
                     if (
@@ -135,7 +136,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     ):
                         if (
                             sorted_mod.item(i).text()
-                            == f"Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                            == f"Year: {year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
                         ):
                             (sorted_mod.item(i)).setForeground(QColor("black"))
                 # Also we need to unred the previous selected item in the sorted model list

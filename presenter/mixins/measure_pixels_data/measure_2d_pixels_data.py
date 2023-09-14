@@ -33,7 +33,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         try:
             if not (masked_ceremics and  mask_grid):
-                image = main_model.open_image(_2d_picture_path, full_size=False)
+                image = main_model.open_image(_2d_picture_path)
             
                 mask_grid = main_presenter.colorgrid_predictor.predict(image)
                 masked_ceremics = main_presenter.ceremic_predictor.predict(image) 
@@ -48,7 +48,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         if not (masked_ceremics and mask_grid):
-            image = main_model.open_image(path_2d,full_size=False)
+            image = main_model.open_image(path_2d)
             masked_ceremics = main_presenter.ceremic_predictor.predict(image)
             mask_grid = main_presenter.colorgrid_predictor.predict(image)
         masked_ceremics_bool = (((np.array(masked_ceremics)).astype(bool)))
@@ -68,7 +68,7 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
     def get_2d_light_summary(self, image_path , masked_ceremics = None):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        image = main_model.open_image(image_path,full_size=False)
+        image = main_model.open_image(image_path)
         if not masked_ceremics:
            
             masked_ceremics = main_presenter.ceremic_predictor.predict(image)

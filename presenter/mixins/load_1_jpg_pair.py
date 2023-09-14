@@ -29,10 +29,10 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_view.path_2d_picture = photos_dir
        
         front_photo = ImageQt(
-            main_model.open_image(str(photos_dir / "1.jpg"), full_size=False)
+            main_model.open_image(str(photos_dir / "1.jpg"))
         )
         back_photo = ImageQt(
-            main_model.open_image(str(photos_dir / "2.jpg"), full_size=False)
+            main_model.open_image(str(photos_dir / "2.jpg"))
         )
       
         main_view.findFrontPhoto_l.setPixmap(
@@ -51,17 +51,12 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_view.selected_find.setText(find_num)
         easting_northing_context = main_presenter.get_easting_northing_context()
 
-        
-
-        _3d_locations = main_view._3d_model_dict[
-            f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
-        ]
         find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
         
          
          
         #Loading the 3d model already matched before
-        if  find_str in main_view.dict_find_2_ply and main_view.dict_find_2_ply[find_str] != None:#_3d_locations[0] != None and _3d_locations[1] != None:
+        if  find_str in main_view.dict_find_2_ply and main_view.dict_find_2_ply[find_str] != None: 
             ply_str = main_view.dict_find_2_ply[find_str] 
             (batch_year, batch_num, batch_piece) = ply_str.split(",")
             main_view.current_year.setText(str(batch_year))
@@ -102,15 +97,6 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
              _2d_image_path
         )
         )
-        #Generate a dictionary to mark if a certain 3d model is matched to other images already
-        #This dictionary will be used in the later stage, when we have to the list item of 3d models already matched before to red
-        # all_matched_3d_models = set()
-        # for key in main_view._3d_model_dict:
-        #     if not (
-        #         main_view._3d_model_dict[key][0] == None
-        #         and main_view._3d_model_dict[key][1] == None
-        #     ):
-        #         all_matched_3d_models.add(main_view._3d_model_dict[key])
 
         model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Sorted models"])

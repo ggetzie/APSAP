@@ -20,7 +20,7 @@ class MeasurePixelsDataMixin(
         self.ceremic_predictor = MaskPredictor(r".\computation\ceremicsmask.pt")
         self.colorgrid_predictor = MaskPredictor(r".\computation\colorgridmask.pt")
  
-        img = model.open_image("assets/reference_placeholder.png", full_size=False).convert('RGB')
+        img = model.open_image("assets/reference_placeholder.png").convert('RGB')
 
         self.ceremic_predictor.predict(img)
        # self.colorgrid_predictor.predict(img)
@@ -29,12 +29,12 @@ class MeasurePixelsDataMixin(
             main_model, main_view, main_presenter = self.get_model_view_presenter()
 
             #Here let's get the ceremic and color grid here at once, that takes
-            image_1 = main_model.open_image(img_1_path, full_size=False)
+            image_1 = main_model.open_image(img_1_path)
 
             masked_ceremics_1 = main_presenter.ceremic_predictor.predict(image_1)
             mask_grid_1 = main_presenter.colorgrid_predictor.predict(image_1)
 
-            image_2 = main_model.open_image(img_2_path, full_size=False)
+            image_2 = main_model.open_image(img_2_path)
             masked_ceremics_2 = main_presenter.ceremic_predictor.predict(image_2)
             mask_grid_2 = main_presenter.colorgrid_predictor.predict(image_2)
 

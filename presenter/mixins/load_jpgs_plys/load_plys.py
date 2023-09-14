@@ -23,16 +23,8 @@ class LoadPlys:
         #Qt associates a model with a select object. 
         self.reset_ply_selection_model()
 
-        #Measurements are used for similaritiy calculuation
-        # self.reset_ply_measurements()
-    
-        #models of the current folder are grouped by batches they belong to
-        batched_models = self.get_batched_models()
-
-
+        #Get a tree like structure that stores all the ply.
         years_models = (self.get_year_models())
-        #We must know the 3d models that were matched with a pair of jpgs, 
-        matched_plys = self.get_matched_plys(main_view._3d_model_dict)
 
         
         for batch_year in sorted(years_models.keys()):
@@ -51,37 +43,7 @@ class LoadPlys:
                    batch_item.appendRow(modelPiece)
                 year_item.appendRow(batch_item)
             main_view.modelList.selectionModel().model().appendRow(year_item)
-            # main_view.dict_find_2_ply[find_str] = ply_str
-            # main_view.dict_ply_2_find[ply_str] = find_str
-        # Go through each batch
-                 
-        
-        # for batch in batched_models:
-            
-
-        #     model_batch = QStandardItem(f"{batch}")
-        #     pieces = batched_models[batch]
-        #     batch_num = int(batch)
-        #     #Go through each piece of the current batch
-        #     for piece in pieces:
-        #         piece_num = piece[0]
-        #         path = piece[1]
-        #         year = piece[2]
-                
  
-        #         #Create a piece q item later for use
-        #         modelPiece = QStandardItem(f"{piece_num}")
-        #         modelPiece.setData(f"{path}", Qt.UserRole)
-               
-        #         #Set the color of the item to be red if it already had a match before
-        #         if (int(batch_num), int(piece_num)) in matched_plys:
-        #             modelPiece.setForeground(QColor("red"))
-               
-               
-        #         model_batch.appendRow(modelPiece)
-           
-           
-        #     main_view.modelList.selectionModel().model().appendRow(model_batch)
 
     def reset_ply_selection_model(self):
         #Either create a model for the selection model instance, or remove all the rows in it
@@ -221,34 +183,7 @@ class LoadPlys:
         # Sort the items
  
 
-
-    def get_batched_models(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()    
-        all_model_paths = glob(str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
-        if not all_model_paths:
-            main_view.statusLabel.setText(f"No models were found")
-
-
-        batches_dict = dict()
-        for path in all_model_paths:
-            m = re.search(
-                main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
-            )
-            # This error happens when the relative path is different
-            year = m.group(1)
-             
-            batch_num = m.group(2)
-            piece_num = m.group(3)
-            if batch_num not in batches_dict:
-                batches_dict[batch_num] = [[int(piece_num), path, year]]
-            else:
-                batches_dict[batch_num].append([int(piece_num), path, year])
-
-        # Sort the items
-
-        for key in batches_dict:
-            batches_dict[key] = sorted(batches_dict[key])
-        return batches_dict
+ 
  
     def get_3d_model_info(self, current_item):
         batch_num = current_item["batch_num"]
@@ -270,11 +205,5 @@ class LoadPlys:
             
         )
 
-    def get_matched_plys(self, _3d_model_dict):
-        all_matched_3d_models = set()
-        for key in _3d_model_dict:
-            if not (_3d_model_dict[key][0] == None and _3d_model_dict[key][1] == None):
-                all_matched_3d_models.add(_3d_model_dict[key])
-        return all_matched_3d_models
 
  

@@ -37,7 +37,6 @@ class LoadJpgs:
         finds.sort(key=lambda f: int(f))
 
         # Get a dictionary to get all
-        main_view._3d_model_dict = dict()
         main_view.dict_find_2_ply = dict()
         main_view.dict_ply_2_find = dict()
         easting, northing, context = main_presenter.get_easting_northing_context()
@@ -55,8 +54,6 @@ class LoadJpgs:
                 print(f"Loading the folder: {context_dir / finds_subdir / find / finds_photo_dir }")
                 item = QListWidgetItem(find)
                 batch_num, batch_piece, batch_year = main_model.get_sherd_info(easting, northing, context, int(find))                # print(f"The year we get from DB is: {_3d_locations[2]}")
-                #_3d_locations[0] is batch, _3d_locations[1] is piece
-                main_view._3d_model_dict[f"{easting},{northing},{context},{int(find)}"] =  (batch_num, batch_piece)  
                 if batch_year!= None  and batch_num!=None and batch_piece!=None:
                     item.setForeground(QColor("red"))
                     find_str = f"{easting},{northing},{context},{int(find)}"

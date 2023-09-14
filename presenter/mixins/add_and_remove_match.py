@@ -61,7 +61,6 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
                 # Remove the dict entry from
                 dict_key = f"{easting},{northing },{context},{int(find)}"
-                main_view._3d_model_dict[dict_key] = (None, None)
                 #print("Notice here that the dict_ply_2_jpg and dict_jpg_2_plt has to be change")
                 batch_year = previous_current_year
                 batch_num = previous_current_batch_num
@@ -175,7 +174,6 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 # Also we need to unred the previous selected item in the sorted model list
 
                 dict_key = f"{easting},{northing },{context},{int(find_num)}"
-                main_view._3d_model_dict[dict_key] = (int(batch_num), int(piece_num))
                 batch_year = new_year
                 batch_num = batch_num
                 batch_piece = piece_num

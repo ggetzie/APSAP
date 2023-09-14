@@ -65,6 +65,7 @@ class DatabaseMixin:
                 return None, None
             else:
                 # print(record, "\n")
+                print(f"the find of {(utm_easting, utm_northing, context_num, find_num)} has the record {record}")
                 return record[0]
 
         except (Exception) as error:
@@ -126,11 +127,12 @@ class DatabaseMixin:
                             find_num,
                         ),
                     )
-                    print(batch_number, sherd_number, new_year)
+                     
                     updated_rows = cursor.rowcount
-                    print("Updated")
                     if updated_rows <= 1:
                         conn.commit()
+                        print(f"Updated with new_batch_num, new_sherd_num, new_year: { (new_batch_num, new_sherd_num, new_year)}")
+
 
         except (Exception) as error:
             print("Error while connecting to PostgreSQL", error)

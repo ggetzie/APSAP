@@ -35,40 +35,53 @@ class LoadPlys:
         matched_plys = self.get_matched_plys(main_view._3d_model_dict)
 
         
-        for year in sorted(years_models.keys()):
-            year_item = QStandardItem(f"{year}")
-            for batch in sorted(years_models[year].keys()):
-                batch_item =  QStandardItem(f"{batch}")
-                for piece in sorted(years_models[year][batch].keys()):
-                   modelPiece = QStandardItem(f"{piece}")
-        # Go through each batch
+        for batch_year in sorted(years_models.keys()):
+            year_item = QStandardItem(f"{batch_year}")
+            for batch_num in sorted(years_models[batch_year].keys()):
+                batch_item =  QStandardItem(f"{batch_num}")
+                for batch_piece in sorted(years_models[batch_year][batch_num].keys()):
+                   path =  years_models[batch_year][batch_num][batch_piece]
+                   modelPiece = QStandardItem(f"{batch_piece}")
+                   modelPiece.setData(f"{path}", Qt.UserRole)
 
-        for batch in batched_models:
+                   ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
+ 
+                   if ply_str in main_view.dict_ply_2_find   :
+                        modelPiece.setForeground(QColor("red"))
+                   batch_item.appendRow(modelPiece)
+                year_item.appendRow(batch_item)
+            main_view.modelList.selectionModel().model().appendRow(year_item)
+            # main_view.dict_find_2_ply[find_str] = ply_str
+            # main_view.dict_ply_2_find[ply_str] = find_str
+        # Go through each batch
+                 
+        
+        # for batch in batched_models:
             
 
-            model_batch = QStandardItem(f"{batch}")
-            pieces = batched_models[batch]
-            batch_num = int(batch)
-            #Go through each piece of the current batch
-            for piece in pieces:
-                piece_num = piece[0]
-                path = piece[1]
-                year = piece[2]
+        #     model_batch = QStandardItem(f"{batch}")
+        #     pieces = batched_models[batch]
+        #     batch_num = int(batch)
+        #     #Go through each piece of the current batch
+        #     for piece in pieces:
+        #         piece_num = piece[0]
+        #         path = piece[1]
+        #         year = piece[2]
                 
  
-                #Create a piece q item later for use
-                modelPiece = QStandardItem(f"{piece_num}")
-                modelPiece.setData(f"{path}", Qt.UserRole)
+        #         #Create a piece q item later for use
+        #         modelPiece = QStandardItem(f"{piece_num}")
+        #         modelPiece.setData(f"{path}", Qt.UserRole)
                
-                #Set the color of the item to be red if it already had a match before
-                if (int(batch_num), int(piece_num)) in matched_plys:
-                    modelPiece.setForeground(QColor("red"))
+        #         #Set the color of the item to be red if it already had a match before
+        #         if (int(batch_num), int(piece_num)) in matched_plys:
+        #             modelPiece.setForeground(QColor("red"))
                
                
-                model_batch.appendRow(modelPiece)
+        #         model_batch.appendRow(modelPiece)
            
            
-            main_view.modelList.selectionModel().model().appendRow(model_batch)
+        #     main_view.modelList.selectionModel().model().appendRow(model_batch)
 
     def reset_ply_selection_model(self):
         #Either create a model for the selection model instance, or remove all the rows in it

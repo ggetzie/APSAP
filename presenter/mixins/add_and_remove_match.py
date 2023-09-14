@@ -37,17 +37,19 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 main_model.update_match_info(easting, northing, context, find, None, None, None)
                 for i in range(mod.rowCount()):
                     for j in range(mod.item(i).rowCount()):
-                    
-                            if int(previous_current_batch_num) == int(
+                        for k in range(mod.item(i).child(j).rowCount()):
+                            if int(previous_current_year) == int(
                                 mod.item(i).text()
-                            ) and int(previous_current_piece_num) == int(
+                            ) and int(previous_current_batch_num) == int(
                                 mod.item(i).child(j).text()
+                            )and int(previous_current_piece_num) == int(
+                                mod.item(i).child(j).child(k).text()
                             ):
                                 # Make the old selected black
-                                mod.item(i).child(j).setForeground(QColor("black"))
+                                mod.item(i).child(j).child(k).setForeground(QColor("black"))
                 # Make the item Black in model sorted list
                 sorted_mod = main_view.sorted_model_list.model()
-                print("Warning: triple stack is needed here")
+               
                 for i in range(sorted_mod.rowCount()):
                     if (
                         sorted_mod.item(i).text()
@@ -118,31 +120,34 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
                 mod = main_view.modelList.model()
                 # Make the item red in modelList
-                print("Warning: triple stack is needed here")
+                
                 for i in range(mod.rowCount()):
 
                     for j in range(mod.item(i).rowCount()):
-                     
-                        if (
-                            previous_current_batch_num != None
-                            and previous_current_piece_num != None
-                            and previous_current_year != None
-                            and previous_current_batch_num != "NS"
-                            and previous_current_piece_num != "NS"
-                            and previous_current_year != "NS"
-                        ):
-                            if int(previous_current_batch_num) == int(
-                                mod.item(i).text()
-                            ) and int(previous_current_piece_num) == int(
-                                mod.item(i).child(j).text()
+                        
+                        for k in range(mod.item(i).child(j).rowCount()):
+                            if (
+                                previous_current_batch_num != None
+                                and previous_current_piece_num != None
+                                and previous_current_year != None
+                                and previous_current_batch_num != "NS"
+                                and previous_current_piece_num != "NS"
+                                and previous_current_year != "NS"
                             ):
-                                # Make the old selected black
-                                mod.item(i).child(j).setForeground(QColor("black"))
-                        if int(batch_num) == int(mod.item(i).text()) and int(
-                                                    piece_num
-                                                ) == int(mod.item(i).child(j).text()):
-                                                    # Make the newly selected red
-                                                    mod.item(i).child(j).setForeground(QColor("red"))
+                                if int(previous_current_year) == int(
+                                    mod.item(i).text()
+                                ) and int(previous_current_batch_num) == int(
+                                    mod.item(i).child(j).text()
+                                ) and int(previous_current_piece_num) == int(
+                                    mod.item(i).child(j).child(k).text()
+                                ):
+                                    # Make the old selected black
+                                    mod.item(i).child(j).child(k).setForeground(QColor("black"))
+                            if int(new_year) == int(mod.item(i).text()
+                            ) and int(batch_num) == int(mod.item(i).child(j).text()
+                            ) and int(piece_num) == int(mod.item(i).child(j).child(k).text()):
+                                                        # Make the newly selected red
+                                mod.item(i).child(j).child(k).setForeground(QColor("red"))
 
                 # Make the item red in sorted_model_list
                 sorted_mod = main_view.sorted_model_list.model()

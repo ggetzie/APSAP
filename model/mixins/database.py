@@ -75,7 +75,7 @@ class DatabaseMixin:
 
 
     def update_match_info(
-        self, utm_easting, utm_northing, context_num, find_num, new_batch_num, new_sherd_num
+        self, utm_easting, utm_northing, context_num, find_num, new_batch_num, new_sherd_num, new_year
     ):
         if(self.conn):
             conn = self.conn
@@ -88,7 +88,7 @@ class DatabaseMixin:
             cursor = conn.cursor()
 
             query_select = """
-            SELECT "3d_batch_number", "3d_batch_piece" 
+            SELECT "3d_batch_number", "3d_batch_piece" , "3d_batch_year"
             FROM object.finds
             WHERE
             finds.area_utm_easting_meters=%s  AND
@@ -99,7 +99,7 @@ class DatabaseMixin:
 
             query_update = """
             UPDATE object.finds 
-            SET "3d_batch_number" = %s, "3d_batch_piece" = %s
+            SET "3d_batch_number" = %s, "3d_batch_piece" = %s, "3d_batch_year" = %s
             WHERE finds.area_utm_easting_meters = %s and finds.area_utm_northing_meters = %s and finds.context_number = %s and finds.find_number = %s;
             """
 
@@ -109,23 +109,24 @@ class DatabaseMixin:
             if len(record) > 1:
                 print("Error, detected duplicate entry!")
             else:
-                batch_number, sherd_number = record[0]
-                if batch_number == new_batch_num and sherd_number == new_sherd_num:
+                batch_number, sherd_number, year_number = record[0]
+                if batch_number == new_batch_num and sherd_number == new_sherd_num and year_number == new_year:
                     pass
                 else:
                     print("Updating...")
-                    print(batch_number, batch_number)
                     cursor.execute(
                         query_update,
                         (
                             new_batch_num,
                             new_sherd_num,
+                            new_year,
                             utm_easting,
                             utm_northing,
                             context_num,
                             find_num,
                         ),
                     )
+                    print(batch_number, sherd_number, new_year)
                     updated_rows = cursor.rowcount
                     print("Updated")
                     if updated_rows <= 1:

@@ -57,11 +57,12 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
         ]
         find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
-        ply_str = main_view.dict_find_2_ply[find_str] 
+        
          
          
         #Loading the 3d model already matched before
-        if  find_str in main_view.dict_find_2_ply:#_3d_locations[0] != None and _3d_locations[1] != None:
+        if  find_str in main_view.dict_find_2_ply and main_view.dict_find_2_ply[find_str] != None:#_3d_locations[0] != None and _3d_locations[1] != None:
+            ply_str = main_view.dict_find_2_ply[find_str] 
             (batch_year, batch_num, batch_piece) = ply_str.split(",")
             main_view.current_year.setText(str(batch_year))
             main_view.current_batch.setText(str(batch_num))
@@ -135,7 +136,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 "*", f"{int(piece_num)}", 1
             )
 
-            ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
+            ply_str = f"{int(year)},{int(batch_num)},{int(piece_num)}"
 
             
             # if (

@@ -42,6 +42,10 @@ class LoadJpgs:
         easting, northing, context = main_presenter.get_easting_northing_context()
         finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
         finds_photo_dir = main_model.path_variables["FINDS_PHOTO_DIR"]
+
+        #Testing if all the years are 2022
+        #D:\ararat\data\files\N\38\483390\4419290\9\finds\individual
+
         for find in finds:
             jpg_1_path = context_dir / finds_subdir / find / finds_photo_dir / "1.jpg"
             jpg_2_path = context_dir / finds_subdir / find / finds_photo_dir / "2.jpg"
@@ -51,7 +55,6 @@ class LoadJpgs:
                 item = QListWidgetItem(find)
                 batch_num, batch_piece, batch_year = main_model.get_sherd_info(easting, northing, context, int(find))                # print(f"The year we get from DB is: {_3d_locations[2]}")
                 #_3d_locations[0] is batch, _3d_locations[1] is piece
-       
                 main_view._3d_model_dict[f"{easting},{northing},{context},{int(find)}"] =  (batch_num, batch_piece)  
                 if batch_year!= None  and batch_num!=None and batch_piece!=None:
                     item.setForeground(QColor("red"))

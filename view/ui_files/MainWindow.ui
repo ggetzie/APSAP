@@ -22,6 +22,11 @@
     <height>600</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Sherd Match Assistance</string>
   </property>
@@ -498,7 +503,13 @@
             </attribute>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QTreeView" name="modelList"/>
+              <widget class="QTreeView" name="modelList">
+               <property name="font">
+                <font>
+                 <pointsize>9</pointsize>
+                </font>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -508,7 +519,38 @@
             </attribute>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
-              <widget class="QTreeView" name="sorted_model_list"/>
+              <widget class="QTreeView" name="sorted_model_list">
+               <property name="font">
+                <font>
+                 <pointsize>7</pointsize>
+                 <italic>false</italic>
+                </font>
+               </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOn</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOn</enum>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="rootIsDecorated">
+                <bool>false</bool>
+               </property>
+               <attribute name="headerCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="headerMinimumSectionSize">
+                <number>350</number>
+               </attribute>
+               <attribute name="headerDefaultSectionSize">
+                <number>350</number>
+               </attribute>
+               <attribute name="headerStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -518,40 +560,16 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_11">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QLabel" name="model">
         <property name="minimumSize">
          <size>
           <width>470</width>
-          <height>430</height>
+          <height>390</height>
          </size>
         </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+        <property name="text">
+         <string/>
         </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <widget class="QLabel" name="model">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>3dmodel</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </widget>
       </item>
      </layout>
@@ -1190,6 +1208,11 @@
     </item>
     <item row="11" column="1">
      <widget class="QLabel" name="statusLabel">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="text">
        <string>Status</string>
       </property>
@@ -1240,12 +1263,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
           <widget class="QLabel" name="contextDisplay">
-           <property name="minimumSize">
-            <size>
-             <width>700</width>
-             <height>30</height>
-            </size>
-           </property>
            <property name="sizeIncrement">
             <size>
              <width>10</width>
@@ -1254,13 +1271,153 @@
            </property>
            <property name="font">
             <font>
-             <pointsize>12</pointsize>
+             <pointsize>10</pointsize>
             </font>
            </property>
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Find Filter</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="find_error">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>7</pointsize>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color : red</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_24">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_16">
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Find Start</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="find_start">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="maximum">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_15">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Find End</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="find_end">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="maximum">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="loadContext">
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Load 
+Context</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -1281,7 +1438,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="error_message">
+              <widget class="QLabel" name="batch_error">
                <property name="minimumSize">
                 <size>
                  <width>150</width>
@@ -1290,7 +1447,7 @@
                </property>
                <property name="font">
                 <font>
-                 <pointsize>10</pointsize>
+                 <pointsize>7</pointsize>
                 </font>
                </property>
                <property name="styleSheet">
@@ -1372,10 +1529,10 @@
                   </font>
                  </property>
                  <property name="minimum">
-                  <number>1</number>
+                  <number>0</number>
                  </property>
                  <property name="maximum">
-                  <number>99999</number>
+                  <number>0</number>
                  </property>
                 </widget>
                </item>
@@ -1411,14 +1568,17 @@
                   </font>
                  </property>
                  <property name="minimum">
-                  <number>1</number>
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <number>0</number>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QToolButton" name="loadAll">
+              <widget class="QToolButton" name="loadSortedPlys">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1439,11 +1599,12 @@
                </property>
                <property name="font">
                 <font>
-                 <pointsize>12</pointsize>
+                 <pointsize>8</pointsize>
                 </font>
                </property>
                <property name="text">
-                <string>Load</string>
+                <string>Load Plys of
+ Selected Images</string>
                </property>
                <property name="autoRaise">
                 <bool>false</bool>

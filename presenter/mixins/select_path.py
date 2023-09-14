@@ -106,30 +106,41 @@ class SelectPathMixin:
     def clearInterface(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        if main_view.context_cb.count() > 0:
+        main_view.findFrontPhoto_l.clear()
+        main_view.findBackPhoto_l.clear()
+        main_view.statusLabel.setText(f"")
+        main_view.selected_find.setText(f"")
+        main_view.current_batch.setText(f"")
+        main_view.current_year.setText(f"")
+        main_view.current_piece.setText(f"")
+        main_view.new_batch.setText(f"")
+        main_view.new_piece.setText(f"")
+        main_view.new_year.setText(f"")
+        main_view.contextDisplay.setText(self.get_context_string())
+        if hasattr(main_view, "current_pcd"):
+            main_view.ply_window.remove_geometry(main_view.current_pcd)
+            main_view.current_pcd = None
 
-            main_view.statusLabel.setText(f"")
-            main_view.selected_find.setText(f"")
-            main_view.current_batch.setText(f"")
-            main_view.current_year.setText(f"")
-            main_view.current_piece.setText(f"")
-            main_view.new_batch.setText(f"")
-            main_view.new_piece.setText(f"")
-            main_view.new_year.setText(f"")
-            main_view.contextDisplay.setText(self.get_context_string())
-            if hasattr(main_view, "current_pcd"):
-                main_view.ply_window.remove_geometry(main_view.current_pcd)
-                main_view.current_pcd = None
-
-            model = QStandardItemModel(main_view)
-            main_view.sorted_model_list.setModel(model)
-            main_presenter.reset_ply_selection_model()
+        model = QStandardItemModel(main_view)
+        main_view.sorted_model_list.setModel(model)
+        main_presenter.reset_ply_selection_model()
 
             
 
     def contextChanged(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        
+        if not main_view.checkFindsValid():
+            from PyQt5.QtWidgets import QMessageBox
+
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Error")
+            msg.setInformativeText('The Finds filter range is not valid')
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            return
+
+
         if main_view.context_cb.count() > 0:
 
 

@@ -25,7 +25,7 @@ class LoadJpgs:
          
 
     def populate_finds(self):
-        print("populate_finds is run")
+
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.finds_list.clear()

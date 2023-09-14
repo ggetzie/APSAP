@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 from PyQt5 import  uic
-
+import os
  
 
 
@@ -55,10 +55,13 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         )
         main_view.batch_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
         main_view.batch_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
-        main_view.loadAll.clicked.connect(main_presenter.contextChanged)
+        main_view.find_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
+        main_view.find_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
+        main_view.loadContext.clicked.connect(main_presenter.contextChanged)
+        main_view.loadSortedPlys.clicked.connect(lambda: main_presenter.load_sorted_models (main_view.finds_list.currentItem()))
 
 
-    def checkValid(self):
+    def checkBatchValid(self):
         main_view = self
         if main_view.batch_start.value() > main_view.batch_end.value():
             return False
@@ -66,14 +69,23 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
 
     def setUpBatchFilter(self, main_presenter):
         main_view = self
-        if self.checkValid():
-            main_view.error_message.setText("")
+        if self.checkBatchValid():
+            main_view.batch_error.setText("")
             
         else:
-            main_view.error_message.setText("Start should be smaller than End")
-        if  main_view.finds_list.currentItem():
-               
-                main_presenter.load_find_images(main_view.finds_list.currentItem())   
+            main_view.batch_error.setText("Start must be smaller than End")
+        if self.checkFindsValid():
+            main_view.find_error.setText("")
+            
+        else:
+            main_view.find_error.setText("Start must be smaller than End")
+
+    def checkFindsValid(self):
+        main_view = self
+        if main_view.find_start.value() > main_view.find_end.value():
+            return False
+        return True
+
     
 
 
@@ -116,18 +128,20 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         batch_nums = []
         for path in glob(batch_nums_folder_path):
              if "batch_" == Path(path).parts[-1][:6]:
-                print(path)
                 batch_nums.append(int(Path(path).parts[-1].replace("batch_","")) )
          
 
         if batch_nums:
             batch_min = min(batch_nums)
             batch_max = max(batch_nums)
-            main_view.year.setReadOnly(False)
+            main_view.batch_start.setReadOnly(False)
+            main_view.batch_end.setReadOnly(False)
+
         else:
             batch_min = 0
             batch_max = 0
-            main_view.year.setReadOnly(True)
+            main_view.batch_start.setReadOnly(True)
+            main_view.batch_end.setReadOnly(True)
         
         main_view.batch_start.setMinimum(batch_min)
         main_view.batch_start.setMaximum(batch_max)
@@ -135,3 +149,40 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         main_view.batch_end.setMinimum(batch_min)
         main_view.batch_end.setMaximum(batch_max)
         main_view.batch_end.setValue(batch_max)
+
+        #Get all find numbers where both 1.jpg and 2.jpg exist
+        finds_photo_dir = main_model.path_variables["FINDS_PHOTO_DIR"]
+        
+        #finds_path = glob(context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*"  / finds_photo_dir / "1.jpg").as_posix() + glob(context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*"  / finds_photo_dir / "2.jpg").as_posix()
+        #finds_path_set = set(finds_path)
+        nums = glob((context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*" ).as_posix())
+        find_nums = []
+        for i in nums:
+            path1 = Path(i)/finds_photo_dir / "1.jpg"
+            path2 = Path(i)/finds_photo_dir / "2.jpg"
+            if os.path.exists(path1) and os.path.exists(path2):
+                if Path(i).parts[-1].isnumeric():
+                    find_nums.append(int(Path(i).parts[-1]))
+        
+
+        print(f"find_nums: {find_nums}")
+        if find_nums:
+            find_min = min(find_nums)
+            find_max = max(find_nums)
+            main_view.find_start.setReadOnly(False)
+            main_view.find_end.setReadOnly(False)
+        else:
+            find_min = 0
+            find_max = 0
+            main_view.find_start.setReadOnly(True)
+            main_view.find_end.setReadOnly(True)
+
+        
+        main_view.find_start.setMinimum(find_min)
+        main_view.find_start.setMaximum(find_max)
+        main_view.find_start.setValue(find_min)
+        main_view.find_end.setMinimum(find_min)
+        main_view.find_end.setMaximum(find_max)
+        main_view.find_end.setValue(find_max)
+        #Do the same thing except this time, we set the min and max if finds
+

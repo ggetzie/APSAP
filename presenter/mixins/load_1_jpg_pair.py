@@ -7,54 +7,70 @@ import time
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
     def load_find_images(self, selected_item):
+            main_model, main_view, main_presenter = self.get_model_view_presenter()
+            main_view.selected_find_widget = selected_item
+            #Setting the images to be shown
+            try:
+                find_num = main_view.finds_list.currentItem().text()
 
+            except AttributeError:
+                main_view.findFrontPhoto_l.clear()
+                main_view.findBackPhoto_l.clear()
+                return
+
+            photos_dir = (
+                main_presenter.get_context_dir()
+                / main_model.path_variables["FINDS_SUBDIR"]
+                / find_num
+                / main_model.path_variables["FINDS_PHOTO_DIR"]
+            )
+
+            main_view.path_2d_picture = photos_dir
+        
+            front_photo = ImageQt(
+                main_model.open_image(str(photos_dir / "1.jpg"))
+            )
+            back_photo = ImageQt(
+                main_model.open_image(str(photos_dir / "2.jpg"))
+            )
+        
+            main_view.findFrontPhoto_l.setPixmap(
+                QPixmap.fromImage(front_photo).scaledToWidth(
+                    main_view.findFrontPhoto_l.width()
+                )
+            )
+            main_view.current_image_front = str(photos_dir / "1.jpg")
+
+            main_view.findBackPhoto_l.setPixmap(
+                QPixmap.fromImage(back_photo).scaledToWidth(
+                    main_view.findBackPhoto_l.width()
+                )
+            )
+            main_view.current_image_back= str(photos_dir / "2.jpg")
+            main_view.selected_find.setText(find_num)
+    def load_sorted_models(self, selected_item):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_view.selected_find_widget = selected_item
-        #Setting the images to be shown
-        try:
-            find_num = main_view.finds_list.currentItem().text()
 
-        except AttributeError:
-            main_view.findFrontPhoto_l.clear()
-            main_view.findBackPhoto_l.clear()
+
+        if not main_view.checkBatchValid():
+            from PyQt5.QtWidgets import QMessageBox
+
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Error")
+            msg.setInformativeText('The batch filter range is not valid')
+            msg.setWindowTitle("Error")
+            msg.exec_()
             return
 
-        photos_dir = (
-            main_presenter.get_context_dir()
-            / main_model.path_variables["FINDS_SUBDIR"]
-            / find_num
-            / main_model.path_variables["FINDS_PHOTO_DIR"]
-        )
 
-        main_view.path_2d_picture = photos_dir
-       
-        front_photo = ImageQt(
-            main_model.open_image(str(photos_dir / "1.jpg"))
-        )
-        back_photo = ImageQt(
-            main_model.open_image(str(photos_dir / "2.jpg"))
-        )
-      
-        main_view.findFrontPhoto_l.setPixmap(
-            QPixmap.fromImage(front_photo).scaledToWidth(
-                main_view.findFrontPhoto_l.width()
-            )
-        )
-        main_view.current_image_front = str(photos_dir / "1.jpg")
-
-        main_view.findBackPhoto_l.setPixmap(
-            QPixmap.fromImage(back_photo).scaledToWidth(
-                main_view.findBackPhoto_l.width()
-            )
-        )
-        main_view.current_image_back= str(photos_dir / "2.jpg")
-        main_view.selected_find.setText(find_num)
-        easting_northing_context = main_presenter.get_easting_northing_context()
-
-        find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(find_num)}"
         
-         
-         
+        if not (selected_item ):
+            return
+        easting_northing_context = main_presenter.get_easting_northing_context()
+        find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(selected_item.text())}"
+        
+
         #Loading the 3d model already matched before
         if  find_str in main_view.dict_find_2_ply and main_view.dict_find_2_ply[find_str] != None: 
             ply_str = main_view.dict_find_2_ply[find_str] 
@@ -88,7 +104,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                 main_view.current_pcd = None
 
  
-        _2d_image_path = photos_dir
+        _2d_image_path = main_view.path_2d_picture
         #Generate a list of 3d models sorted by similarity. 
   
    
@@ -102,11 +118,10 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         model.setHorizontalHeaderLabels(["Sorted models"])
         for weighted_mean, batch_num, piece_num, year in (sorted(flat_simllarity_list)):
             
-            #In case the filter range is valid, we may have to skip adding the current item to the list
-            if main_view.checkValid():
-                #We consider the next if batch_number is not  in the range
-                if (not (int(batch_num ) >= self.main_view.batch_start.value() and int(batch_num )  <= self.main_view.batch_end.value())):
-                    continue
+     
+            #We consider the next if batch_number is not  in the range
+            if (not (int(batch_num ) >= self.main_view.batch_start.value() and int(batch_num )  <= self.main_view.batch_end.value())):
+                continue
             
 
             ply = QStandardItem(
@@ -124,11 +139,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
 
             ply_str = f"{int(year)},{int(batch_num)},{int(piece_num)}"
 
-            
-            # if (
-            #     int(batch_num),
-            #     int(piece_num),
-            # ) in all_matched_3d_models:
+
             if ply_str in main_view.dict_ply_2_find:
                 ply.setForeground(QColor("red"))
 

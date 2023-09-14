@@ -17,6 +17,7 @@ class ImageWindow(QWidget):
         main_view = self
         main_view.label = QLabel("iamge_window")
         pixmap = QPixmap(current_image)
+        pixmap = pixmap.scaledToWidth(720)
         main_view.label.setPixmap(pixmap)
         layout.addWidget(main_view.label)
         main_view.setLayout(layout)

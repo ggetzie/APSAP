@@ -94,7 +94,8 @@ class CalculateSimilarityMixin(
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
 
- 
+        main_view.statusLabel.setText(f"Measuring the pixels of the files in {image_path}")
+        main_view.statusLabel.repaint()
         (
             area_img_1,
             area_img_2,
@@ -135,7 +136,10 @@ class CalculateSimilarityMixin(
                     piece_num,
                     year
             )= self.measure_pixels_3d(path_3d)
-            
+            if int(batch_num) < int(main_view.batch_start.value()) or int(batch_num) > int(main_view.batch_end.value()) or int(year) != int(main_view.year.value()):
+                continue
+            main_view.statusLabel.setText(f"Calculate the similarity with {path_3d}")
+            main_view.statusLabel.repaint()
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
@@ -158,7 +162,7 @@ class CalculateSimilarityMixin(
             )
             similarity_scores.append(
                 [similairty, batch_num, piece_num, year]
-            )  # _#similairty, batch_num, piece_num])
+            )   
 
         return similarity_scores
 

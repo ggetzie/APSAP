@@ -53,41 +53,32 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         main_view.context_cb.currentIndexChanged.connect(
           lambda:   self.set_filter (main_model, main_presenter)
         )
-        main_view.batch_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
-        main_view.batch_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
-        main_view.find_start.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
-        main_view.find_end.valueChanged.connect(lambda: self.setUpBatchFilter (main_presenter)) 
-        main_view.loadContext.clicked.connect(main_presenter.contextChanged)
-        main_view.loadSortedPlys.clicked.connect(lambda: main_presenter.load_sorted_models (main_view.finds_list.currentItem()))
+        main_view.batch_start.valueChanged.connect(self.batch_start_change ) 
+        main_view.batch_end.valueChanged.connect(  self.batch_end_change ) 
+        main_view.find_start.valueChanged.connect( self.find_start_change  ) 
+        main_view.find_end.valueChanged.connect( self.find_end_change  ) 
+        # main_view.loadSortedPlys.clicked.connect(lambda: main_presenter.load_sorted_models (main_view.finds_list.currentItem()))
+        main_view.loadAll.clicked.connect(main_presenter.contextChanged)
 
 
-    def checkBatchValid(self):
+    def batch_start_change(self, main_presenter):
         main_view = self
-        if main_view.batch_start.value() > main_view.batch_end.value():
-            return False
-        return True
-
-    def setUpBatchFilter(self, main_presenter):
+        main_view.batch_end.setMinimum(main_view.batch_start.value())
+        
+    def batch_end_change(self, main_presenter):
         main_view = self
-        if self.checkBatchValid():
-            main_view.batch_error.setText("")
-            
-        else:
-            main_view.batch_error.setText("Start must be smaller than End")
-        if self.checkFindsValid():
-            main_view.find_error.setText("")
-            
-        else:
-            main_view.find_error.setText("Start must be smaller than End")
-
-    def checkFindsValid(self):
-        main_view = self
-        if main_view.find_start.value() > main_view.find_end.value():
-            return False
-        return True
-
+        main_view.batch_start.setMaximum(main_view.batch_end.value())
     
+    def find_start_change(self, main_presenter):
+        main_view = self
+        main_view.find_end.setMinimum(main_view.find_start.value())
+ 
+    def find_end_change(self, main_presenter):
+        main_view = self
+        main_view.find_start.setMaximum(main_view.find_end.value())
 
+ 
+    
 
     def set_filter(self, main_model, main_presenter):
         main_view = self
@@ -150,11 +141,9 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         main_view.batch_end.setMaximum(batch_max)
         main_view.batch_end.setValue(batch_max)
 
-        #Get all find numbers where both 1.jpg and 2.jpg exist
+         
         finds_photo_dir = main_model.path_variables["FINDS_PHOTO_DIR"]
-        
-        #finds_path = glob(context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*"  / finds_photo_dir / "1.jpg").as_posix() + glob(context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*"  / finds_photo_dir / "2.jpg").as_posix()
-        #finds_path_set = set(finds_path)
+ 
         nums = glob((context_dir / main_model.path_variables["FINDS_SUBDIR"]/"*" ).as_posix())
         find_nums = []
         for i in nums:
@@ -164,8 +153,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
                 if Path(i).parts[-1].isnumeric():
                     find_nums.append(int(Path(i).parts[-1]))
         
-
-        print(f"find_nums: {find_nums}")
+ 
         if find_nums:
             find_min = min(find_nums)
             find_max = max(find_nums)
@@ -184,5 +172,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin, AboutMixin):
         main_view.find_end.setMinimum(find_min)
         main_view.find_end.setMaximum(find_max)
         main_view.find_end.setValue(find_max)
+
+        # main_presenter.contextChanged()
         #Do the same thing except this time, we set the min and max if finds
 

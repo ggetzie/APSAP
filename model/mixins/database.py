@@ -60,9 +60,9 @@ class DatabaseMixin:
             record = cursor.fetchall()
             if len(record) > 1:
                 print("Error, detected duplicate entry!")
-                return None
+                return None, None, None
             elif len(record) == 0:
-                return None, None
+                return None, None, None
             else:
                 # print(record, "\n")
                 print(f"the find of {(utm_easting, utm_northing, context_num, find_num)} has the record {record}")

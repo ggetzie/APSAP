@@ -26,16 +26,23 @@ class LoadPlys:
         #Get a tree like structure that stores all the ply.
         years_models = (self.get_year_models())
 
+
         
         for batch_year in sorted(years_models.keys()):
+            if int(batch_year) !=int( main_view.year.value()):
+                continue
             year_item = QStandardItem(f"{batch_year}")
             for batch_num in sorted(years_models[batch_year].keys()):
+                if int(batch_num) < int(main_view.batch_start.value()) or int(batch_num > main_view.batch_end.value()):
+                    continue
                 batch_item =  QStandardItem(f"{batch_num}")
                 for batch_piece in sorted(years_models[batch_year][batch_num].keys()):
                    path =  years_models[batch_year][batch_num][batch_piece]
+                   main_presenter.load_ply_info_from_cache_or_calc(path)
                    modelPiece = QStandardItem(f"{batch_piece}")
                    modelPiece.setData(f"{path}", Qt.UserRole)
-
+                   main_view.statusLabel.setText(f"Loading 3d model {path}")
+                   main_view.statusLabel.repaint()
                    ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
  
                    if ply_str in main_view.dict_ply_2_find   :
@@ -109,7 +116,7 @@ class LoadPlys:
         batch_num = m.group(2)
         piece_num = m.group(3)
         if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 7 :
-            print(f"Point cloud's data has been stored. Loading {path} directly from library")
+            print(f"Loading {path} directly from library")
             cache_result = list(cache_result)
             cache_result.append(year)
             return tuple(cache_result)
@@ -126,7 +133,6 @@ class LoadPlys:
                 width_length_summary,
             ) = main_presenter.get_3d_object_area_and_width_length(path)
             
-            #As area and width_length depend on the size of grid, which we have no control. We disable area and width_length in other parts of the code and here
            
 
             width_length_summary = list(width_length_summary)
@@ -154,7 +160,7 @@ class LoadPlys:
         all_model_paths = glob(str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
         if not all_model_paths:
             main_view.statusLabel.setText(f"No models were found")
-
+            main_view.statusLabel.repaint()
 
         models_dict = dict()
         for path in all_model_paths:

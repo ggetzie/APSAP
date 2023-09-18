@@ -11,7 +11,7 @@ class PlyWindowMixin:
     def set_up_ply_window(self):
         
         widget = self.model
-
+        
         self.ply_window = o3d.visualization.Visualizer()
         self.ply_window.create_window(visible=False)   
         self.ply_window.get_render_option().light_on = False

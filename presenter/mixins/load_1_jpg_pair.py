@@ -26,13 +26,22 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             )
 
             main_view.path_2d_picture = photos_dir
-        
-            front_photo = ImageQt(
-                main_model.open_image(str(photos_dir / "1.jpg"))
-            )
-            back_photo = ImageQt(
-                main_model.open_image(str(photos_dir / "2.jpg"))
-            )
+            try:
+                front_photo = ImageQt(
+                    main_model.open_image(str(photos_dir / "1.jpg"))
+                )
+                back_photo = ImageQt(
+                    main_model.open_image(str(photos_dir / "2.jpg"))
+                )
+            except:
+                from PyQt5.QtWidgets import QMessageBox
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setText("Error")
+                msg.setInformativeText(f'The jpegs in {photos_dir} are not openable')
+                msg.setWindowTitle("Error")
+                msg.exec_()
+                return 
         
             main_view.findFrontPhoto_l.setPixmap(
                 QPixmap.fromImage(front_photo).scaledToWidth(
@@ -48,23 +57,12 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             )
             main_view.current_image_back= str(photos_dir / "2.jpg")
             main_view.selected_find.setText(find_num)
+            self.load_sorted_models(selected_item)
     def load_sorted_models(self, selected_item):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-
-        if not main_view.checkBatchValid():
-            from PyQt5.QtWidgets import QMessageBox
-
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error")
-            msg.setInformativeText('The batch filter range is not valid')
-            msg.setWindowTitle("Error")
-            msg.exec_()
-            return
-
-
         
+ 
+
         if not (selected_item ):
             return
         easting_northing_context = main_presenter.get_easting_northing_context()
@@ -84,8 +82,9 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                     / main_model.path_variables["MODELS_FILES_DIR"]
                 )
             )
-            whole_path = path.replace("*", f"{int(batch_num):03}", 1).replace(
-                "*", f"{int(batch_piece)}", 1
+       
+            whole_path = path.replace("*",str(batch_year)).replace("*", f"{int(batch_num):03}", 1).replace(
+                "*", f"{int(batch_num)}", 1
             )
             now = time.time()
             current_pcd_load = o3d.io.read_point_cloud(whole_path, remove_nan_points=True, remove_infinite_points=True)
@@ -118,14 +117,11 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         model.setHorizontalHeaderLabels(["Sorted models"])
         for weighted_mean, batch_num, piece_num, year in (sorted(flat_simllarity_list)):
             
-     
-            #We consider the next if batch_number is not  in the range
-            if (not (int(batch_num ) >= self.main_view.batch_start.value() and int(batch_num )  <= self.main_view.batch_end.value())):
-                continue
+ 
             
 
             ply = QStandardItem(
-                f"Year: {year}, Batch {batch_num}, model: {piece_num}"
+                f"{year}, Batch {batch_num}, model: {piece_num}"
             )
             path = str(
                 (
@@ -133,7 +129,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
                     / main_model.path_variables["MODELS_FILES_DIR"]
                 )
             )
-            whole_path = path.replace("*", f"{int(batch_num):03}", 1).replace(
+            whole_path = path.replace("*",str(year), 1).replace("*", f"{int(batch_num):03}", 1).replace(
                 "*", f"{int(piece_num)}", 1
             )
 

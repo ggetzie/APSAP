@@ -1,19 +1,14 @@
 import time
 from PyQt5.QtGui import (
-    QStandardItemModel,
+    QStandardItemModel, QFont
 )
 
-from PyQt5.QtWidgets import QMainWindow, QSplashScreen
+ 
 
-##potential view
-class LoadingSplash(QSplashScreen):
-    def mousePressEvent(self, event):
-
-        pass
 
 
 class SelectPathMixin: 
-
+ 
     def populate_hemispheres(self):
 
         # Getting m, v, c from to update the gui and get the data.
@@ -97,6 +92,7 @@ class SelectPathMixin:
                 / main_view.northing_cb.currentText()
             )
             options = main_presenter.get_options(contexts_root)
+           
             options.sort(key=int)
             main_view.context_cb.addItems(options)
 
@@ -124,34 +120,21 @@ class SelectPathMixin:
         model = QStandardItemModel(main_view)
         main_view.sorted_model_list.setModel(model)
         main_presenter.reset_ply_selection_model()
+        main_view.finds_list.clear()
 
             
 
     def contextChanged(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if not main_view.checkFindsValid():
-            from PyQt5.QtWidgets import QMessageBox
-
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error")
-            msg.setInformativeText('The Finds filter range is not valid')
-            msg.setWindowTitle("Error")
-            msg.exec_()
-            return
+        self.clearInterface()
 
 
         if main_view.context_cb.count() > 0:
 
-
-            funcs_to_run = [
-                ["Loading finds. It might take a while", main_presenter.populate_finds],
-                ["Loading models. It might take a while", main_presenter.populate_models],
-            ]
-
-            now = time.time()
-            main_presenter.load_and_run(funcs_to_run)
-            print(f"Time for loading plys and models passed: {time.time() - now} seconds")
+            main_presenter.populate_finds()
+            main_presenter.populate_models()
+ 
+     
 
     def get_context_string(self):
         """Return a string representing the full designation of the current context
@@ -170,21 +153,7 @@ class SelectPathMixin:
             main_view.context_cb.currentText(),
         ]
         return "-".join(hzenc)
-
-    def load_and_run(self, funcs_to_run):
-        # Load the splash
-        splash = LoadingSplash()
-        splash.show()
-        # Run all functions and the message during loading time
-        for message_func in funcs_to_run:
-            message = message_func[0]
-            func = message_func[1]
-            splash.showMessage(message)
-            func()
-        # Close the window
-        window = QMainWindow()
-        window.show()
-        splash.finish(window)
+ 
 
     def get_hemispheres(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -198,5 +167,8 @@ class SelectPathMixin:
         return hemispheres
 
     def get_options(self, path):
-        options = [d.name for d in path.iterdir() if d.is_dir() and d.name.isdigit()]
+        try:
+            options = [d.name for d in path.iterdir() if d.is_dir() and d.name.isdigit()]
+        except:
+            options = []
         return options

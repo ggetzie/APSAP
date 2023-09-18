@@ -53,7 +53,7 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 for i in range(sorted_mod.rowCount()):
                     if (
                         sorted_mod.item(i).text()
-                        == f"Year: {previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                        == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
                     ):
 
                         (sorted_mod.item(i)).setForeground(QColor("black"))
@@ -61,7 +61,6 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
                 # Remove the dict entry from
                 dict_key = f"{easting},{northing },{context},{int(find)}"
-                #print("Notice here that the dict_ply_2_jpg and dict_jpg_2_plt has to be change")
                 batch_year = previous_current_year
                 batch_num = previous_current_batch_num
                 batch_piece = previous_current_piece_num
@@ -106,6 +105,42 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     int(piece_num),
                     int(new_year)
                 )
+                from pathlib import Path
+                #Here we reconstruct the path
+                path = str(
+                    (
+                        main_presenter.get_context_dir()
+                        / main_model.path_variables["MODELS_FILES_DIR"]
+                    )
+                )
+                print(f"path: {path}")
+                original_ply = path.replace("*",str(new_year), 1).replace("*", f"{int(batch_num):03}", 1).replace(
+                "*", f"{int(piece_num)}", 1
+                )
+                 
+                mesh_ply = (original_ply[:-4] + "_sample0_3_mesh.ply")
+                context_dir = main_presenter.get_context_dir()
+                finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
+                folder = context_dir / finds_subdir / str(find_num) / "3d" /  "gp"
+                
+                original_destination = Path(folder/"a.ply")
+                mesh_destination = Path(folder/"a_0_3_mesh.ply")
+
+                print(f"original_ply location: {original_ply}")
+                print()
+                print(f"mesh_ply location: {mesh_ply}")
+                print()
+                print(f"original_ply destination: {original_destination}")
+                print()
+                print(f"mesh_ply destination {mesh_destination}")
+                print()
+                print(f"Copying file from {original_ply} to {original_destination}")
+                main_model.fixAndCopyPly(original_ply, original_destination)
+                print(f"Copying file from {mesh_ply} to {mesh_destination}")
+                main_model.fixAndCopyPly(mesh_ply, mesh_destination)
+                # piece_1_world_sample0_3_mesh
+             
+
                 # Here to avoid loading time, we manually update some data. We can
                 # reload the contexts but it would be way too slow
 
@@ -163,12 +198,12 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     ):
                         if (
                             sorted_mod.item(i).text()
-                            == f"Year: {previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                            == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
                         ):
                             (sorted_mod.item(i)).setForeground(QColor("black"))
                     if (
                         sorted_mod.item(i).text()
-                        == f"Year: {new_year}, Batch {int(batch_num):03}, model: {int(piece_num)}"
+                        == f"{new_year}, Batch {int(batch_num):03}, model: {int(piece_num)}"
                     ):
                         (sorted_mod.item(i)).setForeground(QColor("red"))
                 # Also we need to unred the previous selected item in the sorted model list
@@ -181,7 +216,6 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
                 main_view.dict_find_2_ply[find_str] = ply_str
                 main_view.dict_ply_2_find[ply_str] = find_str
-                #print("Notice here that the dict_ply_2_jpg and dict_jpg_2_plt has to be change")
 
             else:
                 QMessageBox(

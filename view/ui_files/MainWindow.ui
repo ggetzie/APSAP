@@ -1210,7 +1210,7 @@
      <widget class="QLabel" name="statusLabel">
       <property name="font">
        <font>
-        <pointsize>10</pointsize>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="text">
@@ -1390,31 +1390,6 @@
                </item>
               </layout>
              </item>
-             <item>
-              <widget class="QPushButton" name="loadContext">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>100</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Load 
-Context</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
           </layout>
@@ -1578,7 +1553,7 @@ Context</string>
               </layout>
              </item>
              <item>
-              <widget class="QToolButton" name="loadSortedPlys">
+              <widget class="QToolButton" name="loadAll">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -1599,12 +1574,11 @@ Context</string>
                </property>
                <property name="font">
                 <font>
-                 <pointsize>8</pointsize>
+                 <pointsize>13</pointsize>
                 </font>
                </property>
                <property name="text">
-                <string>Load Plys of
- Selected Images</string>
+                <string>Load</string>
                </property>
                <property name="autoRaise">
                 <bool>false</bool>

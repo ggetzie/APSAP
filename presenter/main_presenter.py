@@ -8,6 +8,9 @@ from presenter.mixins.main_measure_pixels_data import MeasurePixelsDataMixin
 import time
 import re
 from pathlib import PurePath
+from PyQt5.QtGui import (
+    QFont
+)
 class Mainpresenter(
     SelectPathMixin,
     MeasurePixelsDataMixin,
@@ -21,11 +24,10 @@ class Mainpresenter(
 
 
     def __init__(self, model, view):
-
+        main_presenter = self
         self.main_model = model
         self.main_view = view
-        main_presenter = self
-        
+
         self.main_model.prepare_data(self.main_view)
         
         self.main_view.set_up_view_presenter_connection(main_presenter, self.main_model )
@@ -33,7 +35,7 @@ class Mainpresenter(
         view.contextDisplay.setText(main_presenter.get_context_string())
 
         MeasurePixelsDataMixin.__init__(self, self.main_view, self.main_model)
-       
+     
         super().__init__(self.main_view, self.main_model)
 
     def get_model_view_presenter(self):

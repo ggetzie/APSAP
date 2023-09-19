@@ -1,32 +1,38 @@
-import time
-from PyQt5.QtGui import (
-    QStandardItemModel, QFont
-)
+from PyQt5.QtGui import QStandardItemModel 
+from pathlib import Path
+class ChooseDirectoryMixin: 
 
- 
+    def get_hemispheres(self):
+        """Get the hemisphere folders under this folder.
 
-
-
-class SelectPathMixin: 
- 
-    def populate_hemispheres(self):
-
-        # Getting m, v, c from to update the gui and get the data.
+        Returns:
+            list: List containing 'N', 'S', or both
+        """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        # Clear the combox box
+        hemispheres = [
+            d.name
+            for d in main_model.file_root.iterdir()
+            if d.name in main_model.path_variables["HEMISPHERES"] and d.is_dir()
+        ]
+
+        return hemispheres
+    def populate_hemispheres(self):
+        """Set the select options of hemisphere as the hemispheres in the root folder
+        """        
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
         main_view.hemisphere_cb.clear()
 
-        # Get the hemispheres and add it to the combo box
+
         options = main_presenter.get_hemispheres()
         main_view.hemisphere_cb.addItems(options)
-        # Set the index of the select as 0 by default and allow the select to be "selected"  if there are more than 1 elements
         main_view.hemisphere_cb.setCurrentIndex(0 if len(options) > 0 else -1)
         main_view.hemisphere_cb.setEnabled(len(options) > 1)
 
 
     def populate_zones(self):
-        # Check populate_zones for explanations
+        """Set the select options of zones as the zones under the current hemisphere
+        """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         if main_view.hemisphere_cb.count() > 0 :
             
@@ -41,7 +47,8 @@ class SelectPathMixin:
             main_view.zone_cb.setEnabled(len(options) > 1)
 
     def populate_eastings(self):
-        # Check populate_zones for explanations
+        """Set the select options of eastings as the eastings under the current zones
+        """ 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         if main_view.zone_cb.count() > 0:
         
@@ -57,9 +64,10 @@ class SelectPathMixin:
             main_view.easting_cb.setEnabled(len(options) > 1)
 
     def populate_northings(self):
-        # Check populate_zones for explanations
+        """Set the select options of northings as the northings under the current eastings
+        """ 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        #Make sure that we only populate if the current items if the previous items
+
         if main_view.easting_cb.count() > 0:
             main_view.northing_cb.clear()
             
@@ -77,9 +85,8 @@ class SelectPathMixin:
             main_view.northing_cb.setEnabled(len(options) > 1)
             
     def populate_contexts(self):
-        # Check populate_zones for explanations,  except this "populate" function takes the final functions populate_finds and populate_models in a load_and_run mechanism that shows
-
-
+        """Set the select options of contexts as the contexts under the current northing
+        """ 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         if main_view.northing_cb.count() > 0:
             main_view.context_cb.clear()
@@ -100,6 +107,8 @@ class SelectPathMixin:
             main_view.context_cb.setEnabled(len(options) > 1)
             
     def clearInterface(self):
+        """Clear all the texts, and selects, iamges displayed and 3d models from the interface.
+        """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.findFrontPhoto_l.clear()
@@ -122,12 +131,11 @@ class SelectPathMixin:
         main_presenter.reset_ply_selection_model()
         main_view.finds_list.clear()
 
-            
-
-    def contextChanged(self):
+    def loadImagesPlys(self):
+        """This function loads all the finds and models under the current path.
+        """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         self.clearInterface()
-
 
         if main_view.context_cb.count() > 0:
 
@@ -155,20 +163,87 @@ class SelectPathMixin:
         return "-".join(hzenc)
  
 
-    def get_hemispheres(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        hemispheres = [
-            d.name
-            for d in main_model.file_root.iterdir()
-            if d.name in main_model.path_variables["HEMISPHERES"] and d.is_dir()
-        ]
-
-        return hemispheres
 
     def get_options(self, path):
+        """This function gets all the options of all the subdirectories under the current directory.
+
+        Args:
+            path (str): The path under which we search for subdirectories
+
+        Returns:
+            list: A list of all the options under the current directory
+        """        
         try:
             options = [d.name for d in path.iterdir() if d.is_dir() and d.name.isdigit()]
         except:
             options = []
         return options
+
+    def get_context_dir(self):
+        """This function get the whole directory path with all the current selects
+
+        Returns:
+            Path(): A Path from pathlib that represents the current path
+        """        
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        res = (
+            main_model.file_root
+            / main_view.hemisphere_cb.currentText()
+            / main_view.zone_cb.currentText()
+            / main_view.easting_cb.currentText()
+            / main_view.northing_cb.currentText()
+            / main_view.context_cb.currentText()
+        )
+        if not res.exists():
+            main_view.statusLabel.setText(f"{res} does not exist!")
+            return Path()
+        return res
+
+    def get_easting_northing_context(self):
+        main_model, view, main_presenter = self.get_model_view_presenter()
+        """This function returns the easting, northing and context
+
+        Returns:
+            tuple: The tuple of the easting, northing and context of the current path
+        """        
+        context_dir = main_presenter.get_context_dir()
+        (easting, northing, context) = Path(context_dir).parts[-3:]
+        return (easting, northing, context)
+    
+    def EnableSignals(self, boolean):
+
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        main_view.hemisphere_cb.setEnabled(boolean)
+        main_view.zone_cb.setEnabled(boolean)
+        main_view.easting_cb.setEnabled(boolean)
+        main_view.northing_cb.setEnabled(boolean)
+        main_view.context_cb.setEnabled(boolean)
+
+         
+   
+        main_view.finds_list.setEnabled(boolean)
+
+        main_view.batch_start.setEnabled(boolean)
+        main_view.batch_end.setEnabled(boolean)
+        main_view.find_start.setEnabled(boolean)
+        main_view.find_end.setEnabled(boolean)
+
+        main_view.loadAll.setEnabled(boolean)
+
+        main_view.update_button.setEnabled(boolean)
+        main_view.remove_button.setEnabled(boolean)
+
+        main_view.modelList.setEnabled(boolean)
+        main_view.sorted_model_list.setEnabled(boolean)
+
+        main_view.year.setEnabled(boolean)
+
+
+
+        #year
+        #images
+        #sortedList
+        #unsortedList

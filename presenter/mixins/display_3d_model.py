@@ -7,9 +7,7 @@ class Display3dModelMixin:
 
     def change_model(self, current_pcd, previous_pcd):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_view.ply_window.get_render_option().point_size = (
-            5  # Generally we need this value to be larger only if we draw the jpgs
-        )
+        main_view.ply_window.get_render_option().point_size = 5  
         if previous_pcd:
             main_view.ply_window.remove_geometry(previous_pcd)
         main_view.current_pcd = current_pcd

@@ -8,24 +8,6 @@ import os
 from PIL import Image
 class LoadJpgs:
 
-
-    def get_find_of_a_ply(self, batch_num, batch_piece, batch_year):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
-        if main_view.dict_ply_2_find and ply_str in main_view.dict_ply_2_find:
-            return main_view.dict_ply_2_find[ply_str]
-        else:
-            return None
-        
-    def get_ply_of_a_find(easting, northing, context, find):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        find_str = f"{easting},{northing},{context},{int(find)}"
-        if main_view.dict_find_2_ply and find_str in main_view.dict_find_2_ply:
-            return main_view.dict_find_2_ply[find_str]
-        else:
-            return None
-         
-
     def populate_finds(self):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
@@ -64,7 +46,7 @@ class LoadJpgs:
                 continue
             item = QListWidgetItem(find)
             print(f"Loading the folder: {context_dir / finds_subdir / find / finds_photo_dir }")    
-            batch_num, batch_piece, batch_year = main_model.get_sherd_info(easting, northing, context, int(find))              
+            (batch_year, batch_num, batch_piece) = main_model.get_sherd_info(easting, northing, context, find)              
             if batch_year!= None  and batch_num!=None and batch_piece!=None:
                 item.setForeground(QColor("red"))
                 find_str = f"{easting},{northing},{context},{int(find)}"

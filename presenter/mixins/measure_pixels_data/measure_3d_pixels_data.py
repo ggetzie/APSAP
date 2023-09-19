@@ -75,34 +75,3 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         else :
             pixels_difference = (red_box_red_locations[1] - red_box_red_locations[0] ) #* 0.9
         return  pixels_difference
-
-    def get_brightnesses_3d (self, model_path):
-
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        ply_window = main_view.ply_window
-        ply_window.clear_geometries()
-        current_pcd_load = o3d.io.read_point_cloud(model_path) 
-        
-        ply_window.add_geometry(current_pcd_load)
-        ctr = ply_window.get_view_control()
-            
-        ply_window.get_render_option().point_size = 5
-
-        ctr.change_field_of_view(step=-9)
-        object_image = ply_window.capture_screen_float_buffer(True)
-        
-        pic = (np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')).ravel())
-        pic[pic==255] = 0
-        pixels_sorted = sorted(pic[pic!=0])
-        median = (pixels_sorted[int(len(pixels_sorted)/2)])
-        max_ = max(pixels_sorted)
-        min_ = min(pixels_sorted)
-        mean = (np.sum(pixels_sorted)/len(pixels_sorted))
-        upper_q = pixels_sorted[int(len(pixels_sorted)* (3/4))]
-        lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
-        ply_window.remove_geometry(current_pcd_load)
-        del ctr
-        std = np.std(pixels_sorted)
-        return (max_,min_,median, mean,upper_q, lower_q, std)
- 

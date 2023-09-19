@@ -63,31 +63,3 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         length = max(y_diff,x_diff)
         return width , length 
  
-
-
-    def get_2d_light_summary(self, image_path , masked_ceremics = None):
-
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        image = main_model.open_image(image_path)
-        if not masked_ceremics:
-           
-            masked_ceremics = main_presenter.ceremic_predictor.predict(image)
-        
-        masked_ravel = (((np.array(masked_ceremics).ravel()).astype(bool)))
-        np_image = np.array(image.convert('L')).ravel()
-    
-        np_image[masked_ravel==False] = 0
-
-    
-        pixels_sorted = sorted(np_image[np_image!=0])
-        
-        median = (pixels_sorted[int(len(pixels_sorted)/2)])
-        max_ = max(pixels_sorted)
-        min_ = min(pixels_sorted)
-        mean = (np.sum(pixels_sorted)/len(pixels_sorted))
-        upper_q = pixels_sorted[int(len(pixels_sorted)* (3/4))]
-        lower_q = pixels_sorted[int(len(pixels_sorted)* (1/4))]
-        std = np.std(pixels_sorted)
-        return (int(max_),int(min_),int(median), (mean),int(upper_q), int(lower_q), (std))
- 
- 

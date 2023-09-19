@@ -100,10 +100,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     easting,
                     northing,
                     context,
-                    int(find_num),
-                    int(batch_num),
-                    int(piece_num),
-                    int(new_year)
+                    find_num,
+                    batch_num,
+                    piece_num,
+                    new_year
                 )
                 from pathlib import Path
                 #Here we reconstruct the path
@@ -135,9 +135,9 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 print(f"mesh_ply destination {mesh_destination}")
                 print()
                 print(f"Copying file from {original_ply} to {original_destination}")
-                main_model.fixAndCopyPly(original_ply, original_destination)
+                main_model.fixAndCopyPly(str(Path(original_ply)), str(Path(original_destination)))
                 print(f"Copying file from {mesh_ply} to {mesh_destination}")
-                main_model.fixAndCopyPly(mesh_ply, mesh_destination)
+                main_model.fixAndCopyPly(str(Path(mesh_ply)), str(Path(mesh_destination)))
                 # piece_1_world_sample0_3_mesh
              
 

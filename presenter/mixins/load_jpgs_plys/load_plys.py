@@ -20,7 +20,8 @@ class LoadPlys:
 
       
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
-        
+        main_presenter.EnableSignals(False)
+
         #Qt associates a model with a select object. 
         self.reset_ply_selection_model()
 
@@ -50,7 +51,8 @@ class LoadPlys:
                    batch_item.appendRow(modelPiece)
                 year_item.appendRow(batch_item)
             main_view.modelList.selectionModel().model().appendRow(year_item)
- 
+        main_presenter.EnableSignals(True)
+
 
     def reset_ply_selection_model(self):
         #Either create a model for the selection model instance, or remove all the rows in it
@@ -105,9 +107,7 @@ class LoadPlys:
         
         main_model, main_view, main_presenter = self.get_model_view_presenter() 
         import diskcache
-        main_view.statusLabel.setText(f"Loading 3d model {path}")
-        main_view.statusLabel.repaint()       
-        QCoreApplication.processEvents()
+
 
         cache_result = main_model.cache_3d.get(path)
         m = re.search(
@@ -118,7 +118,7 @@ class LoadPlys:
         batch_num = m.group(2)
         piece_num = m.group(3)
         
-        if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 7 :
+        if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 6 :
             print(f"Loading {path} directly from library")
             cache_result = list(cache_result)
             cache_result.append(year)
@@ -126,10 +126,15 @@ class LoadPlys:
         else:
             print(f"Loading 3d model: {path}")
             #Extra the batch and piece number from the path
+             
+            main_view.statusLabel.setText(f"Loading 3d model {path}")
+            main_view.statusLabel.repaint()       
+       
 
+
+            QCoreApplication.processEvents()
             import time
             now = time.time()
-            brightness_3d = list(main_presenter.get_brightnesses_3d(path))    
             
             (
                 area,
@@ -149,7 +154,7 @@ class LoadPlys:
 
 
 
-            return_values = (batch_num, piece_num, brightness_3d,  width_length_summary, area, context, contour)
+            return_values = (batch_num, piece_num,  width_length_summary, area, context, contour)
 
             main_model.cache_3d.set(path, return_values)
             return_values = list(return_values)
@@ -162,9 +167,10 @@ class LoadPlys:
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
         all_model_paths = glob(str(main_presenter.get_context_dir() / main_model.path_variables["MODELS_FILES_DIR"]))
         if not all_model_paths:
+             
             main_view.statusLabel.setText(f"No models were found")
             main_view.statusLabel.repaint()
-
+           
         models_dict = dict()
         for path in all_model_paths:
             m = re.search(

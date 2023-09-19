@@ -23,7 +23,7 @@ class CalculateSimilarityMixin(
          
             weighted_mean = (
                  similairty["area_similarity"]  * 1.2
-                #  + similairty["brightness_similarity"] * 0.3   Not usable at this stage
+                
                 #  + similairty["brightness_std_similarity"] * 0.1
                   + similairty["width_length_similarity"] * 0.2
              
@@ -93,14 +93,12 @@ class CalculateSimilarityMixin(
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-
+      
         main_view.statusLabel.setText(f"Measuring the pixels of the files in {image_path}")
         main_view.statusLabel.repaint()
         (
             area_img_1,
             area_img_2,
-            light_ima_1,
-            light_ima_2,
             img_1_width_length,
             img_2_width_length,
         ) = self.measure_pixels_2d(img_1_path, img_2_path)
@@ -129,8 +127,6 @@ class CalculateSimilarityMixin(
             (
                     _3d_area,
                     width_length_3d,
-                    color_brightness_3d,
-                    color_brightness_std_3d,
                     contour_3d,
                     batch_num,
                     piece_num,
@@ -138,18 +134,15 @@ class CalculateSimilarityMixin(
             )= self.measure_pixels_3d(path_3d)
             if int(batch_num) < int(main_view.batch_start.value()) or int(batch_num) > int(main_view.batch_end.value()) or int(year) != int(main_view.year.value()):
                 continue
+            
             main_view.statusLabel.setText(f"Calculate the similarity with {path_3d}")
             main_view.statusLabel.repaint()
+           
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
                 area_img_2,
-                color_brightness_3d,
-                light_ima_1[3],
-                light_ima_2[3],
-                color_brightness_std_3d,
-                light_ima_1[-1],
-                light_ima_2[-1],
+               
                 width_length_3d[0],
                 width_length_3d[1],
                 img_1_width_length[0],
@@ -169,14 +162,8 @@ class CalculateSimilarityMixin(
     def get_similarity(
         self,
         _3d_area,
-        _2d_area_1,
+        area_front,
         _2d_area_2,
-        _3d_brightness,
-        _2d_brightness_1,
-        _2d_brightness_2,
-        _3d_brightness_std,
-        _2d_brightness_std_1,
-        _2d_brightness_std_2,
         _3d_pic_side_1,
         _3d_pic_side_2,
         _first_pic_side_1,
@@ -193,26 +180,11 @@ class CalculateSimilarityMixin(
 
         area_similarity = main_presenter.get_area_similarity(
             _3d_area,
-            _2d_area_1,
+            area_front,
             _2d_area_2,
-            parameters["area"]["slope"],
-            parameters["area"]["intercept"],
         )
-   
-        brightness_similarity = main_presenter.get_brightness_similarity(
-            _3d_brightness,
-            _2d_brightness_1,
-            _2d_brightness_2,
-            parameters["brightness"]["slope"],
-            parameters["brightness"]["intercept"],
-        )
-        brightness_std_similarity = main_presenter.get_brightness_std_similarity(
-            _3d_brightness_std,
-            _2d_brightness_std_1,
-            _2d_brightness_std_2,
-            parameters["brightness_std"]["slope"],
-            parameters["brightness_std"]["intercept"],
-        )
+  
+
         width_length_similarity = main_presenter.get_width_length_similarity(
             _3d_pic_side_1,
             _3d_pic_side_2,
@@ -220,10 +192,7 @@ class CalculateSimilarityMixin(
             _first_pic_side_2,
             _second_pic_side_1,
             _second_pic_side_2,
-            parameters["width"]["slope"],
-            parameters["width"]["intercept"],
-            parameters["length"]["slope"],
-            parameters["length"]["intercept"],
+            
         )
 
         contour_simlarity = main_presenter.get_contour_simlarity(
@@ -232,8 +201,6 @@ class CalculateSimilarityMixin(
 
         similarities = {
             "area_similarity": area_similarity,
-            "brightness_similarity": brightness_similarity,
-            "brightness_std_similarity": brightness_std_similarity,
             "width_length_similarity": width_length_similarity,
             "contour_simlarity": contour_simlarity,
         }

@@ -42,9 +42,7 @@ class MeasurePixelsDataMixin(
             #  
         
             area_img_1 = main_presenter.get_2d_area(img_1_path, masked_ceremics_1, mask_grid_1)
-            area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)
-            light_ima_1 = main_presenter.get_2d_light_summary(img_1_path, masked_ceremics_1 )
-            light_ima_2 = main_presenter.get_2d_light_summary(img_2_path, masked_ceremics_2)       
+            area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)  
             img_1_width_length = main_presenter.get_2d_width_length(img_1_path, masked_ceremics_1, mask_grid_1)
             img_2_width_length = main_presenter.get_2d_width_length(img_2_path,  masked_ceremics_2, mask_grid_2)
             
@@ -55,16 +53,12 @@ class MeasurePixelsDataMixin(
         except:
             area_img_1 = 1
             area_img_2 = 1
-            light_ima_1 = (1,1,1,1,1,1)
-            light_ima_2 = (1,1,1,1,1,1)
             img_1_width_length = (1,1)
             img_2_width_length = (1,1)
 
         return (
             area_img_1,
             area_img_2,
-            light_ima_1,
-            light_ima_2,
             img_1_width_length,
             img_2_width_length,
 
@@ -74,21 +68,16 @@ class MeasurePixelsDataMixin(
     def measure_pixels_3d(self, path_3d):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         
-        (batch_num, piece_num, brightness_3d, width_length_summary, area,   context, contour, year) = self.load_ply_info_from_cache_or_calc(path_3d)
+        (batch_num, piece_num, width_length_summary, area,  context, contour, year) = self.load_ply_info_from_cache_or_calc(path_3d)
         
         _3d_area = area
         batch_num = batch_num
         piece_num = piece_num
         width_length_3d = width_length_summary
-    
-        color_brightness_3d = brightness_3d[3]
-        color_brightness_std_3d = brightness_3d[-1]
         contour_3d = contour
         return (
             _3d_area,
             width_length_3d,
-            color_brightness_3d,
-            color_brightness_std_3d,
             contour_3d,
             batch_num,
             piece_num,

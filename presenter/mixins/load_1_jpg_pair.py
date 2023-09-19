@@ -59,8 +59,10 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             main_view.selected_find.setText(find_num)
             self.load_sorted_models(selected_item)
     def load_sorted_models(self, selected_item):
+
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        
+        main_presenter.EnableSignals(False)
+ 
  
 
         if not (selected_item ):
@@ -148,3 +150,4 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             main_presenter.change_3d_model
         )
+        main_presenter.EnableSignals(True)

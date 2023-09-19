@@ -1,5 +1,6 @@
  
-from PyQt5.QtCore import Qt
+         
+from PyQt5.QtCore import Qt, QCoreApplication
 
 
 from PyQt5.QtGui import (
@@ -41,8 +42,7 @@ class LoadPlys:
                    main_presenter.load_ply_info_from_cache_or_calc(path)
                    modelPiece = QStandardItem(f"{batch_piece}")
                    modelPiece.setData(f"{path}", Qt.UserRole)
-                   main_view.statusLabel.setText(f"Loading 3d model {path}")
-                   main_view.statusLabel.repaint()
+
                    ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
  
                    if ply_str in main_view.dict_ply_2_find   :
@@ -105,8 +105,10 @@ class LoadPlys:
         
         main_model, main_view, main_presenter = self.get_model_view_presenter() 
         import diskcache
-         
-  
+        main_view.statusLabel.setText(f"Loading 3d model {path}")
+        main_view.statusLabel.repaint()       
+        QCoreApplication.processEvents()
+
         cache_result = main_model.cache_3d.get(path)
         m = re.search(
                 main_model.path_variables["MODELS_FILES_RE"],
@@ -115,6 +117,7 @@ class LoadPlys:
         year = (m.group(1))
         batch_num = m.group(2)
         piece_num = m.group(3)
+        
         if cache_result and (type(cache_result) is tuple ) and len(cache_result) == 7 :
             print(f"Loading {path} directly from library")
             cache_result = list(cache_result)

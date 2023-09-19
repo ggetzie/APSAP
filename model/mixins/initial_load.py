@@ -13,8 +13,8 @@ class InitialLoadMixin:
         setting = self.simple_get_json("./configs/settings.json")
         self.file_root = Path(setting["FILE_ROOT"] )
         self.parameters = self.simple_get_json("./configs/parameters.json")
-        self.cache_3d = Cache("./cache/cache_3d")
-        self.cache_2d = Cache("./cache/cache_2d")
+        self.cache_3d = Cache("./cache/cache_3d_new")
+        self.cache_2d = Cache("./cache/cache_2d_new")
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
        
 

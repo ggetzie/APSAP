@@ -20,6 +20,7 @@ class FindsAndObjectsFilter:
         main_view.find_start.setMaximum(main_view.find_end.value())
 
     def set_filter(self):
+         
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # Deselect finds list
         main_view.finds_list.setCurrentItem(None)

@@ -135,13 +135,14 @@ class ChooseDirectoryMixin:
         """This function loads all the finds and models under the current path.
         """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_presenter.blockSignals(True)
         self.clearInterface()
 
         if main_view.context_cb.count() > 0:
 
             main_presenter.populate_finds()
             main_presenter.populate_models()
- 
+        main_presenter.blockSignals(False)
      
 
     def get_context_string(self):
@@ -212,38 +213,33 @@ class ChooseDirectoryMixin:
         (easting, northing, context) = Path(context_dir).parts[-3:]
         return (easting, northing, context)
     
-    def EnableSignals(self, boolean):
+    def blockSignals(self, boolean):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        main_view.hemisphere_cb.setEnabled(boolean)
-        main_view.zone_cb.setEnabled(boolean)
-        main_view.easting_cb.setEnabled(boolean)
-        main_view.northing_cb.setEnabled(boolean)
-        main_view.context_cb.setEnabled(boolean)
+        main_view.hemisphere_cb.setDisabled(boolean)
+        main_view.zone_cb.setDisabled(boolean)
+        main_view.easting_cb.setDisabled(boolean)
+        main_view.northing_cb.setDisabled(boolean)
+        main_view.context_cb.setDisabled(boolean)
+
 
          
    
-        main_view.finds_list.setEnabled(boolean)
+        main_view.finds_list.setDisabled(boolean)
 
-        main_view.batch_start.setEnabled(boolean)
-        main_view.batch_end.setEnabled(boolean)
-        main_view.find_start.setEnabled(boolean)
-        main_view.find_end.setEnabled(boolean)
+        main_view.batch_start.setDisabled(boolean)
+        main_view.batch_end.setDisabled(boolean)
+        main_view.find_start.setDisabled(boolean)
+        main_view.find_end.setDisabled(boolean)
 
-        main_view.loadAll.setEnabled(boolean)
+        main_view.loadAll.setDisabled(boolean)
 
-        main_view.update_button.setEnabled(boolean)
-        main_view.remove_button.setEnabled(boolean)
+        main_view.update_button.setDisabled(boolean)
+        main_view.remove_button.setDisabled(boolean)
 
-        main_view.modelList.setEnabled(boolean)
-        main_view.sorted_model_list.setEnabled(boolean)
+        main_view.modelList.setDisabled(boolean)
+        main_view.sorted_model_list.setDisabled(boolean)
 
-        main_view.year.setEnabled(boolean)
+        main_view.year.setDisabled(boolean)
 
-
-
-        #year
-        #images
-        #sortedList
-        #unsortedList

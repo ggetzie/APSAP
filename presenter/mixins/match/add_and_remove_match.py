@@ -1,10 +1,11 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 
-
 class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
 
-    def remove_match(self):
+    def remove_match_confirm(self, e):
+        if e.text() != "OK":
+            return
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         
         selected_item = main_view.finds_list.currentItem()
@@ -134,6 +135,10 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 print()
                 print(f"mesh_ply destination {mesh_destination}")
                 print()
+
+                
+                Path(str(context_dir / finds_subdir / str(find_num) / "3d"/"gp")).mkdir(parents=True, exist_ok=True) 
+
                 print(f"Copying file from {original_ply} to {original_destination}")
                 main_model.fixAndCopyPly(str(Path(original_ply)), str(Path(original_destination)))
                 print(f"Copying file from {mesh_ply} to {mesh_destination}")
@@ -221,13 +226,26 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                 QMessageBox(
                     main_view, text="Please select both a find and a model"
                 ).exec()
+             
     # next step: use the triple 
     def add_match(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         find_num = main_view.selected_find.text()
         batch_num = main_view.new_batch.text()
         piece_num = main_view.new_piece.text()
-        msg = QMessageBox(main_view, text=f"Update Find ({find_num}) to batch ({batch_num}) piece ({piece_num}). Proceed?")
+        year_num = main_view.new_year.text()
+        msg = QMessageBox(main_view, text=f"Update Find ({find_num}) to batch ({batch_num}) piece ({piece_num}) year ({year_num}). Proceed?")
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.buttonClicked.connect(main_presenter.add_match_confirm)
+        msg.exec()
+
+    def remove_match(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        find_num = main_view.selected_find.text()
+        batch_num = main_view.current_batch.text()
+        piece_num = main_view.current_piece.text()
+        year_num = main_view.current_year.text()
+        msg = QMessageBox(main_view, text=f"Remove the match of the Find ({find_num}), which are batch ({batch_num}) piece ({piece_num}) year ({year_num}). Proceed?")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.buttonClicked.connect(main_presenter.remove_match_confirm)
         msg.exec()

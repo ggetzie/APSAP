@@ -1,13 +1,15 @@
+import sys
+sys.path.insert(0, '../../..')
 from computation.nn_segmentation import MaskPredictor
 from scipy.ndimage import binary_dilation
 from PIL import Image
 import open3d as o3d
 import numpy as np
 import smallestenclosingcircle
-from presenter.mixins.measure_pixels_data.measure_2d_pixels_data import (
+from .measure_2d_pixels_data import (
     MeasurePixels2DDataMixin,
 )
-from presenter.mixins.measure_pixels_data.measure_3d_pixels_data import (
+from .measure_3d_pixels_data import (
     MeasurePixels3DDataMixin,
 )
 import time

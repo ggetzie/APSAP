@@ -61,11 +61,12 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
     def load_sorted_models(self, selected_item):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_presenter.EnableSignals(False)
+        main_presenter.blockSignals(True)
  
  
 
         if not (selected_item ):
+            main_presenter.blockSignals(False)
             return
         easting_northing_context = main_presenter.get_easting_northing_context()
         find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(selected_item.text())}"
@@ -150,4 +151,4 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             main_presenter.change_3d_model
         )
-        main_presenter.EnableSignals(True)
+        main_presenter.blockSignals(False)

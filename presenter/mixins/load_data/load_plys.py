@@ -20,12 +20,12 @@ class LoadPlys:
 
       
         main_model, main_view, main_presenter = self.get_model_view_presenter()    
-        main_presenter.EnableSignals(False)
+        main_presenter.blockSignals(True)
 
-        #Qt associates a model with a select object. 
+        # Qt associates a model with a select object. 
         self.reset_ply_selection_model()
 
-        #Get a tree like structure that stores all the ply.
+        # Get a tree like structure that stores all the ply.
         years_models = (self.get_year_models())
 
 
@@ -51,7 +51,7 @@ class LoadPlys:
                    batch_item.appendRow(modelPiece)
                 year_item.appendRow(batch_item)
             main_view.modelList.selectionModel().model().appendRow(year_item)
-        main_presenter.EnableSignals(True)
+        main_presenter.blockSignals(False)
 
 
     def reset_ply_selection_model(self):

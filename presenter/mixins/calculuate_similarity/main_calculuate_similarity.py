@@ -1,33 +1,23 @@
 from PIL.ImageQt import ImageQt
-from scipy.stats import gmean, tmean
 import numpy as np
-from presenter.mixins.calculuate_similarity.calculuate_individual_similarities import (
+from .calculuate_individual_similarities import (
     CalculateIndividualSimilaritiesMixin,
 )
 from glob import glob as glob
 import re
-import time
-from pathlib import Path as Path
 
 
-class CalculateSimilarityMixin(
-    CalculateIndividualSimilaritiesMixin
-):  # bridging the view(gui) and the model(data)
+class CalculateSimilarityMixin(CalculateIndividualSimilaritiesMixin):
     def genereate_similiarity_ranked_pieces(self, similarities_list):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         grand_similarity = []
 
         for similairty, batch_num, piece_num, year in similarities_list:
-            
-         
             weighted_mean = (
-                 similairty["area_similarity"]  * 1.2
-                
-                #  + similairty["brightness_std_similarity"] * 0.1
-                  + similairty["width_length_similarity"] * 0.2
-             
-                 + similairty["contour_simlarity"] * 0.7
+                similairty["area_similarity"] * 1.2
+                + similairty["width_length_similarity"] * 0.2
+                + similairty["contour_simlarity"] * 0.7
             )
 
             grand_similarity.append([weighted_mean, batch_num, piece_num, year])
@@ -50,8 +40,7 @@ class CalculateSimilarityMixin(
             m = re.search(
                 main_model.path_variables["MODELS_FILES_RE"], path.replace("\\", "/")
             )
-            # This error happens when the relative path is different
-            print(m.group(1))
+
             batch_num = int(m.group(2))
             if batch_num not in batches_dict:
                 batches_dict[batch_num] = 0
@@ -93,8 +82,10 @@ class CalculateSimilarityMixin(
 
         img_1_path = image_path / "1.jpg"
         img_2_path = image_path / "2.jpg"
-      
-        main_view.statusLabel.setText(f"Measuring the pixels of the files in {image_path}")
+
+        main_view.statusLabel.setText(
+            f"Measuring the pixels of the files in {image_path}"
+        )
         main_view.statusLabel.repaint()
         (
             area_img_1,
@@ -105,7 +96,7 @@ class CalculateSimilarityMixin(
         similarity_scores = []
 
         import cv2
-    
+
         contour1_2d = self.get_contour_2d(img_1_path)
         contour2_2d = self.get_contour_2d(img_2_path)
         batch_details = self.get_batch_details()
@@ -121,28 +112,30 @@ class CalculateSimilarityMixin(
                 )
             )
         )
-      
 
         for path_3d in all_3d_models_paths:
             (
-                    _3d_area,
-                    width_length_3d,
-                    contour_3d,
-                    batch_num,
-                    piece_num,
-                    year
-            )= self.measure_pixels_3d(path_3d)
-            if int(batch_num) < int(main_view.batch_start.value()) or int(batch_num) > int(main_view.batch_end.value()) or int(year) != int(main_view.year.value()):
+                _3d_area,
+                width_length_3d,
+                contour_3d,
+                batch_num,
+                piece_num,
+                year,
+            ) = self.measure_pixels_3d(path_3d)
+            if (
+                int(batch_num) < int(main_view.batch_start.value())
+                or int(batch_num) > int(main_view.batch_end.value())
+                or int(year) != int(main_view.year.value())
+            ):
                 continue
-            
+
             main_view.statusLabel.setText(f"Calculate the similarity with {path_3d}")
             main_view.statusLabel.repaint()
-           
+
             similairty = main_presenter.get_similarity(
                 _3d_area,
                 area_img_1,
                 area_img_2,
-               
                 width_length_3d[0],
                 width_length_3d[1],
                 img_1_width_length[0],
@@ -153,9 +146,7 @@ class CalculateSimilarityMixin(
                 contour2_2d,
                 contour_3d,
             )
-            similarity_scores.append(
-                [similairty, batch_num, piece_num, year]
-            )   
+            similarity_scores.append([similairty, batch_num, piece_num, year])
 
         return similarity_scores
 
@@ -183,7 +174,6 @@ class CalculateSimilarityMixin(
             area_front,
             _2d_area_2,
         )
-  
 
         width_length_similarity = main_presenter.get_width_length_similarity(
             _3d_pic_side_1,
@@ -192,7 +182,6 @@ class CalculateSimilarityMixin(
             _first_pic_side_2,
             _second_pic_side_1,
             _second_pic_side_2,
-            
         )
 
         contour_simlarity = main_presenter.get_contour_simlarity(

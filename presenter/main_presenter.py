@@ -1,11 +1,11 @@
 from presenter.mixins.choose_directory.main_choose_directory import ChooseDirectoryMixin
-from presenter.mixins.main_load_jpgs_plys import LoadJpgsPlysMixin
-from presenter.mixins.add_and_remove_match import AddAndRemoveMatchMixin
-from presenter.mixins.load_1_jpg_pair import Load1jpgPairMixin
+from presenter.mixins.load_data.main_load_jpgs_plys import LoadJpgsPlysMixin
+from presenter.mixins.match.add_and_remove_match import AddAndRemoveMatchMixin
+from presenter.mixins.load_data.load_1_jpg_pair import Load1jpgPairMixin
 from presenter.mixins.display_3d_model import Display3dModelMixin
-from presenter.mixins.main_calculuate_similarity import CalculateSimilarityMixin
-from presenter.mixins.main_measure_pixels_data import MeasurePixelsDataMixin
-from presenter.mixins.finds_and_objects_filter import FindsAndObjectsFilter
+from presenter.mixins.calculuate_similarity.main_calculuate_similarity import CalculateSimilarityMixin
+from presenter.mixins.measure_pixels_data.main_measure_pixels_data import MeasurePixelsDataMixin
+from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
 import time
 import re
 from pathlib import PurePath

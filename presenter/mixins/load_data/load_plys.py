@@ -197,28 +197,3 @@ class LoadPlys:
         return models_dict
         # Sort the items
  
-
- 
- 
-    def get_3d_model_info(self, current_item):
-        batch_num = current_item["batch_num"]
-        piece_num = current_item["piece_num"]
-        brightness_3d = current_item["brightness_summary"]
-        width_length_summary = current_item["width_length_summary"]
-        area = current_item["area"]
-        
-        context = current_item["context"]
-       
-        return (
-            batch_num,
-            piece_num,
-            brightness_3d,
-            width_length_summary,
-            area,
-        
-            context,
-            
-        )
-
-
- 

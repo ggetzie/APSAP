@@ -22,32 +22,33 @@ class MeasurePixelsDataMixin(
         self.ceremic_predictor = MaskPredictor(r".\computation\ceremicsmask.pt")
         self.colorgrid_predictor = MaskPredictor(r".\computation\colorgridmask.pt")
  
-        img = model.open_image("assets/reference_placeholder.png").convert('RGB')
+        self.reference_place_holder_img = model.open_image("assets/reference_placeholder.png").convert('RGB')
 
-        self.ceremic_predictor.predict(img)
+        self.ceremic_predictor.predict(self.reference_place_holder_img)
        # self.colorgrid_predictor.predict(img)
-    def measure_pixels_2d(self, img_1_path, img_2_path):
+    def measure_pixels_2d(self, path_front, path_back):
         try:
             main_model, main_view, main_presenter = self.get_model_view_presenter()
 
             #Here let's get the ceremic and color grid here at once, that takes
-            image_1 = main_model.open_image(img_1_path)
+            image_1 = main_model.open_image(path_front)
 
             masked_ceremics_1 = main_presenter.ceremic_predictor.predict(image_1)
             mask_grid_1 = main_presenter.colorgrid_predictor.predict(image_1)
 
-            image_2 = main_model.open_image(img_2_path)
+            image_2 = main_model.open_image(path_back)
             masked_ceremics_2 = main_presenter.ceremic_predictor.predict(image_2)
             mask_grid_2 = main_presenter.colorgrid_predictor.predict(image_2)
 
             #For now wrapping them in try and except, will fix later.
             #  
         
-            area_img_1 = main_presenter.get_2d_area(img_1_path, masked_ceremics_1, mask_grid_1)
-            area_img_2 = main_presenter.get_2d_area(img_2_path,  masked_ceremics_2, mask_grid_2)  
-            img_1_width_length = main_presenter.get_2d_width_length(img_1_path, masked_ceremics_1, mask_grid_1)
-            img_2_width_length = main_presenter.get_2d_width_length(img_2_path,  masked_ceremics_2, mask_grid_2)
-            
+            area_img_1 = main_presenter.get_2d_area(path_front, masked_ceremics_1, mask_grid_1)
+            area_img_2 = main_presenter.get_2d_area(path_back,  masked_ceremics_2, mask_grid_2)  
+            img_1_width_length = main_presenter.get_2d_width_length(path_front, masked_ceremics_1, mask_grid_1)
+            img_2_width_length = main_presenter.get_2d_width_length(path_back,  masked_ceremics_2, mask_grid_2)
+            contour1_2d = main_presenter.get_contour_2d(path_front)
+            contour2_2d = main_presenter.get_contour_2d(path_back)
         
         
 
@@ -57,13 +58,17 @@ class MeasurePixelsDataMixin(
             area_img_2 = 1
             img_1_width_length = (1,1)
             img_2_width_length = (1,1)
+            contour1_2d = main_presenter.get_contour_2d(main_presenter.reference_place_holder_img)
+            contour2_2d = main_presenter.get_contour_2d(main_presenter.reference_place_holder_img)
+
 
         return (
             area_img_1,
             area_img_2,
             img_1_width_length,
             img_2_width_length,
-
+            contour1_2d,
+            contour2_2d
         )
 
  

@@ -110,16 +110,18 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         #Generate a list of 3d models sorted by similarity. 
   
    
-        flat_simllarity_list = main_presenter.genereate_similiarity_ranked_pieces(
-            main_presenter.get_similaritiy_scores(
+        flat_simllarity_list = main_presenter.get_potential_3d_models_sorted_by_similarity(
              _2d_image_path
         )
-        )
+      
 
         model = QStandardItemModel(main_view)
         model.setHorizontalHeaderLabels(["Sorted models"])
-        for weighted_mean, batch_num, piece_num, year in (sorted(flat_simllarity_list)):
-            
+        for batch_num, piece_num, year in ((flat_simllarity_list)):
+            if int(year) !=int( main_view.year.value()):
+                continue
+            if int(batch_num) < int(main_view.batch_start.value()) or int(batch_num) > int(main_view.batch_end.value()):
+                continue
  
             
 

@@ -7,7 +7,7 @@ from diskcache import Cache
 
 class InitialLoadMixin:
     def prepare_data(self, main_view):
-        """This function prepares all the data needs to be preliminary loaded before the application begins.
+        """This function prepares all the data that needs to be preliminarily loaded before the application begins.
 
         Args:
             main_view (QT Window widget): This is the widget that contains GUI related functions and classes

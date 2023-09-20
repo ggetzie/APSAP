@@ -63,3 +63,32 @@ class MeasurePixels2DDataMixin:  # bridging the view(gui) and the model(data)
         length = max(y_diff,x_diff)
         return width , length 
  
+
+    def get_contour_2d(self, img_path):
+        import numpy as np
+        import open3d as o3d
+        from PIL import Image
+        import cv2
+
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        image = Image.open(img_path).resize((450, 300), Image.ANTIALIAS)
+
+        masked_ceremics = main_presenter.ceremic_predictor.predict(image)
+
+        masked_ravel = np.array(masked_ceremics)
+        masked_ravel[masked_ravel < 180] = 0
+
+        masked_ravel[masked_ravel != 0] = 255
+
+        pil_image = Image.fromarray(masked_ravel).convert("RGB")
+
+        open_cv_image = np.array(pil_image)
+        # Convert RGB to BGR
+        open_cv_image = open_cv_image[:, :, ::-1].copy()
+        img_gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+
+        ret, thresh = cv2.threshold(img_gray, 127, 255, 0)
+        contours, hierarchy = cv2.findContours(thresh, 2, 1)
+        cnt2 = contours[0]
+        return cnt2

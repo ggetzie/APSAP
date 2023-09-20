@@ -3,7 +3,9 @@ from presenter.mixins.load_data.main_load_jpgs_plys import LoadJpgsPlysMixin
 from presenter.mixins.match.add_and_remove_match import AddAndRemoveMatchMixin
 from presenter.mixins.load_data.load_1_jpg_pair import Load1jpgPairMixin
 from presenter.mixins.display_3d_model import Display3dModelMixin
-from presenter.mixins.calculuate_similarity.main_calculuate_similarity import CalculateSimilarityMixin
+from presenter.mixins.calculuate_similarity.get_3d_models_sorted_by_similarity import get3dModelSortedBySimilarityMixin
+from presenter.mixins.calculuate_similarity.calculuate_individual_similarities import CalculateIndividualSimilaritiesMixin
+
 from presenter.mixins.measure_pixels_data.main_measure_pixels_data import MeasurePixelsDataMixin
 from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
 import time
@@ -15,7 +17,8 @@ from PyQt5.QtGui import (
 class Mainpresenter(
     ChooseDirectoryMixin,
     MeasurePixelsDataMixin,
-    CalculateSimilarityMixin,
+    get3dModelSortedBySimilarityMixin,
+    CalculateIndividualSimilaritiesMixin,
     Load1jpgPairMixin,
     LoadJpgsPlysMixin,
     AddAndRemoveMatchMixin,

@@ -20,5 +20,7 @@
     "keypoints",
     "threed"
   ],
-  "python.formatting.provider": "black"
+  "python.formatting.provider": "black",
+  "editor.wordWrap": "wordWrapColumn",
+"editor.wordWrapColumn": 160
 }

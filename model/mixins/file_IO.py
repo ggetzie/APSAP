@@ -26,7 +26,7 @@ class FileIOMixin:
         Returns:
             Pillow Image: A Pil image object
         """
-        return Image.open(image_path).resize((450, 300), Image.ANTIALIAS)
+        return Image.open(image_path).resize((450, 300), Image.ANTIALIAS).convert('RGB')
 
     def simple_get_json(self, json_path):
         """This function loads the json path in to a python object

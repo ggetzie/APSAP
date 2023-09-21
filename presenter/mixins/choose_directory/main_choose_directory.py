@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QStandardItemModel
 from pathlib import Path
-
+import re
 
 class ChooseDirectoryMixin:
     def populate_hemispheres(self):
@@ -86,7 +86,7 @@ class ChooseDirectoryMixin:
             main_view.context_cb.setCurrentIndex(0 if len(options) > 0 else -1)
             main_view.context_cb.setEnabled(len(options) > 1)
 
-    def clearInterface(self):
+    def clear_interface(self):
         """Clear all the texts, and selects, iamges displayed and 3d models from the interface."""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -115,7 +115,7 @@ class ChooseDirectoryMixin:
         """This function loads all the finds and models under the current path."""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         main_presenter.blockSignals(True)
-        self.clearInterface()
+        self.clear_interface()
 
         if main_view.context_cb.count() > 0:
             main_presenter.populate_finds()
@@ -220,3 +220,15 @@ class ChooseDirectoryMixin:
         main_view.sorted_model_list.setDisabled(boolean)
 
         main_view.year.setDisabled(boolean)
+
+    def get_year_batch_piece(self, path_3d):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        m = re.search(
+            main_model.path_variables["MODELS_FILES_RE"],
+            path_3d.replace("\\", "/"),
+        )
+        year = m.group(1)
+        batch = m.group(2)
+        piece = m.group(3)
+        return (year, batch, piece)

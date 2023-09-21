@@ -1,6 +1,6 @@
-from .load_jpgs import LoadJpgs
+from .load_finds import LoadFinds
 from .load_plys import LoadPlys
 
 
-class LoadJpgsPlysMixin(LoadJpgs, LoadPlys):
+class LoadDataMixin(LoadFinds, LoadPlys):
     pass

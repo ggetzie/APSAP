@@ -26,17 +26,10 @@ class Display3dModelMixin:
             main_presenter.change_model(current_pcd_load, main_view.current_pcd)
             main_view.current_pcd = current_pcd_load
 
-            m = re.search(
-                main_model.path_variables["MODELS_FILES_RE"],
-                current_model_path.replace("\\", "/"),
-            )
-            # This error happens when the relative path is different
-            if m:
-                batch_year = str(m.group(1))
-                batch_num = str(
-                    int(m.group(2))
-                )   
-                piece_num = m.group(3)
-                main_view.new_batch.setText(batch_num)
-                main_view.new_piece.setText(piece_num)
-                main_view.new_year.setText(batch_year)
+
+            (year, batch, piece)  = main_presenter.get_year_batch_piece(current_model_path)
+
+            main_view.new_year.setText(year)
+            main_view.new_batch.setText(str(int(batch)))
+            main_view.new_piece.setText(piece)
+                

@@ -26,6 +26,9 @@ class InitialLoadMixin:
         self.parameters = self.simple_get_json("./configs/parameters.json")
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
+        # Data 4: An dummy image here is needed for what we need
+        self.reference_place_holder_img = "computation/reference_placeholder.jpg"
+
     def ensure_settings_exists(self, main_view):
         """This function will keep asking the user to select a folder to the root of the files if there isn't one already
 
@@ -43,7 +46,7 @@ class InitialLoadMixin:
             if not (Path(chosen_path).is_dir()):
                 message = "Path doesn't exist"
                 continue
-            
+
             # Test 2: The file path's directory contains an N or an S.
             has_N_S = any(
                 [

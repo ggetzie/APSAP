@@ -20,12 +20,8 @@ class get3dModelSortedBySimilarityMixin:
 
         # Measuring all the relevant data of the front and back images so that we can compare them with the data of the 3d models later
         (
-            area_front,
-            area_back,
-            (width_front, length_front),
-            (width_back, length_back),
-            contour_front,
-            contour_back,
+            (area_front, width_front, length_front, contour_front),
+            (area_back, width_back, length_back, contour_back),
         ) = main_presenter.measure_pixels_2d(path_front, path_back)
 
         # The list will be appened with [similarity_mean, batch_num, piece_num, year] of all 3d models we want to compare with
@@ -44,9 +40,9 @@ class get3dModelSortedBySimilarityMixin:
                 area_3d,
                 (width_3d, length_3d),
                 contour_3d,
+                year,
                 batch_num,
                 piece_num,
-                year,
             ) = main_presenter.measure_pixels_3d(path_3d)
 
             # If the batch number is outside of the filter or the year doesn't match, we skip this 3d model!.

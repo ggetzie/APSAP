@@ -8,7 +8,7 @@ class FindsAndObjectsFilter:
         """This function cleans the interface then set up appropriate filters in the interface based on the current path"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        main_presenter.clearInterface()
+        main_presenter.clear_interface()
 
         main_presenter.set_year_filter()
         main_presenter.set_batch_filter()

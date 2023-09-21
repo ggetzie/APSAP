@@ -115,11 +115,11 @@ class AddAndRemoveMatchMixin:  # bridging the view(gui) and the model(data)
                     )
                 )
                 print(f"path: {path}")
-                original_ply = path.replace("*",str(new_year), 1).replace("*", f"{int(batch_num):03}", 1).replace(
+                mesh_ply = path.replace("*",str(new_year), 1).replace("*", f"{int(batch_num):03}", 1).replace(
                 "*", f"{int(piece_num)}", 1
                 )
                  
-                mesh_ply = (original_ply[:-4] + "_sample0_3_mesh.ply")
+                original_ply = (mesh_ply.replace("_sample0_3_mesh.ply",".ply", 1))
                 context_dir = main_presenter.get_context_dir()
                 finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
                 folder = context_dir / finds_subdir / str(find_num) / "3d" /  "gp"

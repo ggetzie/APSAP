@@ -57,7 +57,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             )
             main_view.current_image_back= str(photos_dir / "2.jpg")
             main_view.selected_find.setText(find_num)
-            self.load_sorted_models(selected_item)
+            main_presenter.load_sorted_models(selected_item)
     def load_sorted_models(self, selected_item):
 
         main_model, main_view, main_presenter = self.get_model_view_presenter()

@@ -5,7 +5,7 @@ import open3d as o3d
 import numpy as np
 import smallestenclosingcircle
  
-class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
+class Measure3dMixin:  # bridging the view(gui) and the model(data)
  
 
     def get_3d_object_area_and_width_length(self, _3d_object_path):
@@ -75,3 +75,40 @@ class MeasurePixels3DDataMixin:  # bridging the view(gui) and the model(data)
         else :
             pixels_difference = (red_box_red_locations[1] - red_box_red_locations[0] ) #* 0.9
         return  pixels_difference
+
+    def get_contour_3d (self,  model_path):
+        import numpy as np
+        import open3d as o3d
+        from PIL import Image
+        import cv2
+        main_model, main_view, main_presenter = self.get_model_view_presenter()    
+
+        ply_window = main_view.ply_window
+        ply_window.clear_geometries()
+        current_pcd_load = o3d.io.read_point_cloud(model_path) 
+        
+        ply_window.add_geometry(current_pcd_load)
+        ctr = ply_window.get_view_control()
+            
+        ply_window.get_render_option().point_size = 5
+
+        ctr.change_field_of_view(step=-9)
+        object_image = ply_window.capture_screen_float_buffer(True)
+        
+        pic = np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L'))#(np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')).ravel())
+        pic[pic==255] = 0
+        pic[pic != 0] = 255
+        
+        pil_image = Image.fromarray(pic).convert("RGB")
+      
+        open_cv_image = np.array(pil_image) 
+    # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy() 
+        img_gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+        
+        ret, thresh = cv2.threshold(img_gray, 127, 255,0)
+        contours, hierarchy  = cv2.findContours(thresh,2,1)
+        cnt1 = contours[0]
+        ply_window.remove_geometry(current_pcd_load)
+        del ctr
+        return cnt1

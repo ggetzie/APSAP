@@ -4,61 +4,53 @@ from PIL import Image
 import open3d as o3d 
 import numpy as np
 import smallestenclosingcircle
- 
+import cv2
 class Measure3dMixin:  # bridging the view(gui) and the model(data)
  
 
-    def get_3d_object_area_and_width_length(self, _3d_object_path):
+    def get_area_width_length_contour3d(self, _3d_object_path):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        
         #Loading a bounding box to get the actual width length in cm and the pixel, we got the 
         ply_window = main_view.ply_window
+        ply_window.get_render_option().point_size = 5
+        ctr = ply_window.get_view_control()
+        ctr.change_field_of_view(step=-9)
         
+
+
         current_pcd_load = o3d.io.read_point_cloud(_3d_object_path) 
         bounding_box = current_pcd_load.get_axis_aligned_bounding_box() 
         bounding_box.color = (1,0,0)
-        extents = (bounding_box.get_extent())
-        length = (max(extents[0], extents[1]))
-        width = min(extents[0],extents[1]) 
-        bounding_box.color = (1,0,0)
-        
-        
         ply_window.add_geometry(bounding_box)
-        ctr = ply_window.get_view_control()
-        ctr.change_field_of_view(step=-9)
-        bounding_box_pixels_difference = main_presenter.bounding_box_get_pixel_difference()
-        bounding_box_width_mm = extents[0]
+        (width_3d, length_3d) = main_presenter.get_width_length_3d(bounding_box)
+        mm_pixels_ratio = main_presenter.get_mm_pixels_ratio(bounding_box, ply_window)
         ply_window.remove_geometry(bounding_box)
-        #We now got 
-        #When geomoetry is added camera is supposed to change, so we need to change the field of view again
+
         ply_window.add_geometry(current_pcd_load)
-        ctr.change_field_of_view(step=-9)
-        
-        object_image = ply_window.capture_screen_float_buffer(True)
-        object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
-
-        object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))   
-
-        pixel_counts = (np.count_nonzero(object_image_array_object_locations))
-        mm_pixels_ratio = bounding_box_width_mm/bounding_box_pixels_difference
-        
-         
-        #Cleanup
+        (area_3d) = main_presenter.get_area_3d(ply_window,mm_pixels_ratio)
+       
+        (contour3d) = main_presenter.get_contour_3d(ply_window)        
+       
         ply_window.remove_geometry(current_pcd_load)
         del ctr
         
-        area = ((mm_pixels_ratio ** 2 )* pixel_counts)/100 
-        return (area), ((width,length))        
+        
+        return (area_3d, width_3d, length_3d ,contour3d)      
 
-
-
-    def bounding_box_get_pixel_difference(self ):
-        #Detecting the length of bounding box to get the correct ratio
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        ply_window = main_view.ply_window
-     
+    
+    def get_width_length_3d(self, bounding_box):
+        extents = (bounding_box.get_extent())
+        width_3d = min(extents[0],extents[1]) 
+        length_3d = (max(extents[0], extents[1]))
+        return (width_3d, length_3d)
+                
+    def get_mm_pixels_ratio(self, bounding_box, ply_window):
+        
         ply_window.get_render_option().point_size = 5
+        ctr = ply_window.get_view_control()
+        ctr.change_field_of_view(step=-9)
+        
         red_box_image = ply_window.capture_screen_float_buffer(True)
   
         red_box_image_array = np.multiply(np.array(red_box_image), 255).astype(np.uint8)
@@ -71,44 +63,42 @@ class Measure3dMixin:  # bridging the view(gui) and the model(data)
         #Here we get the pixel to cm ratio
         if(len(red_box_red_locations)>=4):
 
-            pixels_difference = (red_box_red_locations[2] - red_box_red_locations[1] ) #* 0.9
+            bounding_box_pixels_difference = (red_box_red_locations[2] - red_box_red_locations[1] ) #* 0.9
         else :
-            pixels_difference = (red_box_red_locations[1] - red_box_red_locations[0] ) #* 0.9
-        return  pixels_difference
-
-    def get_contour_3d (self,  model_path):
-        import numpy as np
-        import open3d as o3d
-        from PIL import Image
-        import cv2
-        main_model, main_view, main_presenter = self.get_model_view_presenter()    
-
-        ply_window = main_view.ply_window
-        ply_window.clear_geometries()
-        current_pcd_load = o3d.io.read_point_cloud(model_path) 
+            bounding_box_pixels_difference = (red_box_red_locations[1] - red_box_red_locations[0] ) #* 0.9
+        bounding_box_width_mm = bounding_box.get_extent()[0]
         
-        ply_window.add_geometry(current_pcd_load)
-        ctr = ply_window.get_view_control()
-            
-        ply_window.get_render_option().point_size = 5
+        return bounding_box_width_mm/bounding_box_pixels_difference
 
+    def get_area_3d(self, ply_window, mm_pixels_ratio):
+        ply_window.get_render_option().point_size = 5
+        ctr = ply_window.get_view_control()
         ctr.change_field_of_view(step=-9)
+        
+        
+        object_image = ply_window.capture_screen_float_buffer(True)
+        object_image_array = np.multiply(np.array(object_image), 255).astype(np.uint8).reshape(-1, 3)
+
+        object_image_array_object_locations =  ~((object_image_array==(255,255,255)).all(axis=-1))   
+
+        pixel_counts = (np.count_nonzero(object_image_array_object_locations))
+        area_3d = ((mm_pixels_ratio ** 2 )* pixel_counts)/100 
+        return area_3d
+
+    def get_contour_3d(self, ply_window):
+        ply_window.get_render_option().point_size = 5
+        ctr = ply_window.get_view_control()
+        ctr.change_field_of_view(step=-9)
+        
         object_image = ply_window.capture_screen_float_buffer(True)
         
-        pic = np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L'))#(np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')).ravel())
+        pic = np.array(Image.fromarray( np.multiply(np.array(object_image), 255).astype(np.uint8)).convert('L')) 
         pic[pic==255] = 0
         pic[pic != 0] = 255
         
-        pil_image = Image.fromarray(pic).convert("RGB")
-      
-        open_cv_image = np.array(pil_image) 
-    # Convert RGB to BGR 
-        open_cv_image = open_cv_image[:, :, ::-1].copy() 
-        img_gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
-        
-        ret, thresh = cv2.threshold(img_gray, 127, 255,0)
+        ret, thresh = cv2.threshold(pic, 127, 255,0)
         contours, hierarchy  = cv2.findContours(thresh,2,1)
-        cnt1 = contours[0]
-        ply_window.remove_geometry(current_pcd_load)
-        del ctr
-        return cnt1
+        contour3d = contours[0]  
+        return contour3d
+
+

@@ -38,7 +38,8 @@ class get3dModelSortedBySimilarityMixin:
             # Measure all the relevant data of the 3d model
             (
                 area_3d,
-                (width_3d, length_3d),
+                width_3d, 
+                length_3d,
                 contour_3d,
                 year,
                 batch_num,

@@ -8,10 +8,7 @@ import cv2
  
 
 class Measure2DMixin:  # bridging the view(gui) and the model(data)
-
-
-
-        
+      
     def get_area_width_length_contour2d(self, path):
         """Get the measured values of area, width, length and contour of the image in the given path
 

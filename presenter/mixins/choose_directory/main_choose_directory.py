@@ -222,6 +222,14 @@ class ChooseDirectoryMixin:
         main_view.year.setDisabled(boolean)
 
     def get_year_batch_piece(self, path_3d):
+        """This function returns the year, batch, and piece number of a 3d model
+
+        Args:
+            path_3d (str): the path of the 3d model
+
+        Returns:
+            tuple: The year, batch and piece values to be returned
+        """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         m = re.search(

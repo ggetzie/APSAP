@@ -14,7 +14,7 @@ class LoadFinds:
         finds = main_presenter.get_options(finds_dir)
         finds.sort(key=lambda f: int(f))
 
-        # Get a dictionary to get all
+        # Get a dictionary to get the mapping between plys and finds if they are already matched
         main_view.dict_find_2_ply = dict()
         main_view.dict_ply_2_find = dict()
 

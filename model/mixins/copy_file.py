@@ -1,6 +1,6 @@
 from plyfile import PlyData, PlyProperty
 from pathlib import Path
-
+import logging
 
 class CopyFileMixin:
 
@@ -15,10 +15,10 @@ class CopyFileMixin:
             target (str): The url of the fixed 3d model
         """
         if source[-4:] != ".ply" or target[-4:] != ".ply":
-            print("Source and Target must be valid ply")
+            logging.error("Source and Target must be valid ply")
 
         if source == target or Path(source) == Path(target):
-            print("Source cannot be the same as target")
+            logging.error("Source cannot be the same as target")
             return
 
         plydata = PlyData.read(source)

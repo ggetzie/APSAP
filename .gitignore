@@ -164,3 +164,4 @@ settings.json
 computation/
 opengl32.dll
 cache
+logs

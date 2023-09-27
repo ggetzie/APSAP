@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor 
 from pathlib import Path
+import logging
 class LoadFinds:
 
     def populate_finds(self):
@@ -29,7 +30,7 @@ class LoadFinds:
             find_base_path = context_dir / finds_subdir / find / finds_photo_dir
 
             #Updating on the GUI to show that we are loading this find
-            print(f"Loading the folder: {find_base_path}")  
+            logging.info(f"Loading the folder: {find_base_path}")  
             main_view.statusLabel.setText(f"Loading find in folder {find_base_path}")
             main_view.statusLabel.repaint()
 

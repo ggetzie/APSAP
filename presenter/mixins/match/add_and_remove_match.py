@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 from pathlib import Path
-
+import logging
 
 class AddAndRemoveMatchMixin:
     """This class contains the functions that handle modifying an entry at the database.
@@ -101,9 +101,9 @@ class AddAndRemoveMatchMixin:
         )
 
         # We copy the files to the destination
-        print(f"Copying file from {orig_path} to {original_destination}")
+        logging.info(f"Copying file from {orig_path} to {original_destination}")
         main_model.fixAndCopyPly(str(Path(orig_path)), str(Path(original_destination)))
-        print(f"Copying file from {mesh_path} to {mesh_destination}")
+        logging.info(f"Copying file from {mesh_path} to {mesh_destination}")
         main_model.fixAndCopyPly(str(Path(mesh_path)), str(Path(mesh_destination)))
 
         # We save the batch, piece and year that will get replaced later

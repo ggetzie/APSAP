@@ -8,7 +8,7 @@ from computation.nn_segmentation import MaskPredictor
 from .measure_2d import Measure2DMixin
 from .measure_3d import Measure3dMixin
 from PyQt5.QtCore import QCoreApplication
-
+import logging
 
 class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
     def __init__(self):
@@ -60,7 +60,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             ) = main_presenter.get_area_width_length_contour2d(path_back)
 
         except:
-            print("Using fallback in 2d!")
+            logging.error(f"We failed to measure for either the paths: {path_front} and {path_back}")
             (
                 area_front,
                 width_front,
@@ -103,7 +103,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         #Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(path_3d)
         if cache_result != None and len(cache_result) == 7:
-            print(f"Loading {path_3d} directly from library")
+            logging.info(f"Loading {path_3d} directly from library")
             return cache_result
         
         #In case it is not cached, we have to measure the pixels directly.
@@ -112,7 +112,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
 
 
         #Showing that we are measure the 3d models
-        print(f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} ")
+        logging.info(f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} ")
         main_view.statusLabel.setText(f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} ")
         main_view.statusLabel.repaint()
         QCoreApplication.processEvents()
@@ -140,7 +140,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             #Caching the calculuated values
             main_model.cache_3d.set(path_3d, return_values)
         except:
-            print(f"We are using a fallback in 3d ")
+            logging.error(f"We failed to measure the pixels in {path_3d}")
             (
                 area_3d,
                 width_3d,

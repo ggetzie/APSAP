@@ -1,7 +1,7 @@
 import psycopg2
 import environ
 from pathlib import Path
-
+import logging
 SRC_DIR = Path(__file__).resolve(strict=True).parent
 
 
@@ -66,18 +66,18 @@ class DatabaseMixin:
 
             record = cursor.fetchall()
             if len(record) > 1:
-                print("Error, detected duplicate entry!")
+                logging.error("Error, detected duplicate entry!")
                 return None, None, None
             elif len(record) == 0:
                 return None, None, None
             else:
-                print(
+                logging.info(
                     f"the find of {(utm_easting, utm_northing, context_num, find_num)} has the record {record}"
                 )
                 return record[0]
 
         except Exception as error:
-            print("Error while connecting to PostgreSQL", error)
+            logging.error(f"Error while connecting to PostgreSQL: {error}" )
         finally:
             if conn:
                 cursor.close()
@@ -132,7 +132,7 @@ class DatabaseMixin:
 
             record = cursor.fetchall()
             if len(record) > 1:
-                print("Error, detected duplicate entry!")
+                logging.error("Error, detected duplicate entry!")
             else:
                 batch_number, sherd_number, year_number = record[0]
                 if (
@@ -142,7 +142,7 @@ class DatabaseMixin:
                 ):
                     pass
                 else:
-                    print("Updating...")
+                    logging.info("Updating...")
                     cursor.execute(
                         query_update,
                         (
@@ -159,12 +159,12 @@ class DatabaseMixin:
                     updated_rows = cursor.rowcount
                     if updated_rows <= 1:
                         conn.commit()
-                        print(
+                        logging.info(
                             f"Updated with new_batch_num, new_sherd_num, new_year: { (new_batch_num, new_sherd_num, new_year)}"
                         )
 
         except Exception as error:
-            print("Error while connecting to PostgreSQL", error)
+            logging.info(f"Error while connecting to PostgreSQL: {error}")
         finally:
             if conn:
                 cursor.close()

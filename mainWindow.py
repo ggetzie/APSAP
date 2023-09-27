@@ -12,9 +12,9 @@ from time import ctime
 def main():
     """Main function."""
 
+    #Setting the logger and logging file, and make sure logging information goes to both the file and 
     logFolder = f"./logs/{getpass.getuser()}"
     logPath = f"{logFolder}/{ctime().replace(':','')}.txt"
-     
     Path(logFolder).mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
@@ -22,11 +22,13 @@ def main():
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.FileHandler(logPath), logging.StreamHandler()],
     )
+
+    #Setting the basic style
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
+    #Run the model, view and presenter one by one and count the time it takes to load each of them.
     now = time.time()
-
     main_model = MainModel()
     logging.info(f"main_model {time.time() - now} seconds have passed")
     now = time.time()
@@ -37,8 +39,8 @@ def main():
     logging.info(f"main_presenter {time.time() - now} seconds have passed")
     logging.info(f"")
 
+    #Show the GUI application
     main_view.show()
-
     sys.exit(app.exec_())
 
 

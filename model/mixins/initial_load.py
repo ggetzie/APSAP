@@ -22,8 +22,7 @@ class InitialLoadMixin:
         self.cache_3d = Cache("./cache/cache_3d_new")
         self.cache_2d = Cache("./cache/cache_2d_new")
 
-        # Data 3: Loading the parameters(For similarities calculuations) and path_variables(for locating specific paths)
-        self.parameters = self.simple_get_json("./configs/parameters.json")
+        # Data 3: Loading the path_variables(for locating specific paths)
         self.path_variables = self.simple_get_json("./configs/pathVariables.json")
 
         # Data 4: An dummy image here is needed for what we need

@@ -40,9 +40,9 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="1" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="path_selection">
       <item>
-       <widget class="QFrame" name="frame_2">
+       <widget class="QFrame" name="hemisphere_block">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -99,7 +99,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_3">
+       <widget class="QFrame" name="zone_block">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -150,7 +150,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_6">
+       <widget class="QFrame" name="easting_block">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -201,7 +201,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_7">
+       <widget class="QFrame" name="northing_block">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -252,7 +252,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_8">
+       <widget class="QFrame" name="context_block">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -344,9 +344,9 @@
      </spacer>
     </item>
     <item row="6" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QHBoxLayout" name="select_and_display">
       <item>
-       <widget class="QFrame" name="frame_9">
+       <widget class="QFrame" name="finds_list_frame">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -417,7 +417,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_10">
+       <widget class="QFrame" name="find_photos_frame">
         <property name="minimumSize">
          <size>
           <width>256</width>
@@ -467,7 +467,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame">
+       <widget class="QFrame" name="model_selects_frame">
         <property name="minimumSize">
          <size>
           <width>270</width>
@@ -482,7 +482,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QTabWidget" name="tabWidget">
+          <widget class="QTabWidget" name="model_selects_tab">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -497,7 +497,7 @@
            <property name="currentIndex">
             <number>1</number>
            </property>
-           <widget class="QWidget" name="tab">
+           <widget class="QWidget" name="model_list_tab">
             <attribute name="title">
              <string>Order by Batch #</string>
             </attribute>
@@ -513,7 +513,7 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="tab_2">
+           <widget class="QWidget" name="sorted_model_list_tab">
             <attribute name="title">
              <string>Order by Area Similarity</string>
             </attribute>
@@ -588,9 +588,9 @@
      </spacer>
     </item>
     <item row="9" column="1">
-     <layout class="QGridLayout" name="gridLayout_2">
+     <layout class="QGridLayout" name="matching_dashboard">
       <item row="0" column="4">
-       <widget class="QFrame" name="frame_14">
+       <widget class="QFrame" name="current_piece_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -599,7 +599,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_12">
          <item>
-          <widget class="QFrame" name="frame_4">
+          <widget class="QFrame" name="current_piece_white_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -615,7 +615,7 @@
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QLabel" name="label_11">
+           <widget class="QLabel" name="current_piece_title">
             <property name="geometry">
              <rect>
               <x>6</x>
@@ -654,7 +654,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frame_5">
+          <widget class="QFrame" name="current_value_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -672,7 +672,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_13">
             <item>
-             <widget class="QLabel" name="label_13">
+             <widget class="QLabel" name="current_value_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -690,7 +690,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QFrame" name="frame_17">
+       <widget class="QFrame" name="selected_find_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -699,7 +699,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="QFrame" name="frame_39">
+          <widget class="QFrame" name="selected_find_title_box">
            <property name="minimumSize">
             <size>
              <width>90</width>
@@ -720,7 +720,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_19">
             <item>
-             <widget class="QLabel" name="label_6">
+             <widget class="QLabel" name="selected_find_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -759,7 +759,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frame_40">
+          <widget class="QFrame" name="selected_find_equal_box">
            <property name="minimumSize">
             <size>
              <width>90</width>
@@ -783,7 +783,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_20">
             <item>
-             <widget class="QLabel" name="label_39">
+             <widget class="QLabel" name="selected_find_equal">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -804,7 +804,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QFrame" name="frame_18">
+       <widget class="QFrame" name="current_batch_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -813,7 +813,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_21">
          <item>
-          <widget class="QFrame" name="frame_41">
+          <widget class="QFrame" name="current_batch_white_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -829,7 +829,7 @@
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <widget class="QLabel" name="label_40">
+           <widget class="QLabel" name="current_batch_title">
             <property name="geometry">
              <rect>
               <x>6</x>
@@ -871,7 +871,7 @@
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QFrame" name="frame_16">
+       <widget class="QFrame" name="new_piece_Box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -880,7 +880,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
-          <widget class="QFrame" name="frame_37">
+          <widget class="QFrame" name="new_piece_white_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -898,7 +898,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_16">
             <item>
-             <widget class="QLabel" name="label_37">
+             <widget class="QLabel" name="new_piece_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -931,7 +931,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frame_38">
+          <widget class="QFrame" name="new_value_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -949,7 +949,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_17">
             <item>
-             <widget class="QLabel" name="label_38">
+             <widget class="QLabel" name="new_value_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -967,7 +967,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QFrame" name="frame_15">
+       <widget class="QFrame" name="buttons_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1015,7 +1015,7 @@
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QFrame" name="frame_13">
+       <widget class="QFrame" name="new_batch_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1024,7 +1024,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <item>
-          <widget class="QFrame" name="frame_36">
+          <widget class="QFrame" name="new_batch_white_background">
            <property name="minimumSize">
             <size>
              <width>91</width>
@@ -1042,7 +1042,7 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <item>
-             <widget class="QLabel" name="label_36">
+             <widget class="QLabel" name="new_batch_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -1078,7 +1078,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QFrame" name="frame_19">
+       <widget class="QFrame" name="current_year_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1087,7 +1087,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_27">
          <item>
-          <widget class="QFrame" name="frame_20">
+          <widget class="QFrame" name="current_year_white_background">
            <property name="styleSheet">
             <string notr="true"> background-color : white</string>
            </property>
@@ -1099,7 +1099,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_29">
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="current_year_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -1135,7 +1135,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QFrame" name="frame_22">
+       <widget class="QFrame" name="new_year_box">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1144,7 +1144,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_28">
          <item>
-          <widget class="QFrame" name="frame_23">
+          <widget class="QFrame" name="new_year_white_background">
            <property name="styleSheet">
             <string notr="true"> background-color : white</string>
            </property>
@@ -1156,7 +1156,7 @@
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_30">
             <item>
-             <widget class="QLabel" name="label_7">
+             <widget class="QLabel" name="new_year_title">
               <property name="font">
                <font>
                 <pointsize>11</pointsize>
@@ -1251,9 +1251,9 @@
      </spacer>
     </item>
     <item row="5" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="extra_information">
       <item>
-       <widget class="QFrame" name="frame_12">
+       <widget class="QFrame" name="extra_information_frame">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1280,52 +1280,27 @@
           </widget>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_12">
+          <layout class="QVBoxLayout" name="find_filter_box">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_22">
-             <item>
-              <widget class="QLabel" name="label_8">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Find Filter</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="find_error">
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>7</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color : red</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QLabel" name="find_filter_title">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Find Filter</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <layout class="QHBoxLayout" name="find_filters_container">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_16">
+              <layout class="QVBoxLayout" name="find_start_box">
                <item>
-                <widget class="QLabel" name="label_10">
+                <widget class="QLabel" name="find_start_title">
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>
@@ -1357,9 +1332,9 @@
               </layout>
              </item>
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_15">
+              <layout class="QVBoxLayout" name="find_end_box">
                <item>
-                <widget class="QLabel" name="label_9">
+                <widget class="QLabel" name="find_end_title">
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>
@@ -1395,52 +1370,27 @@
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_11">
+          <layout class="QVBoxLayout" name="batch_filter_box">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_23">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="font">
-                <font>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Batch Filter</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="batch_error">
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>7</pointsize>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color : red</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QLabel" name="batch_filter_title">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Batch Filter</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QHBoxLayout" name="batch_filters_container">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_10">
+              <layout class="QVBoxLayout" name="year_box">
                <item>
-                <widget class="QLabel" name="label_4">
+                <widget class="QLabel" name="year_title">
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>
@@ -1475,9 +1425,9 @@
               </layout>
              </item>
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_8">
+              <layout class="QVBoxLayout" name="batch_start_box">
                <item>
-                <widget class="QLabel" name="label">
+                <widget class="QLabel" name="batch_start_title">
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>
@@ -1514,9 +1464,9 @@
               </layout>
              </item>
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_9">
+              <layout class="QVBoxLayout" name="batch_end_box">
                <item>
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="batch_end_title">
                  <property name="font">
                   <font>
                    <pointsize>12</pointsize>

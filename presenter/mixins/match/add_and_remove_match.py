@@ -1,18 +1,18 @@
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+from pathlib import Path
 
 
-class AddAndRemoveMatchMixin:   
+class AddAndRemoveMatchMixin:
     """This class contains the functions that handle modifying an entry at the database.
     Notice that we need confirmtion before the database operations are being done to make it more secure
-    """    
-       
+    """
+
     def add_match(self):
-        """This function creates a pop up box that asks if the user wants to confirm adding the match
-        """        
+        """This function creates a pop up box that asks if the user wants to confirm adding the match"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        #Create the message to be shown
+        # Create the message to be shown
         find_num = main_view.selected_find.text()
         batch_num = main_view.new_batch.text()
         piece_num = main_view.new_piece.text()
@@ -22,143 +22,115 @@ class AddAndRemoveMatchMixin:
             text=f"Update Find ({find_num}) to batch ({batch_num}) piece ({piece_num}) year ({year_num}). Proceed?",
         )
 
-        #Set the buttons and callback to the buttons
+        # Set the buttons and callback to the buttons
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         msg.buttonClicked.connect(main_presenter.add_match_confirm)
 
-        #Show the pop up with buttons ok and cancel
+        # Show the pop up with buttons ok and cancel
         msg.exec()
 
     def add_match_confirm(self, e):
-        """_summary_
+        """This function tries to do two things when the ok button is clicked for add_match.
+        First, it tries to update the database to reflect the matched result.
+        Second, it tries to fix the added ceremic sherds and put them to the find folder.
+        These sherds include the original-sized one and the
 
         Args:
-            e (_type_): _description_
-        """        
+            (button): The button that get clicked on.
+        """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
-        if e.text() == "OK":
-            easting, northing, context = main_presenter.get_easting_northing_context()
-            find_num = main_view.selected_find.text()
-            batch_num = main_view.new_batch.text()
-            piece_num = main_view.new_piece.text()
-            new_year = main_view.new_year.text()
+        # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
+        if not e.text() == "OK":
+            return
 
-            previous_current_batch_num = main_view.current_batch.text()
-            previous_current_piece_num = main_view.current_piece.text()
-            previous_current_year = main_view.current_year.text()
+        # Get all needed to update the database
+        easting, northing, context = main_presenter.get_easting_northing_context()
+        find_num = main_view.selected_find.text()
+        batch_num = main_view.new_batch.text()
+        piece_num = main_view.new_piece.text()
+        new_year = main_view.new_year.text()
 
-            if (
-                easting != None
-                and northing != None
-                and context != None
-                and find_num != None
-                and batch_num != None
-                and piece_num != None
-                and new_year != None
-                and new_year.isnumeric()
-            ):
-                main_model.update_match_info(
-                    easting, northing, context, find_num, batch_num, piece_num, new_year
-                )
-                from pathlib import Path
+        # If either of the of these parameters is None, we do not update the database
+        if (
+            easting == None
+            or northing == None
+            or context == None
+            or find_num == None
+            or batch_num == None
+            or piece_num == None
+            or new_year == None
+            or not new_year.isnumeric()
+        ):
+            QMessageBox(main_view, text="Please select both a find and a model").exec()
+            return
 
-                # Here we reconstruct the path
-                path = str(
-                    (
-                        main_presenter.get_context_dir()
-                        / main_model.path_variables["MODELS_FILES_DIR"]
-                    )
-                )
-                print(f"path: {path}")
-                mesh_ply = (
-                    path.replace("*", str(new_year), 1)
-                    .replace("*", f"{int(batch_num):03}", 1)
-                    .replace("*", f"{int(piece_num)}", 1)
-                )
+        ##Updating the database
+        main_model.update_match_info(
+            easting, northing, context, find_num, batch_num, piece_num, new_year
+        )
 
-                original_ply = mesh_ply.replace("_sample0_3_mesh.ply", ".ply", 1)
-                context_dir = main_presenter.get_context_dir()
-                finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
-                folder = context_dir / finds_subdir / str(find_num) / "3d" / "gp"
+        # Create the folder in which we will put the 3d models in(A subfolder in the find folder)
+        context_dir = main_presenter.get_context_dir()
+        finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
+        folder = context_dir / finds_subdir / str(find_num) / "3d" / "gp"
 
-                original_destination = Path(folder / "a.ply")
-                mesh_destination = Path(folder / "a_0_3_mesh.ply")
+        # Here we reconstruct the path to the 0.3 mesh 3d model
+        mesh_ply_path_re = str(
+            (
+                main_presenter.get_context_dir()
+                / main_model.path_variables["MODELS_FILES_DIR"]
+            )
+        )
 
-                print(f"original_ply location: {original_ply}")
-                print()
-                print(f"mesh_ply location: {mesh_ply}")
-                print()
-                print(f"original_ply destination: {original_destination}")
-                print()
-                print(f"mesh_ply destination {mesh_destination}")
-                print()
+        mesh_path = (
+            mesh_ply_path_re.replace("*", str(new_year), 1)
+            .replace("*", f"{int(batch_num):03}", 1)
+            .replace("*", f"{int(piece_num)}", 1)
+        )
 
-                Path(
-                    str(context_dir / finds_subdir / str(find_num) / "3d" / "gp")
-                ).mkdir(parents=True, exist_ok=True)
+        # We have reconstructed the path to the 0.3 mesh ply. Now we can get 3 more extra paths
+        # So that we can put both the 0.3 mesh and original ply to the find oflder
+        orig_path = mesh_path.replace("_sample0_3_mesh.ply", ".ply", 1)
+        original_destination = Path(folder / "a.ply")
+        mesh_destination = Path(folder / "a_0_3_mesh.ply")
 
-                print(f"Copying file from {original_ply} to {original_destination}")
-                main_model.fixAndCopyPly(
-                    str(Path(original_ply)), str(Path(original_destination))
-                )
-                print(f"Copying file from {mesh_ply} to {mesh_destination}")
-                main_model.fixAndCopyPly(
-                    str(Path(mesh_ply)), str(Path(mesh_destination))
-                )
-                # piece_1_world_sample0_3_mesh
+        # Create the folder of the destination in case it doesn't exist
+        Path(str(context_dir / finds_subdir / str(find_num) / "3d" / "gp")).mkdir(
+            parents=True, exist_ok=True
+        )
 
-                # Here to avoid loading time, we manually update some data. We can
-                # reload the contexts but it would be way too slow
+        # We copy the files to the destination
+        print(f"Copying file from {orig_path} to {original_destination}")
+        main_model.fixAndCopyPly(str(Path(orig_path)), str(Path(original_destination)))
+        print(f"Copying file from {mesh_path} to {mesh_destination}")
+        main_model.fixAndCopyPly(str(Path(mesh_path)), str(Path(mesh_destination)))
 
-                if hasattr(main_view, "selected_find_widget"):
-                    main_view.selected_find_widget.setForeground(QColor("red"))
-                main_view.current_batch.setText(batch_num)
-                main_view.current_piece.setText(piece_num)
-                main_view.current_year.setText(new_year)
+        # We save the batch, piece and year that will get replaced later
+        previous_current_batch_num = main_view.current_batch.text()
+        previous_current_piece_num = main_view.current_piece.text()
+        previous_current_year = main_view.current_year.text()
 
-                # Here's let's try to get color red
+        # We turn the selected find_widget as red to indicate that the item is matched
+        if hasattr(main_view, "selected_find_widget"):
+            main_view.selected_find_widget.setForeground(QColor("red"))
 
-                mod = main_view.modelList.model()
-                # Make the item red in modelList
+        # Update on the GUI that the find has the new matched 3d model
+        main_view.current_batch.setText(batch_num)
+        main_view.current_piece.setText(piece_num)
+        main_view.current_year.setText(new_year)
 
-                for i in range(mod.rowCount()):
-                    for j in range(mod.item(i).rowCount()):
-                        for k in range(mod.item(i).child(j).rowCount()):
-                            if (
-                                previous_current_batch_num != None
-                                and previous_current_piece_num != None
-                                and previous_current_year != None
-                                and previous_current_batch_num != "NS"
-                                and previous_current_piece_num != "NS"
-                                and previous_current_year != "NS"
-                            ):
-                                if (
-                                    int(previous_current_year)
-                                    == int(mod.item(i).text())
-                                    and int(previous_current_batch_num)
-                                    == int(mod.item(i).child(j).text())
-                                    and int(previous_current_piece_num)
-                                    == int(mod.item(i).child(j).child(k).text())
-                                ):
-                                    # Make the old selected black
-                                    mod.item(i).child(j).child(k).setForeground(
-                                        QColor("black")
-                                    )
-                            if (
-                                int(new_year) == int(mod.item(i).text())
-                                and int(batch_num) == int(mod.item(i).child(j).text())
-                                and int(piece_num)
-                                == int(mod.item(i).child(j).child(k).text())
-                            ):
-                                # Make the newly selected red
-                                mod.item(i).child(j).child(k).setForeground(
-                                    QColor("red")
-                                )
+        # Here's let's try to get color red
 
-                # Make the item red in sorted_model_list
-                sorted_mod = main_view.sorted_model_list.model()
-                for i in range(sorted_mod.rowCount()):
+        mod = main_view.modelList.model()
+        # Make the item red in modelList
+
+        # Go throguh the unsorted model that stores year, batch and piece.
+        # If it is the previously selected model, we turn it black from red
+        ##If it is the newly selected model that we just updatedm we turn it red.
+        for i in range(mod.rowCount()):
+            for j in range(mod.item(i).rowCount()):
+                for k in range(mod.item(i).child(j).rowCount()):
                     if (
                         previous_current_batch_num != None
                         and previous_current_piece_num != None
@@ -168,72 +140,23 @@ class AddAndRemoveMatchMixin:
                         and previous_current_year != "NS"
                     ):
                         if (
-                            sorted_mod.item(i).text()
-                            == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                            int(previous_current_year) == int(mod.item(i).text())
+                            and int(previous_current_batch_num)
+                            == int(mod.item(i).child(j).text())
+                            and int(previous_current_piece_num)
+                            == int(mod.item(i).child(j).child(k).text())
                         ):
-                            (sorted_mod.item(i)).setForeground(QColor("black"))
+                            mod.item(i).child(j).child(k).setForeground(QColor("black"))
                     if (
-                        sorted_mod.item(i).text()
-                        == f"{new_year}, Batch {int(batch_num):03}, model: {int(piece_num)}"
+                        int(new_year) == int(mod.item(i).text())
+                        and int(batch_num) == int(mod.item(i).child(j).text())
+                        and int(piece_num) == int(mod.item(i).child(j).child(k).text())
                     ):
-                        (sorted_mod.item(i)).setForeground(QColor("red"))
-                # Also we need to unred the previous selected item in the sorted model list
+                        mod.item(i).child(j).child(k).setForeground(QColor("red"))
 
-                dict_key = f"{easting},{northing },{context},{int(find_num)}"
-                batch_year = new_year
-                batch_num = batch_num
-                batch_piece = piece_num
-                find_str = f"{easting},{northing},{context},{int(find_num)}"
-                ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
-                main_view.dict_find_2_ply[find_str] = ply_str
-                main_view.dict_ply_2_find[ply_str] = find_str
-
-            else:
-                QMessageBox(
-                    main_view, text="Please select both a find and a model"
-                ).exec()
-
-
-
-    def remove_match(self):
-            main_model, main_view, main_presenter = self.get_model_view_presenter()
-            find_num = main_view.selected_find.text()
-            batch_num = main_view.current_batch.text()
-            piece_num = main_view.current_piece.text()
-            year_num = main_view.current_year.text()
-            msg = QMessageBox(
-                main_view,
-                text=f"Remove the match of the Find ({find_num}), which are batch ({batch_num}) piece ({piece_num}) year ({year_num}). Proceed?",
-            )
-            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            msg.buttonClicked.connect(main_presenter.remove_match_confirm)
-            msg.exec()
-
-
-    def remove_match_confirm(self, e):
-        if e.text() != "OK":
-            return
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        selected_item = main_view.finds_list.currentItem()
-
-        if selected_item:
-            find = selected_item.text()
-            selected_item.setForeground(QColor("black"))
-            # Update the database
-            (
-                easting,
-                northing,
-                context,
-            ) = main_presenter.get_easting_northing_context()
-
-            # Unred the matched items in the 3d models list
-            previous_current_batch_num = main_view.current_batch.text()
-            previous_current_piece_num = main_view.current_piece.text()
-            previous_current_year = main_view.current_year.text()
-
-            mod = main_view.modelList.model()
-            # Make the item Black in modelList
+        # Go through the sorted list to turn previously matched model to black and the newly matched model to black
+        sorted_mod = main_view.sorted_model_list.model()
+        for i in range(sorted_mod.rowCount()):
             if (
                 previous_current_batch_num != None
                 and previous_current_piece_num != None
@@ -242,44 +165,128 @@ class AddAndRemoveMatchMixin:
                 and previous_current_piece_num != "NS"
                 and previous_current_year != "NS"
             ):
-                main_model.update_match_info(
-                    easting, northing, context, find, None, None, None
-                )
-                for i in range(mod.rowCount()):
-                    for j in range(mod.item(i).rowCount()):
-                        for k in range(mod.item(i).child(j).rowCount()):
-                            if (
-                                int(previous_current_year) == int(mod.item(i).text())
-                                and int(previous_current_batch_num)
-                                == int(mod.item(i).child(j).text())
-                                and int(previous_current_piece_num)
-                                == int(mod.item(i).child(j).child(k).text())
-                            ):
-                                # Make the old selected black
-                                mod.item(i).child(j).child(k).setForeground(
-                                    QColor("black")
-                                )
-                # Make the item Black in model sorted list
-                sorted_mod = main_view.sorted_model_list.model()
+                if (
+                    sorted_mod.item(i).text()
+                    == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                ):
+                    (sorted_mod.item(i)).setForeground(QColor("black"))
+            if (
+                sorted_mod.item(i).text()
+                == f"{new_year}, Batch {int(batch_num):03}, model: {int(piece_num)}"
+            ):
+                (sorted_mod.item(i)).setForeground(QColor("red"))
+      
 
-                for i in range(sorted_mod.rowCount()):
+        #We saved the updated matching info in the two dicts to inform later that what is matched to what
+        find_str = f"{easting},{northing},{context},{int(find_num)}"
+        ply_str = f"{int(new_year)},{int(batch_num)},{int(piece_num)}"
+        main_view.dict_find_2_ply[find_str] = ply_str
+        main_view.dict_ply_2_find[ply_str] = find_str
+
+    def remove_match(self):
+        """This function creates a pop up box that asks if the user wants to remove the match"""
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        #Get the info to be displayed in the alert
+        find_num = main_view.selected_find.text()
+        batch_num = main_view.current_batch.text()
+        piece_num = main_view.current_piece.text()
+        year_num = main_view.current_year.text()
+        #Setting up the message
+        msg = QMessageBox(
+            main_view,
+            text=f"Remove the match of the Find ({find_num}), which are batch ({batch_num}) piece ({piece_num}) year ({year_num}). Proceed?",
+        )
+        #Set up the handler for the OK button
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.buttonClicked.connect(main_presenter.remove_match_confirm)
+        #Show the message
+        msg.exec()
+
+    def remove_match_confirm(self, e):
+        """This function will try to remove an existent match
+
+        Args:
+            e (button): _description_
+        """       
+
+        #If the button clicked is not ok, we do not remove the matche 
+        if e.text() != "OK":
+            return
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+       
+        selected_item = main_view.finds_list.currentItem()
+        #We will only consider removing the match if the selected item is not none or ""
+        if not selected_item:
+            return
+        
+        #Get the previous year, batch and piece
+        previous_current_batch_num = main_view.current_batch.text()
+        previous_current_piece_num = main_view.current_piece.text()
+        previous_current_year = main_view.current_year.text()
+
+        #In case there is no a 3d model matched before with this find, we don't have to remove it at all
+        if (
+            previous_current_batch_num == None
+            or previous_current_piece_num == None
+            or previous_current_year == None
+            or previous_current_batch_num == "NS"
+            or previous_current_piece_num == "NS"
+            or previous_current_year == "NS"
+        ):
+            return
+
+       
+        #Now all things are set. We can get the info needed to update the database
+        (
+            easting,
+            northing,
+            context,
+        ) = main_presenter.get_easting_northing_context()
+        find = selected_item.text()
+        
+        #We update the database to indicate we are unmatching a find with its 3d model
+        main_model.update_match_info(
+            easting, northing, context, find, None, None, None
+        )
+        #We blacken the item in the find list to indicate that 
+        selected_item.setForeground(QColor("black"))
+
+        #We go throguh the unsorted model list and if it is the previous matched item, we blacken it.
+        mod = main_view.modelList.model()    
+        for i in range(mod.rowCount()):
+            for j in range(mod.item(i).rowCount()):
+                for k in range(mod.item(i).child(j).rowCount()):
                     if (
-                        sorted_mod.item(i).text()
-                        == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+                        int(previous_current_year) == int(mod.item(i).text())
+                        and int(previous_current_batch_num)
+                        == int(mod.item(i).child(j).text())
+                        and int(previous_current_piece_num)
+                        == int(mod.item(i).child(j).child(k).text())
                     ):
-                        (sorted_mod.item(i)).setForeground(QColor("black"))
-                # Also we need to unred the previous selected item in the sorted model list
+                        # Make the old selected black
+                        mod.item(i).child(j).child(k).setForeground(
+                            QColor("black")
+                        )
 
-                # Remove the dict entry from
-                dict_key = f"{easting},{northing },{context},{int(find)}"
-                batch_year = previous_current_year
-                batch_num = previous_current_batch_num
-                batch_piece = previous_current_piece_num
-                find_str = f"{easting},{northing},{context},{int(find)}"
-                ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
-                main_view.dict_find_2_ply[find_str] = None
-                main_view.dict_ply_2_find[ply_str] = None
 
-                main_view.current_batch.setText(f"NS")
-                main_view.current_piece.setText(f"NS")
-                main_view.current_year.setText(f"NS")
+        # We go throguh the sorted model list and if it is the previous matched item, we blacken it.
+        sorted_mod = main_view.sorted_model_list.model()
+        for i in range(sorted_mod.rowCount()):
+            if (
+                sorted_mod.item(i).text()
+                == f"{previous_current_year}, Batch {int(previous_current_batch_num):03}, model: {int(previous_current_piece_num)}"
+            ):
+                (sorted_mod.item(i)).setForeground(QColor("black"))
+     
+
+        # We remove the matching from the two dicts so that the application knows they are no longer matched together
+        find_str = f"{easting},{northing},{context},{int(find)}"
+        ply_str = f"{int(previous_current_year)},{int(previous_current_batch_num)},{int(previous_current_piece_num)}"
+        main_view.dict_find_2_ply[find_str] = None
+        main_view.dict_ply_2_find[ply_str] = None
+
+        #We show on the GUI that we unmatched the 3d model
+        main_view.current_batch.setText(f"NS")
+        main_view.current_piece.setText(f"NS")
+        main_view.current_year.setText(f"NS")

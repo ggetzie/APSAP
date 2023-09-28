@@ -1271,13 +1271,59 @@
            </property>
            <property name="font">
             <font>
-             <pointsize>10</pointsize>
+             <pointsize>8</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string/>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="grid_frame">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Color Grid</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox">
+             <property name="iconSize">
+              <size>
+               <width>51</width>
+               <height>60</height>
+              </size>
+             </property>
+             <item>
+              <property name="text">
+               <string>Default</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>./default_grid.jpg</normaloff>./default_grid.jpg</iconset>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>24ColorCard</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>./24Color_grid.jpg</normaloff>./24Color_grid.jpg</iconset>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="find_filter_box">

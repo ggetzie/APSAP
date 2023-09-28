@@ -47,16 +47,25 @@ class Measure2DMixin:  # bridging the view(gui) and the model(data)
 
         #The predicted pixels of the color grid in the image, 0 means 0% chance the pixel is color grid
         #255 means 100%, we take 200 as a threshhold
-        color_grid_pixels = (np.array(main_presenter.colorgrid_predictor.predict(image)))
 
+    
+        if main_view.comboBox.currentText() != "24ColorCard":
+            color_grid_pixels = (np.array(main_presenter.colorgrid_predictor.predict(image)))
+        else:
+            color_grid_pixels = (np.array(main_presenter.colorgrid_predictor_24color.predict(image)))
+   
         #We get all the x coordinates of the color grid pixels and sort them
         x_coordiantes_mask = (sorted(np.where(color_grid_pixels>200)[1]))
-
+       
         #We get the distance of the color grid in pixel
         pixel_difference_x = x_coordiantes_mask[-15] - x_coordiantes_mask[5]
-
+       
         #We get the distance of the color grid in actual milimeters(we can google the value)
-        mm_difference_x = 53.98
+        if main_view.comboBox.currentText() != "24ColorCard":
+            mm_difference_x = 53.98  
+        else:
+            mm_difference_x =50.8
+        print(4)
         return  (mm_difference_x/pixel_difference_x)
         
     def get_ceremic_area(self, ceremic_mask, mm_per_pixel):

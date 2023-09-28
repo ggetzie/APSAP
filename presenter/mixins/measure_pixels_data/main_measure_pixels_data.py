@@ -10,11 +10,12 @@ from .measure_3d import Measure3dMixin
 from PyQt5.QtCore import QCoreApplication
 import logging
 
+
 class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
     def __init__(self):
         """This constructor initializes the two Pytorch-trained neural networks used
         for measuring the pixels. It also runs the networks for once so it loads faster for
-        subsequent runs
+        subsequent runs. Notice that we have two different neural networks for the two color grids.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -22,12 +23,19 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             r".\computation\ceremicsmask.pt"
         )
         main_presenter.colorgrid_predictor = MaskPredictor(
-            r".\computation\colorgridmask.pt"
+            r".\computation\colorgridmask.pt"  
+        )
+
+        main_presenter.colorgrid_predictor_24color = MaskPredictor(
+             r".\computation\Different_colro_grid.pt"
         )
         main_presenter.ceremic_predictor.predict(
             main_model.open_image(main_model.reference_place_holder_img)
         )
         main_presenter.colorgrid_predictor.predict(
+            main_model.open_image(main_model.reference_place_holder_img)
+        )
+        main_presenter.colorgrid_predictor_24color.predict(
             main_model.open_image(main_model.reference_place_holder_img)
         )
 
@@ -60,7 +68,9 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             ) = main_presenter.get_area_width_length_contour2d(path_back)
 
         except:
-            logging.error(f"We failed to measure for either the paths: {path_front} and {path_back}")
+            logging.error(
+                f"We failed to measure for either the paths: {path_front} and {path_back}"
+            )
             (
                 area_front,
                 width_front,
@@ -98,28 +108,29 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
 
         Returns:
             tuple:  Tuple of the measured values
-        """        
+        """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        #Check if the result has already been cached. If yes, directly return the result
+        # Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(path_3d)
         if cache_result != None and len(cache_result) == 7:
             logging.info(f"Loading {path_3d} directly from library")
             return cache_result
-        
-        #In case it is not cached, we have to measure the pixels directly.
-        #Get the year, batch and piece of the 3d model.
+
+        # In case it is not cached, we have to measure the pixels directly.
+        # Get the year, batch and piece of the 3d model.
         (year, batch, piece) = main_presenter.get_year_batch_piece(path_3d)
 
-
-        #Showing that we are measure the 3d models
-        logging.info(f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} ")
-        main_view.statusLabel.setText(f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} ")
+        # Showing that we are measure the 3d models
+        logging.info(
+            f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} "
+        )
+        main_view.statusLabel.setText(
+            f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} "
+        )
         main_view.statusLabel.repaint()
         QCoreApplication.processEvents()
 
-
-
-        #Try to get the measurements. If there is an error, return the value
+        # Try to get the measurements. If there is an error, return the value
         try:
             (
                 area_3d,
@@ -137,7 +148,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 batch,
                 piece,
             )
-            #Caching the calculuated values
+            # Caching the calculuated values
             main_model.cache_3d.set(path_3d, return_values)
         except:
             logging.error(f"We failed to measure the pixels in {path_3d}")
@@ -150,7 +161,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 1,
                 1,
                 1,
-                main_presenter.get_contour_2d(main_model.reference_place_holder_img)
+                main_presenter.get_contour_2d(main_model.reference_place_holder_img),
             )
 
             return_values = (

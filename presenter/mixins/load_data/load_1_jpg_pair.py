@@ -91,11 +91,11 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         # We don't allow interactions with the GUI if we are loading the 3d models
-        main_presenter.blockSignals(True)
+        main_view.blockSignals(True)
 
         # If nothing is selectted, we simply return and do nothing
         if not (selected_item):
-            main_presenter.blockSignals(False)
+            main_view.blockSignals(False)
             return
 
         # Create a find_str so we can check if the current find has a 3d model already matched before
@@ -175,4 +175,4 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
 
         #Reenable interaction with the GUI
-        main_presenter.blockSignals(False)
+        main_view.blockSignals(False)

@@ -31,3 +31,35 @@ class PlyWindowMixin:
         """This function periodically updates the little window that displays the 3d model"""
         self.ply_window.poll_events()
         self.ply_window.update_renderer()
+
+    def blockSignals(self, boolean):
+        """This function disables or enables all the interative elements from the GUI when certain oprations are being done
+        at the moment
+
+        Args:
+            boolean (boolean): True means we disable interaction, False means we enable interaction
+        """
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+
+        main_view.hemisphere_cb.setDisabled(boolean)
+        main_view.zone_cb.setDisabled(boolean)
+        main_view.easting_cb.setDisabled(boolean)
+        main_view.northing_cb.setDisabled(boolean)
+        main_view.context_cb.setDisabled(boolean)
+
+        main_view.finds_list.setDisabled(boolean)
+
+        main_view.batch_start.setDisabled(boolean)
+        main_view.batch_end.setDisabled(boolean)
+        main_view.find_start.setDisabled(boolean)
+        main_view.find_end.setDisabled(boolean)
+
+        main_view.loadAll.setDisabled(boolean)
+
+        main_view.update_button.setDisabled(boolean)
+        main_view.remove_button.setDisabled(boolean)
+
+        main_view.modelList.setDisabled(boolean)
+        main_view.sorted_model_list.setDisabled(boolean)
+
+        main_view.year.setDisabled(boolean)

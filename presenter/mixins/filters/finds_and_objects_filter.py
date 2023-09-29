@@ -7,13 +7,13 @@ class FindsAndObjectsFilter:
     def set_filter(self):
         """This function cleans the interface then set up appropriate filters in the interface based on the current path"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        main_view.blockSignals(True)
         main_presenter.clear_interface()
 
         main_presenter.set_year_filter()
         main_presenter.set_batch_filter()
         main_presenter.set_find_filter()
-
+        main_view.blockSignals(False)
     def set_year_filter(self):
         """This function sets up the max and min of the year filters based on the year subfolders(which have values like 2022, 2021, 2023)"""
 
@@ -97,13 +97,15 @@ class FindsAndObjectsFilter:
 
         # Get the folder we are considering
         context_dir = main_presenter.get_context_dir()
-
+        import time
         # Get all the potential find folders
+        
         find_num_paths = glob(
             (context_dir / main_model.path_variables["FINDS_SUBDIR"] / "*").as_posix()
         )
-
+       
         # Get all the find folders in which both of 1.jpg and 2.jpg exists, and the name of the folder is a number
+         
         find_nums = set()
         for i in find_num_paths:
             path1 = Path(i) / main_model.path_variables["FINDS_PHOTO_DIR"] / "1.jpg"
@@ -117,6 +119,7 @@ class FindsAndObjectsFilter:
                     find_nums.add(int(Path(i).parts[-1]))
                 except:
                     pass
+         
         # Set the default values of all finds's min and max as 0 and the GUI to be readonly
         find_min = 0
         find_max = 0

@@ -114,13 +114,13 @@ class ChooseDirectoryMixin:
     def loadImagesPlys(self):
         """This function loads all the finds and models under the current path."""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_presenter.blockSignals(True)
+        main_view.blockSignals(True)
         self.clear_interface()
 
         if main_view.context_cb.count() > 0:
             main_presenter.populate_finds()
             main_presenter.populate_models()
-        main_presenter.blockSignals(False)
+        main_view.blockSignals(False)
 
     def get_context_string(self):
         """Return a string representing the full designation of the current context
@@ -189,37 +189,7 @@ class ChooseDirectoryMixin:
         (easting, northing, context) = Path(context_dir).parts[-3:]
         return (easting, northing, context)
 
-    def blockSignals(self, boolean):
-        """This function disables or enables all the interative elements from the GUI when certain oprations are being done
-        at the moment
 
-        Args:
-            boolean (boolean): True means we disable interaction, False means we enable interaction
-        """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        main_view.hemisphere_cb.setDisabled(boolean)
-        main_view.zone_cb.setDisabled(boolean)
-        main_view.easting_cb.setDisabled(boolean)
-        main_view.northing_cb.setDisabled(boolean)
-        main_view.context_cb.setDisabled(boolean)
-
-        main_view.finds_list.setDisabled(boolean)
-
-        main_view.batch_start.setDisabled(boolean)
-        main_view.batch_end.setDisabled(boolean)
-        main_view.find_start.setDisabled(boolean)
-        main_view.find_end.setDisabled(boolean)
-
-        main_view.loadAll.setDisabled(boolean)
-
-        main_view.update_button.setDisabled(boolean)
-        main_view.remove_button.setDisabled(boolean)
-
-        main_view.modelList.setDisabled(boolean)
-        main_view.sorted_model_list.setDisabled(boolean)
-
-        main_view.year.setDisabled(boolean)
 
     def get_year_batch_piece(self, path_3d):
         """This function returns the year, batch, and piece number of a 3d model

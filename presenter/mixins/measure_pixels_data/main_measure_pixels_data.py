@@ -20,7 +20,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         main_presenter.ceremic_predictor = MaskPredictor(
-            r".\computation\ceremicsmask.pt"
+            r".\computation\updated_ceremicsmask.pt"
         )
         main_presenter.colorgrid_predictor = MaskPredictor(
             r".\computation\colorgridmask.pt"  

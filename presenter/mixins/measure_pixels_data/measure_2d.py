@@ -65,7 +65,7 @@ class Measure2DMixin:  # bridging the view(gui) and the model(data)
             mm_difference_x = 53.98  
         else:
             mm_difference_x =50.8
-        print(4)
+      
         return  (mm_difference_x/pixel_difference_x)
         
     def get_ceremic_area(self, ceremic_mask, mm_per_pixel):

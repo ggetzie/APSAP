@@ -15,7 +15,7 @@ class LoadPlys:
         """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # We block interactions with the GUI during loading!
-        main_presenter.blockSignals(True)
+        main_view.blockSignals(True)
  
         # Either create a model for the selection model instance, or remove all the rows in it
         self.reset_ply_selection_model()
@@ -72,7 +72,7 @@ class LoadPlys:
 
 
         #After loading is successful, we enable the interactions with the GUI.
-        main_presenter.blockSignals(False)
+        main_view.blockSignals(False)
 
     def reset_ply_selection_model(self):
         """This function ensures that there is a empty modelList

@@ -176,11 +176,34 @@ class AddAndRemoveMatchMixin:
             ):
                 (sorted_mod.item(i)).setForeground(QColor("red"))
       
-
+        #Here we seaerch through all find
         #We saved the updated matching info in the two dicts to inform later that what is matched to what
         find_str = f"{easting},{northing},{context},{int(find_num)}"
         ply_str = f"{int(new_year)},{int(batch_num)},{int(piece_num)}"
         main_view.dict_find_2_ply[find_str] = ply_str
+
+        #We match a previous matched find only if it is inside the dict and it is a different find from the find we just updated
+        if ply_str in main_view.dict_ply_2_find and main_view.dict_ply_2_find[ply_str] != find_str:
+            #This means that there is a previous find matched to this 3d model
+            previous_matched_find_num = main_view.dict_ply_2_find[ply_str].split(",")[-1]
+            logging.info(f"There is a previous find_num matched to this element: {previous_matched_find_num}, we now will attempt to unmatch that ")
+           
+            for index in range(main_view.finds_list.count()):
+                if main_view.finds_list.item(index).text() == str(previous_matched_find_num):
+                    logging.info(f"We have a previous find matched with this ply, the find number is :{previous_matched_find_num}")   
+                    #Updating to database
+                    main_model.update_match_info(
+                        easting, northing, context, str(previous_matched_find_num), None, None, None
+                    )
+                    #Updating the color to black
+                    main_view.finds_list.item(index).setForeground(QColor("black"))
+                    #Saving the data to make the application know that the previously match find is not matched anymore
+                    previously_matched_key = main_view.dict_ply_2_find[ply_str]
+                    main_view.dict_find_2_ply[previously_matched_key] = None
+                    break
+                
+         
+
         main_view.dict_ply_2_find[ply_str] = find_str
 
     def remove_match(self):

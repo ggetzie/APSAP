@@ -8,6 +8,7 @@ class LoadFinds:
         """This function adds all the finds onto the finds list
         """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_presenter.blockSignals(True)
 
         #Get all the finds and sort them by their numerical values
         context_dir = main_presenter.get_context_dir()
@@ -23,6 +24,9 @@ class LoadFinds:
         easting, northing, context = main_presenter.get_easting_northing_context()
         finds_subdir = main_model.path_variables["FINDS_SUBDIR"]
         finds_photo_dir = main_model.path_variables["FINDS_PHOTO_DIR"]
+
+
+        duplicates_checks = dict()
 
         #Go through all finds one by one
         for find in finds:
@@ -48,8 +52,14 @@ class LoadFinds:
             #If yes, 
             # We set the item as red to indicate it is matched already
             # We also store the matching result in two dict() so we can later reference it
-            (batch_year, batch_num, batch_piece) = main_model.get_sherd_info(easting, northing, context, find)              
+            (batch_year, batch_num, batch_piece) = main_model.get_sherd_info(easting, northing, context, find)    
             if batch_year!= None  and batch_num!=None and batch_piece!=None:
+                text = f"{easting},{northing},{context},{batch_year},{batch_num},{batch_piece}"
+                if text not in duplicates_checks:
+                    duplicates_checks[text] = [find]
+                else:
+                    duplicates_checks[text].append(find)
+        
                 item.setForeground(QColor("red"))
                 find_str = f"{easting},{northing},{context},{int(find)}"
                 ply_str = f"{int(batch_year)},{int(batch_num)},{int(batch_piece)}"
@@ -57,3 +67,13 @@ class LoadFinds:
                 main_view.dict_ply_2_find[ply_str] = find_str
             #Finally we add our item to the list
             main_view.finds_list.addItem(item)
+        logging.info(f"Showing possible duplicates")  
+        for key in duplicates_checks:
+            if (len(duplicates_checks[key]) >= 2):
+                logging.info(f"Duplicates: ")
+                logging.info(f"Key: {key}")  
+                logging.info(f"find: {duplicates_checks[key]}")  
+
+            
+        main_presenter.blockSignals(False)
+        

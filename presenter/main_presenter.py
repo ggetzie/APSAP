@@ -8,6 +8,7 @@ from presenter.mixins.calculuate_similarity.calculuate_individual_similarities i
 from presenter.mixins.measure_pixels_data.main_measure_pixels_data import MeasurePixelsDataMixin
 from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
 import time
+import logging
 import re
 from pathlib import PurePath
 from PyQt5.QtGui import (
@@ -50,3 +51,46 @@ class Mainpresenter(
     def get_model_view_presenter(self):
 
         return self.main_model, self.main_view, self
+
+    def blockSignals(self, boolean):
+        """This function disables or enables all the interative elements from the GUI when certain oprations are being done
+        at the moment
+
+        Args:
+            boolean (boolean): True means we disable interaction, False means we enable interaction
+        """
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        
+         
+        main_view.setDisabled(boolean) 
+        # main_view.hemisphere_cb.setDisabled(boolean)
+        # main_view.zone_cb.setDisabled(boolean)
+        # main_view.easting_cb.setDisabled(boolean)
+        # main_view.northing_cb.setDisabled(boolean)
+        # main_view.context_cb.setDisabled(boolean)
+    
+       
+        # main_view.finds_list.setDisabled(boolean)
+
+        # main_view.batch_start.setDisabled(boolean)
+        # main_view.batch_end.setDisabled(boolean)
+        # main_view.find_start.setDisabled(boolean)
+        # main_view.find_end.setDisabled(boolean)
+
+        # main_view.loadAll.setDisabled(boolean)
+
+        # main_view.update_button.setDisabled(boolean)
+        # main_view.remove_button.setDisabled(boolean)
+
+        # main_view.modelList.setDisabled(boolean)
+        # main_view.sorted_model_list.setDisabled(boolean)
+
+        # main_view.year.setDisabled(boolean)
+         
+        # if boolean == True:
+        #     logging.info("GUI disabled")
+        # else:
+        #     logging.info("GUI enabled")
+
+        
+

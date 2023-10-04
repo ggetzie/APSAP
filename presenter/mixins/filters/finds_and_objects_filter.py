@@ -7,13 +7,13 @@ class FindsAndObjectsFilter:
     def set_filter(self):
         """This function cleans the interface then set up appropriate filters in the interface based on the current path"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_view.blockSignals(True)
+        main_presenter.blockSignals(True)
         main_presenter.clear_interface()
 
         main_presenter.set_year_filter()
         main_presenter.set_batch_filter()
         main_presenter.set_find_filter()
-        main_view.blockSignals(False)
+        main_presenter.blockSignals(False)
     def set_year_filter(self):
         """This function sets up the max and min of the year filters based on the year subfolders(which have values like 2022, 2021, 2023)"""
 

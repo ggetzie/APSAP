@@ -2,9 +2,8 @@ import win32gui
 import open3d as o3d
 from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QTimer
-
-
+from PyQt5.QtCore import QTimer, QCoreApplication 
+import logging
 class PlyWindowMixin:
     def set_up_ply_window(self):
         """This function set up the window that displays the point cloud ply fie."""
@@ -25,41 +24,12 @@ class PlyWindowMixin:
 
         timer = QTimer(self)
         timer.timeout.connect(self.update_ply_window)
-        timer.start(1)
+        timer.start(100)
 
     def update_ply_window(self):
         """This function periodically updates the little window that displays the 3d model"""
         self.ply_window.poll_events()
         self.ply_window.update_renderer()
 
-    def blockSignals(self, boolean):
-        """This function disables or enables all the interative elements from the GUI when certain oprations are being done
-        at the moment
 
-        Args:
-            boolean (boolean): True means we disable interaction, False means we enable interaction
-        """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        main_view.hemisphere_cb.setDisabled(boolean)
-        main_view.zone_cb.setDisabled(boolean)
-        main_view.easting_cb.setDisabled(boolean)
-        main_view.northing_cb.setDisabled(boolean)
-        main_view.context_cb.setDisabled(boolean)
-
-        main_view.finds_list.setDisabled(boolean)
-
-        main_view.batch_start.setDisabled(boolean)
-        main_view.batch_end.setDisabled(boolean)
-        main_view.find_start.setDisabled(boolean)
-        main_view.find_end.setDisabled(boolean)
-
-        main_view.loadAll.setDisabled(boolean)
-
-        main_view.update_button.setDisabled(boolean)
-        main_view.remove_button.setDisabled(boolean)
-
-        main_view.modelList.setDisabled(boolean)
-        main_view.sorted_model_list.setDisabled(boolean)
-
-        main_view.year.setDisabled(boolean)
+   

@@ -114,14 +114,13 @@ class ChooseDirectoryMixin:
     def loadImagesPlys(self):
         """This function loads all the finds and models under the current path."""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_view.blockSignals(True)
+         
         self.clear_interface()
 
         if main_view.context_cb.count() > 0:
             main_presenter.populate_finds()
             main_presenter.populate_models()
-        main_view.blockSignals(False)
-
+       
     def get_context_string(self):
         """Return a string representing the full designation of the current context
         as utm_hemisphere-utm_zone-utm_easting-utm_northing-context_number

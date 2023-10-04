@@ -14,12 +14,15 @@ class LoadPlys:
         This function populates the list that not sorted by similarity but by year, batch then piece number
         """        
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        # We block interactions with the GUI during loading!
-        main_view.blockSignals(True)
+        
  
         # Either create a model for the selection model instance, or remove all the rows in it
         self.reset_ply_selection_model()
 
+        # We block interactions with the GUI during loading!
+         
+        main_presenter.blockSignals(True)
+ 
         # A tree like structure where you can get use tree traveral using a dict to get all the 3d models
         #First by their year, then by their batch, then finally by their piece number
         #We use this tree like structure to make sure things run in O(n)
@@ -72,7 +75,7 @@ class LoadPlys:
 
 
         #After loading is successful, we enable the interactions with the GUI.
-        main_view.blockSignals(False)
+        main_presenter.blockSignals(False)
 
     def reset_ply_selection_model(self):
         """This function ensures that there is a empty modelList

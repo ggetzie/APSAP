@@ -183,7 +183,7 @@ class AddAndRemoveMatchMixin:
         main_view.dict_find_2_ply[find_str] = ply_str
 
         #We match a previous matched find only if it is inside the dict and it is a different find from the find we just updated
-        if ply_str in main_view.dict_ply_2_find and main_view.dict_ply_2_find[ply_str] != find_str:
+        if ply_str in main_view.dict_ply_2_find and main_view.dict_ply_2_find[ply_str]!= None and main_view.dict_ply_2_find[ply_str] != find_str:
             #This means that there is a previous find matched to this 3d model
             previous_matched_find_num = main_view.dict_ply_2_find[ply_str].split(",")[-1]
             logging.info(f"There is a previous find_num matched to this element: {previous_matched_find_num}, we now will attempt to unmatch that ")

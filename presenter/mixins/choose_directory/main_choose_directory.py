@@ -1,11 +1,12 @@
-from PyQt5.QtGui import QStandardItemModel
 from pathlib import Path
 import re
+from PyQt5.QtGui import QStandardItemModel
+
 
 class ChooseDirectoryMixin:
     def populate_hemispheres(self):
         """Set the select options of hemisphere as the hemispheres in the root folder"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view, _ = self.get_model_view_presenter()
         main_view.hemisphere_cb.clear()
 
         options = [
@@ -87,19 +88,19 @@ class ChooseDirectoryMixin:
             main_view.context_cb.setEnabled(len(options) > 1)
 
     def clear_interface(self):
-        """Clear all the texts, and selects, iamges displayed and 3d models from the interface."""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        """Clear all the texts, and selects, images displayed and 3d models from the interface."""
+        _, main_view, main_presenter = self.get_model_view_presenter()
 
         main_view.findFrontPhoto_l.clear()
         main_view.findBackPhoto_l.clear()
-        main_view.statusLabel.setText(f"")
-        main_view.selected_find.setText(f"")
-        main_view.current_batch.setText(f"")
-        main_view.current_year.setText(f"")
-        main_view.current_piece.setText(f"")
-        main_view.new_batch.setText(f"")
-        main_view.new_piece.setText(f"")
-        main_view.new_year.setText(f"")
+        main_view.statusLabel.setText("")
+        main_view.selected_find.setText("")
+        main_view.current_batch.setText("")
+        main_view.current_year.setText("")
+        main_view.current_piece.setText("")
+        main_view.new_batch.setText("")
+        main_view.new_piece.setText("")
+        main_view.new_year.setText("")
         main_view.contextDisplay.setText(self.get_context_string())
         if hasattr(main_view, "current_pcd"):
             main_view.ply_window.remove_geometry(main_view.current_pcd)
@@ -111,16 +112,16 @@ class ChooseDirectoryMixin:
         main_view.finds_list.setCurrentItem(None)
         main_view.finds_list.clear()
 
-    def loadImagesPlys(self):
+    def load_images_plys(self):
         """This function loads all the finds and models under the current path."""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-         
+        _, main_view, main_presenter = self.get_model_view_presenter()
+
         self.clear_interface()
 
         if main_view.context_cb.count() > 0:
             main_presenter.populate_finds()
             main_presenter.populate_models()
-       
+
     def get_context_string(self):
         """Return a string representing the full designation of the current context
         as utm_hemisphere-utm_zone-utm_easting-utm_northing-context_number
@@ -128,7 +129,7 @@ class ChooseDirectoryMixin:
         Returns:
             str: The full designation of the currently selected context
         """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        _, main_view, _ = self.get_model_view_presenter()
 
         hzenc = [
             main_view.hemisphere_cb.currentText(),
@@ -152,7 +153,8 @@ class ChooseDirectoryMixin:
             options = [
                 d.name for d in path.iterdir() if d.is_dir() and d.name.isdigit()
             ]
-        except:
+        except FileNotFoundError:
+            options = []
             options = []
         return options
 
@@ -162,7 +164,7 @@ class ChooseDirectoryMixin:
         Returns:
             Path(): A Path from pathlib that represents the current path
         """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view, _ = self.get_model_view_presenter()
 
         res = (
             main_model.file_root
@@ -183,12 +185,10 @@ class ChooseDirectoryMixin:
         Returns:
             tuple: The tuple of the easting, northing and context of the current path
         """
-        main_model, view, main_presenter = self.get_model_view_presenter()
+        _, _, main_presenter = self.get_model_view_presenter()
         context_dir = main_presenter.get_context_dir()
         (easting, northing, context) = Path(context_dir).parts[-3:]
         return (easting, northing, context)
-
-
 
     def get_year_batch_piece(self, path_3d):
         """This function returns the year, batch, and piece number of a 3d model
@@ -198,8 +198,8 @@ class ChooseDirectoryMixin:
 
         Returns:
             tuple: The year, batch and piece values to be returned
-        """        
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        """
+        main_model, _, _ = self.get_model_view_presenter()
 
         m = re.search(
             main_model.path_variables["MODELS_FILES_RE"],

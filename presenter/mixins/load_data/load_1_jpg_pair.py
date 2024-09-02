@@ -1,8 +1,8 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PIL.ImageQt import ImageQt
+
 import open3d as o3d
-import time
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
@@ -15,7 +15,6 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # Set the currenly selected item
-     
 
         # We test two things to see if we discard the subsequent operations of this function
         # 1. We check of the current selected item has text
@@ -40,7 +39,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
 
         main_view.path_2d_picture = photos_dir
-        
+
         try:
             front_photo = ImageQt(main_model.open_image(str(photos_dir / "1.jpg")))
             back_photo = ImageQt(main_model.open_image(str(photos_dir / "2.jpg")))
@@ -143,31 +142,30 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             if ply_str in main_view.dict_ply_2_find:
                 ply.setForeground(QColor("red"))
 
-            #We save the 3d model path to the item as well
+            # We save the 3d model path to the item as well
             whole_path = (
-            str(
-                (
-                    main_presenter.get_context_dir()
-                    / main_model.path_variables["MODELS_FILES_DIR"]
+                str(
+                    (
+                        main_presenter.get_context_dir()
+                        / main_model.path_variables["MODELS_FILES_DIR"]
+                    )
                 )
-            )
-            .replace("*", str(year), 1)
-            .replace("*", f"{int(batch_num):03}", 1)
-            .replace("*", f"{int(piece_num)}", 1)
+                .replace("*", str(year), 1)
+                .replace("*", f"{int(batch_num):03}", 1)
+                .replace("*", f"{int(piece_num)}", 1)
             )
             ply.setData(f"{whole_path}", Qt.UserRole)
 
-            #Finally we add the item to the model
+            # Finally we add the item to the model
             model.appendRow(ply)
 
-        
         main_presenter.clean_ply_window()
 
-        #Reset the list that contains the sorted 3d models
+        # Reset the list that contains the sorted 3d models
         main_view.sorted_model_list.setModel(model)
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             main_presenter.change_3d_model
         )
 
-        #Reenable interaction with the GUI
+        # Reenable interaction with the GUI
         main_presenter.blockSignals(False)

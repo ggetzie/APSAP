@@ -1,10 +1,12 @@
 import cv2
 
 
-class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the model(data)
+class CalculateIndividualSimilaritiesMixin:  
+    # bridging the view(gui) and the model(data)
     def get_similarity_two_nums(self, a, b):  # a, b >
-        """A similarity score between two numbers, 0 means exactly the same, 1 means infinitely different
-        A small number is added to the denominator to avoid divided by 0.
+        """A similarity score between two numbers, 0 means exactly the same, 1 means
+        infinitely different.
+        A small number is added to the denominator to avoid dividing by 0.
 
         Returns:
             double: a double value that represents how close two numbers are
@@ -21,9 +23,9 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
             area_back (double): _description_
 
         Returns:
-            double: A similarity score representing how similiar the 3d model and the find are.
+            double: A similarity score representing how similar the 3d model and the find are.
         """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        _, _, main_presenter = self.get_model_view_presenter()
 
         smaller_area = min(area_front, area_back)
         larger_area = max(area_front, area_back)
@@ -42,7 +44,8 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
         width_back,
         length_back,
     ):
-        """This function calculuates the similarity between a 3d model and the find by comparing the similarities of the width and the length of the bounding box.
+        """This function calculates the similarity between a 3d model and the find by
+        comparing the similarities of the width and the length of the bounding box.
 
         Args:
             width_3d (double): The width of the bounding box of the picture of the 3d model
@@ -53,9 +56,9 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
             length_back (double):  The length of the bounding box of the picture of the back image
 
         Returns:
-            double: A similarity score representing how similiar the 3d model and the find are.
+            double: A similarity score representing how similar the 3d model and the find are.
         """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        _, _, main_presenter = self.get_model_view_presenter()
 
         similarity_with_img_1 = main_presenter.get_similarity_two_nums(
             length_front, length_3d
@@ -67,8 +70,9 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
 
         return min(similarity_with_img_1, similarity_with_img_2)
 
-    def get_contour_simlarity(self, contour_3d, contour_front, contour_back):
-        """This function calculates the similarity regarding 3d contour and contours of the images
+    def get_contour_similarity(self, contour_3d, contour_front, contour_back):
+        """This function calculates the similarity regarding 3d contour and contours
+        of the images
 
         Args:
             contour_3d (object): A contour of the 3d model described the 3d model
@@ -76,7 +80,7 @@ class CalculateIndividualSimilaritiesMixin:  # bridging the view(gui) and the mo
             contour_back (object): A contour of the 3d model described the back image
 
         Returns:
-            double: A similarity score representing how similiar the 3d model and the find are.
+            double: A similarity score representing how similar the 3d model and the find are.
         """
         closeness_1 = cv2.matchShapes(contour_front, contour_3d, 1, 0.0)
         closeness_2 = cv2.matchShapes(contour_back, contour_3d, 1, 0.0)

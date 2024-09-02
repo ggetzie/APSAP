@@ -13,14 +13,12 @@
     "dbro",
     "dbrw",
     "hzenc",
+    "plys",
     "psycopg2",
     "qtcreator"
   ],
-  "cSpell.words": [
-    "keypoints",
-    "threed"
-  ],
+  "cSpell.words": ["keypoints", "threed"],
   "python.formatting.provider": "black",
   "editor.wordWrap": "wordWrapColumn",
-"editor.wordWrapColumn": 160
+  "editor.wordWrapColumn": 160
 }

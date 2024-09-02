@@ -1,16 +1,20 @@
 from glob import glob
 
 
-class get3dModelSortedBySimilarityMixin:
+class Get3dModelSortedBySimilarityMixin:
     def get_potential_3d_models_sorted_by_similarity(self, find_path):
-        """Given a certain path of a find, we have two images, 1.jpg and 2.jpg. By comparing them with the 3d model, we can have a sorted
-        list of 3d models sorted by how similiar that find is with respect to the 3d models. This function gets such a sorted list
+        """Given a certain path of a find, we have two images, 1.jpg and 2.jpg.
+        By comparing them with the 3d model, we can have a list of 3d models sorted
+        by how similar that find is with respect to the 3d models. This function
+        gets such a sorted list
 
         Args:
-            find_path (str): The path to the find in which we have 1.jpg and 2.jpg. We compare the 3d models
+            find_path (str): The path to the find in which we have 1.jpg and 2.jpg.
+            We compare the 3d models
 
         Returns:
-             list[batch_num, piece_num, year]: A list of batch_num piece_num, year, which uniquly define a 3d model.
+             list[batch_num, piece_num, year]: A list of batch_num piece_num, year,
+             which uniquely define a 3d model.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
@@ -38,7 +42,7 @@ class get3dModelSortedBySimilarityMixin:
             # Measure all the relevant data of the 3d model
             (
                 area_3d,
-                width_3d, 
+                width_3d,
                 length_3d,
                 contour_3d,
                 year,

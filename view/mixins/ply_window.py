@@ -1,9 +1,12 @@
+import logging
+
 import win32gui
 import open3d as o3d
 from PyQt5.QtGui import QWindow
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QTimer, QCoreApplication 
-import logging
+from PyQt5.QtCore import QTimer, QCoreApplication
+
+
 class PlyWindowMixin:
     def set_up_ply_window(self):
         """This function set up the window that displays the point cloud ply fie."""
@@ -19,8 +22,8 @@ class PlyWindowMixin:
         # 2.Attaching the open3d window we just created to our application
         hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
         window = QWindow.fromWinId(hwnd)
-        windowcontainer = QWidget.createWindowContainer(window, widget)
-        windowcontainer.setMinimumSize(430, 390)
+        window_container = QWidget.createWindowContainer(window, widget)
+        window_container.setMinimumSize(430, 390)
 
         timer = QTimer(self)
         timer.timeout.connect(self.update_ply_window)
@@ -30,6 +33,3 @@ class PlyWindowMixin:
         """This function periodically updates the little window that displays the 3d model"""
         self.ply_window.poll_events()
         self.ply_window.update_renderer()
-
-
-   

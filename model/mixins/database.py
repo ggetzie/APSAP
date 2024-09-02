@@ -1,7 +1,9 @@
-import psycopg2
-import environ
 from pathlib import Path
 import logging
+
+import psycopg2
+import environ
+
 SRC_DIR = Path(__file__).resolve(strict=True).parent
 
 
@@ -31,8 +33,7 @@ WRITE_SETTINGS = {
 
 class DatabaseMixin:
     def __init__(self):
-        """This constructor intitalizes a database connection that gets reused throughout the whole application
-        """        
+        """This constructor initializes a database connection that gets reused throughout the whole application"""
         self.conn = psycopg2.connect(**READ_SETTINGS)
 
     def get_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
@@ -46,7 +47,7 @@ class DatabaseMixin:
 
         Returns:
             tuple: (batch_year, batch_number, batch_piece)
-        """        
+        """
         if not self.conn:
             self.conn = psycopg2.connect(**READ_SETTINGS)
         conn = self.conn
@@ -72,12 +73,17 @@ class DatabaseMixin:
                 return None, None, None
             else:
                 logging.info(
-                    f"the find of {(utm_easting, utm_northing, context_num, find_num)} has the record {record}"
+                    "the find of (%i, %i, %i, %i) has the record %s",
+                    utm_easting,
+                    utm_northing,
+                    context_num,
+                    find_num,
+                    record,
                 )
                 return record[0]
 
-        except Exception as error:
-            logging.error(f"Error while connecting to PostgreSQL: {error}" )
+        except psycopg2.Error as error:
+            logging.error("Error while connecting to PostgreSQL: %s", error)
         finally:
             if conn:
                 cursor.close()
@@ -102,7 +108,7 @@ class DatabaseMixin:
             new_batch_num (str): The batch number of the 3d model of the find
             new_sherd_num (str): The sherd number of the 3d model of the find
             new_year (str): The year number of the 3d model of the find
-        """        
+        """
         if not self.conn:
             self.conn = psycopg2.connect(**READ_SETTINGS)
         conn = self.conn
@@ -160,11 +166,14 @@ class DatabaseMixin:
                     if updated_rows <= 1:
                         conn.commit()
                         logging.info(
-                            f"Updated with new_batch_num, new_sherd_num, new_year: { (new_batch_num, new_sherd_num, new_year)}"
+                            "Updated with (new_batch_num, new_sherd_num, new_year): (%i, %i, %i)",
+                            new_batch_num,
+                            new_sherd_num,
+                            new_year,
                         )
 
-        except Exception as error:
-            logging.info(f"Error while connecting to PostgreSQL: {error}")
+        except psycopg2.Error as error:
+            logging.error("Error while connecting to PostgreSQL: %s", error)
         finally:
             if conn:
                 cursor.close()

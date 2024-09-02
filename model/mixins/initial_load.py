@@ -1,16 +1,18 @@
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
 import json
 from pathlib import Path
-from glob import glob as glob
+from glob import glob
 from diskcache import Cache
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 
 class InitialLoadMixin:
     def prepare_data(self, main_view):
-        """This function prepares all the data that needs to be preliminarily loaded before the application begins.
+        """This function prepares all the data that needs to be preliminarily loaded
+        before the application begins.
 
         Args:
-            main_view (QT Window widget): This is the widget that contains GUI related functions and classes
+            main_view (QT Window widget): This is the widget that contains GUI related
+            functions and classes
         """
 
         # Data 1: Loading the root of the 3d model and 2d jpegs files.
@@ -29,10 +31,12 @@ class InitialLoadMixin:
         self.reference_place_holder_img = "computation/reference_placeholder.jpg"
 
     def ensure_settings_exists(self, main_view):
-        """This function will keep asking the user to select a folder to the root of the files if there isn't one already
+        """This function will keep asking the user to select a folder to the root
+        of the files if there isn't one already
 
         Args:
-            main_view (QT Window widget): This is the widget that contains GUI related functions and classes
+            main_view (QT Window widget): This is the widget that contains GUI related
+            functions and classes
         """
 
         if self.setting_file_exists():
@@ -42,35 +46,39 @@ class InitialLoadMixin:
         while True:
             # Test 1: The file path the user just chose is a valid directory?
             chosen_path = self.ask_for_path_to_files(main_view, message)
-            if not (Path(chosen_path).is_dir()):
+            if not Path(chosen_path).is_dir():
                 message = "Path doesn't exist"
                 continue
 
             # Test 2: The file path's directory contains an N or an S.
-            has_N_S = any(
+            has_hemisphere = any(
                 [
                     Path(path).stem == "N" or Path(path).stem == "S"
                     for path in glob(f"{chosen_path}/*")
                 ]
             )
-            if not has_N_S:
+            if not has_hemisphere:
                 message = "Valid paths must contain a directory named N or S!"
                 continue
 
             # We save the json file
             file_dict = {"FILE_ROOT": f"{chosen_path}"}
-            with open("./configs/settings.json", "w") as fp:
+            with open("./configs/settings.json", "w", encoding="utf-8") as fp:
                 json.dump(file_dict, fp)
                 fp.close()
             # If a saving operation is successful we immediately return
             return
 
     def ask_for_path_to_files(self, main_view, message):
-        """This function asks the user to locate the root folder for the 3d models and 2d images
+        """This function asks the user to locate the root folder for the
+        3d models and 2d images
 
         Args:
-            main_view (QT Window widget): This is the widget that contains GUI related functions and classes
-            message (str): The message that gets displayed to ask the user to input the correct folder.
+            main_view (QT Window widget): This is the widget that contains
+            GUI related functions and classes
+
+            message (str): The message that gets displayed to ask the user
+            to input the correct folder.
 
         Returns:
             str: The directory that user just chose
@@ -96,7 +104,7 @@ class InitialLoadMixin:
 
         # Test 2: Check if the json file has valid json
         try:
-            setting_dict = json.load(open("./configs/settings.json"))
+            setting_dict = json.load(open("./configs/settings.json", encoding="utf-8"))
         except:
             return False
 
@@ -104,7 +112,7 @@ class InitialLoadMixin:
         if "FILE_ROOT" not in setting_dict:
             return False
 
-        # Test 4: Check if the FILE_ROOT desiginated is a valid directory.
+        # Test 4: Check if the FILE_ROOT designated is a valid directory.
         if not Path(setting_dict["FILE_ROOT"]).is_dir():
             return False
 

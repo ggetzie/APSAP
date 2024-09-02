@@ -22,13 +22,15 @@ class Get3dModelSortedBySimilarityMixin:
         path_front = find_path / "1.jpg"
         path_back = find_path / "2.jpg"
 
-        # Measuring all the relevant data of the front and back images so that we can compare them with the data of the 3d models later
+        # Measuring all the relevant data of the front and back images so that we can
+        # compare them with the data of the 3d models later
         (
             (area_front, width_front, length_front, contour_front),
             (area_back, width_back, length_back, contour_back),
         ) = main_presenter.measure_pixels_2d(path_front, path_back)
 
-        # The list will be appened with [similarity_mean, batch_num, piece_num, year] of all 3d models we want to compare with
+        # The list will be append with [similarity_mean, batch_num, piece_num, year] of
+        # all 3d models we want to compare with
         similarity_scores = []
 
         # A regular expression with which that we search all relevant 3d models.
@@ -50,7 +52,8 @@ class Get3dModelSortedBySimilarityMixin:
                 piece_num,
             ) = main_presenter.measure_pixels_3d(path_3d)
 
-            # If the batch number is outside of the filter or the year doesn't match, we skip this 3d model!.
+            # If the batch number is outside of the filter or the year doesn't match,
+            # we skip this 3d model!.
             if (
                 int(batch_num) < int(main_view.batch_start.value())
                 or int(batch_num) > int(main_view.batch_end.value())
@@ -62,7 +65,7 @@ class Get3dModelSortedBySimilarityMixin:
             main_view.statusLabel.setText(f"Calculate the similarity with {path_3d}")
             main_view.statusLabel.repaint()
 
-            # Then we calculuat the similarity with respect to different criteria
+            # Then we calculate the similarity with respect to different criteria
             area_similarity = main_presenter.get_area_similarity(
                 area_3d,
                 area_front,
@@ -78,14 +81,14 @@ class Get3dModelSortedBySimilarityMixin:
                 length_back,
             )
 
-            contour_simlarity = main_presenter.get_contour_simlarity(
+            contour_similarity = main_presenter.get_contour_similarity(
                 contour_3d, contour_front, contour_back
             )
             # We get a weighted mean of similarity for this model.
             similarity_mean = (
                 area_similarity * 1.2
                 + width_length_similarity * 0.2
-                + contour_simlarity * 0.7
+                + contour_similarity * 0.7
             )
             # We append the similarity and 3d model data to the list we defined
             similarity_scores.append([similarity_mean, batch_num, piece_num, year])

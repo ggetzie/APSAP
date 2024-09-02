@@ -1,8 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import QMessageBox
 from PIL.ImageQt import ImageQt
-
-import open3d as o3d
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
@@ -14,7 +13,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             selected_item (_type_): _description_
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        # Set the currenly selected item
+        # Set the currently selected item
 
         # We test two things to see if we discard the subsequent operations of this function
         # 1. We check of the current selected item has text
@@ -43,9 +42,14 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         try:
             front_photo = ImageQt(main_model.open_image(str(photos_dir / "1.jpg")))
             back_photo = ImageQt(main_model.open_image(str(photos_dir / "2.jpg")))
-        except:
-            from PyQt5.QtWidgets import QMessageBox
-
+        except (
+            AttributeError,
+            FileNotFoundError,
+            IOError,
+            OSError,
+            TypeError,
+            ValueError,
+        ):
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Error")
@@ -77,28 +81,33 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         # Set up the selected_find's text
         main_view.selected_find.setText(find_num)
 
-        # We immediately try to load all 3d models but sorted according to their similarity with the current find
+        # We immediately try to load all 3d models but sorted according to their
+        # similarity with the current find
         main_presenter.load_sorted_models(selected_item)
 
     def load_sorted_models(self, selected_item):
-        """This function load the 3d models sorted by how similiar they are with respected to the selectec
-        image.
+        """This function load the 3d models sorted by how similar they are with respected
+        to the selected image.
 
         Args:
-            selected_item (object): The selected object in the list that represends a find
+            selected_item (object): The selected object in the list that represents a find
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
 
         # We don't allow interactions with the GUI if we are loading the 3d models
         main_presenter.blockSignals(True)
 
-        # Create a find_str so we can check if the current find has a 3d model already matched before
+        # Create a find_str so we can check if the current find has a 3d model already
+        # matched before
         easting_northing_context = main_presenter.get_easting_northing_context()
-        find_str = f"{easting_northing_context[0]},{easting_northing_context[1]},{easting_northing_context[2]},{int(selected_item.text())}"
+        find_str = (
+            f"{easting_northing_context[0]},{easting_northing_context[1]},",
+            f"{easting_northing_context[2]},{int(selected_item.text())}",
+        )
 
         if (
             find_str in main_view.dict_find_2_ply
-            and main_view.dict_find_2_ply[find_str] != None
+            and main_view.dict_find_2_ply[find_str] is not None
         ):
             ply_str = main_view.dict_find_2_ply[find_str]
             (batch_year, batch_num, batch_piece) = ply_str.split(",")
@@ -134,7 +143,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             ) > int(main_view.batch_end.value()):
                 continue
 
-            # Now the 3d model is guranteed to be a legitimate one, we add it to the an item
+            # Now the 3d model is guaranteed to be a legitimate one, we add it to the an item
             ply = QStandardItem(f"{year}, Batch {batch_num}, model: {piece_num}")
 
             # We check if the 3d model is matched with a find, if it is we set the item to be red

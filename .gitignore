@@ -161,7 +161,7 @@ cython_debug/
 
 settings.json
 
-computation/
+computation
 opengl32.dll
 cache
 logs

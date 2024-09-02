@@ -1,14 +1,15 @@
 import sys
-import time
-import re
-import diskcache
+import logging
+
+
+from presenter.mixins.measure_pixels_data.measure_2d import Measure2DMixin
+from presenter.mixins.measure_pixels_data.measure_3d import Measure3dMixin
+from computation.nn_segmentation import MaskPredictor
+
+from PyQt5.QtCore import QCoreApplication
+
 
 sys.path.insert(0, "../../..")
-from computation.nn_segmentation import MaskPredictor
-from .measure_2d import Measure2DMixin
-from .measure_3d import Measure3dMixin
-from PyQt5.QtCore import QCoreApplication
-import logging
 
 
 class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
@@ -23,11 +24,11 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             r".\computation\updated_ceremicsmask.pt"
         )
         main_presenter.colorgrid_predictor = MaskPredictor(
-            r".\computation\colorgridmask.pt"  
+            r".\computation\colorgridmask.pt"
         )
 
         main_presenter.colorgrid_predictor_24color = MaskPredictor(
-             r".\computation\Different_colro_grid.pt"
+            r".\computation\Different_colro_grid.pt"
         )
         main_presenter.ceremic_predictor.predict(
             main_model.open_image(main_model.reference_place_holder_img)

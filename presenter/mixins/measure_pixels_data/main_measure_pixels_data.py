@@ -18,9 +18,9 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         for measuring the pixels. It also runs the networks for once so it loads faster for
         subsequent runs. Notice that we have two different neural networks for the two color grids.
         """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, _, main_presenter = self.get_model_view_presenter()
 
-        main_presenter.ceremic_predictor = MaskPredictor(
+        main_presenter.ceramic_predictor = MaskPredictor(
             r".\computation\updated_ceremicsmask.pt"
         )
         main_presenter.colorgrid_predictor = MaskPredictor(
@@ -30,7 +30,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         main_presenter.colorgrid_predictor_24color = MaskPredictor(
             r".\computation\Different_colro_grid.pt"
         )
-        main_presenter.ceremic_predictor.predict(
+        main_presenter.ceramic_predictor.predict(
             main_model.open_image(main_model.reference_place_holder_img)
         )
         main_presenter.colorgrid_predictor.predict(
@@ -52,7 +52,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             tuple: Tuple of the measured values
         """
         try:
-            main_model, main_view, main_presenter = self.get_model_view_presenter()
+            main_model, _, main_presenter = self.get_model_view_presenter()
 
             (
                 area_front,
@@ -70,7 +70,9 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
 
         except:
             logging.error(
-                f"We failed to measure for either the paths: {path_front} and {path_back}"
+                "We failed to measure for either the paths: %s and %s",
+                path_front,
+                path_back,
             )
             (
                 area_front,
@@ -113,8 +115,8 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(path_3d)
-        if cache_result != None and len(cache_result) == 7:
-            logging.info(f"Loading {path_3d} directly from library")
+        if cache_result is not None and len(cache_result) == 7:
+            logging.info("Loading %s directly from library", path_3d)
             return cache_result
 
         # In case it is not cached, we have to measure the pixels directly.
@@ -123,7 +125,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
 
         # Showing that we are measure the 3d models
         logging.info(
-            f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} "
+            "Measuring 3d model: Year %s, Batch: %s, Piece: %s ", year, batch, piece
         )
         main_view.statusLabel.setText(
             f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} "
@@ -149,10 +151,10 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 batch,
                 piece,
             )
-            # Caching the calculuated values
+            # Caching the calculated values
             main_model.cache_3d.set(path_3d, return_values)
         except:
-            logging.error(f"We failed to measure the pixels in {path_3d}")
+            logging.error("We failed to measure the pixels in %s", path_3d)
             (
                 area_3d,
                 width_3d,

@@ -32,6 +32,7 @@ ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
 six==1.16.0
+smallestenclosingcircle==0.0.1
 stack-data==0.6.3
 sympy==1.13.1
 tomli==2.0.1

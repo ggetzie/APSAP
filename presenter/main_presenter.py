@@ -1,8 +1,3 @@
-import time
-import logging
-import re
-from pathlib import PurePath
-
 from PyQt5.QtGui import QFont
 
 from presenter.mixins.choose_directory.main_choose_directory import ChooseDirectoryMixin

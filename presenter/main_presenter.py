@@ -1,5 +1,3 @@
-from PyQt5.QtGui import QFont
-
 from presenter.mixins.choose_directory.main_choose_directory import ChooseDirectoryMixin
 from presenter.mixins.load_data.main_load_data import LoadDataMixin
 from presenter.mixins.match.add_and_remove_match import AddAndRemoveMatchMixin

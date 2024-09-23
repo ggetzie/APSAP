@@ -16,6 +16,6 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         and Image files
         DatabaseMixin (class): This mixin contains the functions related to get and
         update the ceramic find information from the database
-        CopyFileMixin (class): This mixin contains the function fixAndCopyPly() that
+        CopyFileMixin (class): This mixin contains the function fix_and_copy_ply() that
         opens a 3d model, fixes it, then save it to another place.
     """

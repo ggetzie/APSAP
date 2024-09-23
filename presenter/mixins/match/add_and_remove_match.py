@@ -127,9 +127,11 @@ class AddAndRemoveMatchMixin:
 
         # We copy the files to the destination
         logging.info("Copying file from %s to %s", orig_path, original_destination)
-        main_model.fixAndCopyPly(str(Path(orig_path)), str(Path(original_destination)))
+        main_model.fix_and_copy_ply(
+            str(Path(orig_path)), str(Path(original_destination))
+        )
         logging.info("Copying file from %s to %s", mesh_path, mesh_destination)
-        main_model.fixAndCopyPly(str(Path(mesh_path)), str(Path(mesh_destination)))
+        main_model.fix_and_copy_ply(str(Path(mesh_path)), str(Path(mesh_destination)))
 
         # We save the batch, piece and year that will get replaced later
         previous_current_batch_num = main_view.current_batch.text()

@@ -24,7 +24,7 @@ class LoadPlys:
 
         # We block interactions with the GUI during loading!
 
-        main_presenter.blockSignals(True)
+        main_presenter.block_signals(True)
 
         # A tree like structure where you can get use tree traversal using a dict to get all
         # the 3d models first by their year, then by their batch, then finally by their
@@ -78,7 +78,7 @@ class LoadPlys:
             main_view.modelList.selectionModel().model().appendRow(year_item)
 
         # After loading is successful, we enable the interactions with the GUI.
-        main_presenter.blockSignals(False)
+        main_presenter.block_signals(False)
 
     def reset_ply_selection_model(self):
         """This function ensures that there is a empty modelList

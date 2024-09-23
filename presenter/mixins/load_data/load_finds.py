@@ -9,7 +9,7 @@ class LoadFinds:
     def populate_finds(self):
         """This function adds all the finds onto the finds list"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_presenter.blockSignals(True)
+        main_presenter.block_signals(True)
 
         # Get all the finds and sort them by their numerical values
         context_dir = main_presenter.get_context_dir()
@@ -85,4 +85,4 @@ class LoadFinds:
                 logging.info("Key: %s", key)
                 logging.info("find: %s", value)
 
-        main_presenter.blockSignals(False)
+        main_presenter.block_signals(False)

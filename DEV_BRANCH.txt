@@ -1,0 +1,15 @@
+This is the development branch of the application
+for testing of new features and optimizations to improve performance.
+
+To switch back to the main branch
+
+1. Close the application if it is currently running
+2. Open the folder E:\tools\APSAP\APSAP_Sherd_Matching_Tool in windows explorer
+3. Right-click anywhere in the folder and select "Git Bash here"
+4. In the command line window that comes up type "git checkout matrix". 
+   You may then close this command line.
+
+The folder will switch back to the main production branch.
+
+To switch back to this development branch, perform the same procedure but
+instead type "git checkout speedup" in the Git Bash window.

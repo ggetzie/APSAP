@@ -2,11 +2,11 @@ import ctypes
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5 import uic
 
 from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import uic
 
 
 class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
@@ -67,7 +67,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         main_view.find_end.valueChanged.connect(main_presenter.find_end_change)
 
         # Connecting the button to the function that load the images and 3d models
-        main_view.loadAll.clicked.connect(main_presenter.loadImagesPlys)
+        main_view.loadAll.clicked.connect(main_presenter.load_images_plys)
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(main_presenter.add_match)

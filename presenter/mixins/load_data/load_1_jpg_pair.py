@@ -1,7 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QMessageBox
-from PIL.ImageQt import ImageQt
+
+# from PIL.ImageQt import ImageQt
+from PIL import ImageQt
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)

@@ -3,7 +3,7 @@ from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QMessageBox
 
 # from PIL.ImageQt import ImageQt
-from PIL import ImageQt
+from PIL.ImageQt import ImageQt
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
@@ -51,11 +51,11 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             OSError,
             TypeError,
             ValueError,
-        ):
+        ) as e:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Error")
-            msg.setInformativeText(f"The jpegs in {photos_dir} are not openable")
+            msg.setInformativeText(f"The jpegs in {photos_dir} are not openable: {e}")
             msg.setWindowTitle("Error")
             msg.exec_()
             return

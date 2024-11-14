@@ -73,7 +73,7 @@ class DatabaseMixin:
                 return None, None, None
             else:
                 logging.info(
-                    "the find of (%i, %i, %i, %i) has the record %s",
+                    "the find of (%s, %s, %s, %s) has the record %s",
                     utm_easting,
                     utm_northing,
                     context_num,

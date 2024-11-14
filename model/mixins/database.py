@@ -166,7 +166,7 @@ class DatabaseMixin:
                     if updated_rows <= 1:
                         conn.commit()
                         logging.info(
-                            "Updated with (new_batch_num, new_sherd_num, new_year): (%i, %i, %i)",
+                            "Updated with (new_batch_num, new_sherd_num, new_year): (%s, %s, %s)",
                             new_batch_num,
                             new_sherd_num,
                             new_year,

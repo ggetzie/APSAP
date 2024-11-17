@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1105</width>
+    <width>1267</width>
     <height>928</height>
    </rect>
   </property>
@@ -632,6 +632,9 @@
             <property name="text">
              <string>Piece:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </widget>
          </item>
@@ -846,6 +849,9 @@
             <property name="text">
              <string>Batch:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </widget>
          </item>
@@ -906,6 +912,9 @@
               </property>
               <property name="text">
                <string>Piece:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -1051,6 +1060,9 @@
               <property name="text">
                <string>Batch:</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1108,6 +1120,9 @@
               <property name="text">
                <string>Year: </string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1164,6 +1179,9 @@
               </property>
               <property name="text">
                <string>Year: </string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -1309,7 +1327,7 @@
               </property>
               <property name="icon">
                <iconset>
-                <normaloff>./default_grid.jpg</normaloff>./default_grid.jpg</iconset>
+                <normaloff>default_grid.jpg</normaloff>default_grid.jpg</iconset>
               </property>
              </item>
              <item>
@@ -1318,7 +1336,7 @@
               </property>
               <property name="icon">
                <iconset>
-                <normaloff>./24Color_grid.jpg</normaloff>./24Color_grid.jpg</iconset>
+                <normaloff>24Color_grid.jpg</normaloff>24Color_grid.jpg</iconset>
               </property>
              </item>
             </widget>

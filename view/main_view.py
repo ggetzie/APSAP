@@ -2,6 +2,7 @@ import ctypes
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
+from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import uic
 
@@ -31,6 +32,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
 
         self.set_up_ply_window()
         self.set_up_images_pop_up()
+        self.threadpool = QThreadPool()
 
     def set_up_view_presenter_connection(self, main_presenter):
         """This function links the interaction from the user with the

@@ -2,7 +2,7 @@ from pathlib import Path
 import logging
 
 from plyfile import PlyData, PlyProperty
-
+logger = logging.getLogger(__name__)
 
 class CopyFileMixin:
 
@@ -17,10 +17,10 @@ class CopyFileMixin:
             target (str): The url of the fixed 3d model
         """
         if source[-4:] != ".ply" or target[-4:] != ".ply":
-            logging.error("Source and Target must be valid ply")
+            logger.error("Source and Target must be valid ply")
 
         if source == target or Path(source) == Path(target):
-            logging.error("Source cannot be the same as target")
+            logger.error("Source cannot be the same as target")
             return
 
         ply_data = PlyData.read(source)

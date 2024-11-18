@@ -6,7 +6,7 @@ import environ
 
 SRC_DIR = Path(__file__).resolve(strict=True).parent
 
-
+logger = logging.getLogger(__name__)
 # Store sensitive data and configuration in a file .env
 # outside source control
 env = environ.Env()
@@ -34,7 +34,7 @@ WRITE_SETTINGS = {
 class DatabaseMixin:
     def __init__(self):
         """This constructor initializes a database connection that gets reused throughout the whole application"""
-        self.conn = psycopg2.connect(**READ_SETTINGS)
+        self.conn = psycopg2.connect(**WRITE_SETTINGS)
 
     def get_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
         """This function gets the batch information from the database
@@ -67,12 +67,12 @@ class DatabaseMixin:
 
             record = cursor.fetchall()
             if len(record) > 1:
-                logging.error("Error, detected duplicate entry!")
+                logger.error("Error, detected duplicate entry!")
                 return None, None, None
             elif len(record) == 0:
                 return None, None, None
             else:
-                logging.info(
+                logger.info(
                     "the find of (%s, %s, %s, %s) has the record %s",
                     utm_easting,
                     utm_northing,
@@ -83,7 +83,7 @@ class DatabaseMixin:
                 return record[0]
 
         except psycopg2.Error as error:
-            logging.error("Error while connecting to PostgreSQL: %s", error)
+            logger.error("Error while connecting to PostgreSQL: %s", error)
         finally:
             if conn:
                 cursor.close()
@@ -138,7 +138,7 @@ class DatabaseMixin:
 
             record = cursor.fetchall()
             if len(record) > 1:
-                logging.error("Error, detected duplicate entry!")
+                logger.error("Error, detected duplicate entry!")
             else:
                 batch_number, sherd_number, year_number = record[0]
                 if (
@@ -148,7 +148,7 @@ class DatabaseMixin:
                 ):
                     pass
                 else:
-                    logging.info("Updating...")
+                    logger.info("Updating...")
                     cursor.execute(
                         query_update,
                         (
@@ -165,15 +165,15 @@ class DatabaseMixin:
                     updated_rows = cursor.rowcount
                     if updated_rows <= 1:
                         conn.commit()
-                        logging.info(
-                            "Updated with (new_batch_num, new_sherd_num, new_year): (%s, %s, %s)",
+                        logger.info(
+                            "Updated with (new_batch_num, new_sherd_num, new_year): (%i, %i, %i)",
                             new_batch_num,
                             new_sherd_num,
                             new_year,
                         )
 
         except psycopg2.Error as error:
-            logging.error("Error while connecting to PostgreSQL: %s", error)
+            logger.error("Error while connecting to PostgreSQL: %s", error)
         finally:
             if conn:
                 cursor.close()

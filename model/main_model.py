@@ -35,24 +35,22 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         hemisphere_dir: pathlib.Path = (
             BASE_DATA_DIR / self.hemisphere_list[self.selected_hemisphere_idx]
         )
-        self.zone_list: List[int] = [
-            int(d.name)
+        self.zone_list: List[str] = [
+            d.name
             for d in hemisphere_dir.iterdir()
             if d.is_dir() and d.name.isnumeric()
         ]
         self.selected_zone_idx: int = 0
         zone_dir: pathlib.Path = hemisphere_dir / self.zone_list[self.selected_zone_idx]
-        self.easting_list: List[int] = [
-            int(d.name) for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()
+        self.easting_list: List[str] = [
+            d.name for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()
         ]
         self.selected_easting_idx: int = 0
         easting_dir: pathlib.Path = (
             zone_dir / self.easting_list[self.selected_easting_idx]
         )
-        self.northing_list: List[int] = [
-            int(d.name)
-            for d in easting_dir.iterdir()
-            if d.is_dir() and d.name.isnumeric()
+        self.northing_list: List[str] = [
+            d.name for d in easting_dir.iterdir() if d.is_dir() and d.name.isnumeric()
         ]
         self.selected_northing_idx: int = 0
         northing_dir: pathlib.Path = (

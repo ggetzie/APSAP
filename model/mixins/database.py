@@ -34,7 +34,7 @@ WRITE_SETTINGS = {
 class DatabaseMixin:
     def __init__(self):
         """This constructor initializes a database connection that gets reused throughout the whole application"""
-        self.conn = psycopg2.connect(**READ_SETTINGS)
+        self.conn = psycopg2.connect(**WRITE_SETTINGS)
 
     def get_sherd_info(self, utm_easting, utm_northing, context_num, find_num):
         """This function gets the batch information from the database

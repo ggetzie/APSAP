@@ -6,6 +6,8 @@
     "CUDNN",
     "CUFFT",
     "DWITH",
+    "Dmodel",
+    "Dmodels",
     "Pixmap",
     "ceremicsmask",
     "colorgrid",
@@ -15,6 +17,7 @@
     "dbro",
     "dbrw",
     "hzenc",
+    "maskthres",
     "plys",
     "psycopg2",
     "qtcreator"

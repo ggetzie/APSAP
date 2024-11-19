@@ -9,83 +9,94 @@ class ChooseDirectoryMixin:
         main_model, main_view, _ = self.get_model_view_presenter()
         main_view.hemisphere_cb.clear()
 
-        options = [
-            d.name
-            for d in main_model.file_root.iterdir()
-            if d.name in main_model.path_variables["HEMISPHERES"] and d.is_dir()
-        ]
+        options = main_model.hemisphere_list
         main_view.hemisphere_cb.addItems(options)
         main_view.hemisphere_cb.setCurrentIndex(0 if len(options) > 0 else -1)
         main_view.hemisphere_cb.setEnabled(len(options) > 1)
+        self.populate_zones()
 
     def populate_zones(self):
         """Set the select options of zones as the zones under the current hemisphere"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if main_view.hemisphere_cb.count() > 0:
-            main_view.zone_cb.clear()
-
-            hemisphere = main_view.hemisphere_cb.currentText()
-            zone_root = main_model.file_root / hemisphere
-            options = main_presenter.get_options(zone_root)
-            main_view.zone_cb.addItems(options)
-
-            main_view.zone_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-            main_view.zone_cb.setEnabled(len(options) > 1)
+        main_model, main_view, _ = self.get_model_view_presenter()
+        options = main_model.zone_list
+        main_view.zone_cb.clear()
+        main_view.zone_cb.addItems(options)
+        main_view.zone_cb.setCurrentIndex(main_model.selected_zone_idx)
+        main_view.zone_cb.setEnabled(len(options) > 1)
+        self.populate_eastings()
 
     def populate_eastings(self):
         """Set the select options of eastings as the eastings under the current zones"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if main_view.zone_cb.count() > 0:
-            main_view.easting_cb.clear()
-
-            hemisphere = main_view.hemisphere_cb.currentText()
-            zone = main_view.zone_cb.currentText()
-            eastings_root = main_model.file_root / hemisphere / zone
-            options = main_presenter.get_options(eastings_root)
-            main_view.easting_cb.addItems(options)
-
-            main_view.easting_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-            main_view.easting_cb.setEnabled(len(options) > 1)
+        main_model, main_view, _ = self.get_model_view_presenter()
+        options = main_model.easting_list
+        main_view.easting_cb.clear()
+        main_view.easting_cb.addItems(options)
+        main_view.easting_cb.setCurrentIndex(main_model.selected_easting_idx)
+        main_view.easting_cb.setEnabled(len(options) > 1)
+        self.populate_northings()
 
     def populate_northings(self):
         """Set the select options of northings as the northings under the current eastings"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        if main_view.easting_cb.count() > 0:
-            main_view.northing_cb.clear()
-
-            northings_root = (
-                main_model.file_root
-                / main_view.hemisphere_cb.currentText()
-                / main_view.zone_cb.currentText()
-                / main_view.easting_cb.currentText()
-            )
-            options = main_presenter.get_options(northings_root)
-
-            main_view.northing_cb.addItems(options)
-            main_view.northing_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-            main_view.northing_cb.setEnabled(len(options) > 1)
+        main_model, main_view, _ = self.get_model_view_presenter()
+        options = main_model.northing_list
+        main_view.northing_cb.clear()
+        main_view.northing_cb.addItems(options)
+        main_view.northing_cb.setCurrentIndex(main_model.selected_northing_idx)
+        main_view.northing_cb.setEnabled(len(options) > 1)
+        self.populate_contexts()
 
     def populate_contexts(self):
         """Set the select options of contexts as the contexts under the current northing"""
+        main_model, main_view, _ = self.get_model_view_presenter()
+        options = [str(sc.context_number) for sc in main_model.context_list]
+        main_view.context_cb.clear()
+        main_view.context_cb.addItems(options)
+        main_view.context_cb.setCurrentIndex(main_model.selected_context_idx)
+        main_view.context_cb.setEnabled(len(options) > 1)
+
+    def on_hemisphere_change(self):
+        """This function is called when the user changes the hemisphere select"""
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        if main_view.northing_cb.count() > 0:
-            main_view.context_cb.clear()
+        new_index = main_view.hemisphere_cb.currentIndex()
+        if new_index != main_model.selected_hemisphere_idx:
+            main_model.set_hemisphere_index(new_index)
+            main_presenter.populate_zones()
+            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
-            contexts_root = (
-                main_model.file_root
-                / main_view.hemisphere_cb.currentText()
-                / main_view.zone_cb.currentText()
-                / main_view.easting_cb.currentText()
-                / main_view.northing_cb.currentText()
-            )
-            options = main_presenter.get_options(contexts_root)
+    def on_zone_change(self):
+        """This function is called when the user changes the zone select"""
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        new_index = main_view.zone_cb.currentIndex()
+        if new_index != main_model.selected_zone_idx:
+            main_model.set_zone_index(new_index)
+            main_presenter.populate_eastings()
+            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
-            options.sort(key=int)
-            main_view.context_cb.addItems(options)
+    def on_easting_change(self):
+        """This function is called when the user changes the easting select"""
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        new_index = main_view.easting_cb.currentIndex()
+        if new_index != main_model.selected_easting_idx:
+            main_model.set_easting_index(new_index)
+            main_presenter.populate_northings()
+            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
-            main_view.context_cb.setCurrentIndex(0 if len(options) > 0 else -1)
-            main_view.context_cb.setEnabled(len(options) > 1)
+    def on_northing_change(self):
+        """This function is called when the user changes the northing select"""
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        new_index = main_view.northing_cb.currentIndex()
+        if new_index != main_model.selected_northing_idx:
+            main_model.set_northing_index(new_index)
+            main_presenter.populate_contexts()
+            main_view.contextDisplay.setText(main_presenter.get_context_string())
+
+    def on_context_change(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        new_index = main_view.context_cb.currentIndex()
+        if new_index != main_model.selected_context_idx:
+            main_model.set_context_index(new_index)
+            main_view.contextDisplay.setText(main_presenter.get_context_string())
+            self.set_filter()
 
     def clear_interface(self):
         """Clear all the texts, and selects, images displayed and 3d models from the interface."""
@@ -129,16 +140,8 @@ class ChooseDirectoryMixin:
         Returns:
             str: The full designation of the currently selected context
         """
-        _, main_view, _ = self.get_model_view_presenter()
-
-        hzenc = [
-            main_view.hemisphere_cb.currentText(),
-            main_view.zone_cb.currentText(),
-            main_view.easting_cb.currentText(),
-            main_view.northing_cb.currentText(),
-            main_view.context_cb.currentText(),
-        ]
-        return "-".join(hzenc)
+        main_model, _, _ = self.get_model_view_presenter()
+        return str(main_model.context_list[main_model.selected_context_idx])
 
     def get_options(self, path):
         """This function gets all the options of all the subdirectories under the current directory.

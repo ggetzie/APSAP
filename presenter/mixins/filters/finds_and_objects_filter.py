@@ -1,8 +1,3 @@
-from glob import glob
-import os
-from pathlib import Path
-
-
 class FindsAndObjectsFilter:
     def set_filter(self):
         """This function cleans the interface then set up appropriate filters in the
@@ -20,16 +15,10 @@ class FindsAndObjectsFilter:
         """This function sets up the max and min of the year filters based on the year
         subfolders(which have values like 2022, 2021, 2023)"""
 
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-
-        # Get the folder we are considering
-        context_dir = main_presenter.get_context_dir()
-
-        # Get all the potential years under the current path
-        years_folder_re = (
-            context_dir / main_model.path_variables["BATCH_3D_SUBDIR"] / "*"
-        ).as_posix()
-        years = [Path(path).parts[-1] for path in glob(years_folder_re)]
+        main_model, main_view, _ = self.get_model_view_presenter()
+        years = {
+            m.batch_year for m in main_model.a3dmodels_list
+        }  # set of unique batch_years
 
         # if there is not a single year folder in the current path, we disable the filter and return
         if not years:
@@ -38,40 +27,18 @@ class FindsAndObjectsFilter:
             main_view.year.setReadOnly(True)
             return
 
-        # We go through all year values in years, if it is a valid integer, we add to it.
-        years_set = set()
-        for year in years:
-            try:
-                years_set.add(int(year))
-            except ValueError:
-                pass
-
         # We set the minimum and maximum of our filter to be the max and min of the years we got.
-        main_view.year.setMinimum(min(years_set))
-        main_view.year.setMaximum(max(years_set))
+        main_view.year.setMinimum(min(years))
+        main_view.year.setMaximum(max(years))
         main_view.year.setReadOnly(False)
         return
 
     def set_batch_filter(self):
         """This function sets up the min and max of the batch filter based on the
         batch subfolders"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view, _ = self.get_model_view_presenter()
 
-        # Get the folder we are considering
-        context_dir = main_presenter.get_context_dir()
-
-        # Get all the potential batch folders
-        batch_nums_folder_re = (
-            context_dir / main_model.path_variables["BATCH_3D_SUBDIR"] / "*" / "*"
-        ).as_posix()
-        batch_num_paths = glob(batch_nums_folder_re)
-
-        # Get the batch numbers from all potential batch folders under the condition
-        # that they have to have "batch_" in their names
-        batch_nums = set()
-        for path in batch_num_paths:
-            if "batch_" == Path(path).parts[-1][:6]:
-                batch_nums.add(int(Path(path).parts[-1].replace("batch_", "")))
+        batch_nums = {m.batch_number for m in main_model.a3dmodels_list}
 
         # We set the default value of the batch_start and batch_end to be 0 and read only
         batch_min = 0
@@ -100,33 +67,9 @@ class FindsAndObjectsFilter:
     ):
         """This function sets up the min and max of the find filter based on the the find
         subfolders"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view, _ = self.get_model_view_presenter()
 
-        # Get the folder we are considering
-        context_dir = main_presenter.get_context_dir()
-
-        # Get all the potential find folders
-
-        find_num_paths = glob(
-            (context_dir / main_model.path_variables["FINDS_SUBDIR"] / "*").as_posix()
-        )
-
-        # Get all the find folders in which both of 1.jpg and 2.jpg
-        # exists, and the name of the folder is a number
-
-        find_nums = set()
-        for i in find_num_paths:
-            path1 = Path(i) / main_model.path_variables["FINDS_PHOTO_DIR"] / "1.jpg"
-            path2 = Path(i) / main_model.path_variables["FINDS_PHOTO_DIR"] / "2.jpg"
-            if (
-                os.path.exists(path1)
-                and os.path.exists(path2)
-                and Path(i).parts[-1].isnumeric()
-            ):
-                try:
-                    find_nums.add(int(Path(i).parts[-1]))
-                except ValueError:
-                    pass
+        find_nums = sorted({f.find_number for f in main_model.finds_list})
 
         # Set the default values of all finds's min and max as 0 and the GUI to be readonly
         find_min = 0

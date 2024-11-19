@@ -27,7 +27,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         """This constructor loads the ply to the ui file, set up the 3d model window,
         and make it the images pop when you click on them.
         """
-        super(MainView, self).__init__()
+        super().__init__()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
 
         self.set_up_ply_window()
@@ -48,16 +48,19 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         # Connecting the selects of hemisphere, zone, easting, northing and context
         # with their handlers
         main_view.hemisphere_cb.currentIndexChanged.connect(
-            main_presenter.populate_zones
+            main_presenter.on_hemisphere_change
         )
-        main_view.zone_cb.currentIndexChanged.connect(main_presenter.populate_eastings)
+        main_view.zone_cb.currentIndexChanged.connect(main_presenter.on_zone_change)
         main_view.easting_cb.currentIndexChanged.connect(
-            main_presenter.populate_northings
+            main_presenter.on_easting_change
         )
         main_view.northing_cb.currentIndexChanged.connect(
-            main_presenter.populate_contexts
+            main_presenter.on_northing_change
         )
-        main_view.context_cb.currentIndexChanged.connect(main_presenter.set_filter)
+        # main_view.context_cb.currentIndexChanged.connect(main_presenter.set_filter)
+        main_view.context_cb.currentIndexChanged.connect(
+            main_presenter.on_context_change
+        )
 
         # Connecting the select list of of finds with its handler
         main_view.finds_list.currentItemChanged.connect(main_presenter.load_find_images)

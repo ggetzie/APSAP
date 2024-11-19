@@ -1,5 +1,9 @@
 import ctypes
 
+import logging
+import pathlib
+import subprocess
+
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
 from PyQt5.QtCore import QThreadPool
@@ -8,6 +12,8 @@ from PyQt5 import uic
 
 from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
+
+logger = logging.getLogger(__name__)
 
 
 class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
@@ -33,6 +39,9 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.set_up_ply_window()
         self.set_up_images_pop_up()
         self.threadpool = QThreadPool()
+        version = self.get_version()
+        ## append the version to the window title
+        self.setWindowTitle(f"Sherd Match Assistance Version: {version}")
 
     def set_up_view_presenter_connection(self, main_presenter):
         """This function links the interaction from the user with the
@@ -77,3 +86,19 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(main_presenter.add_match)
         main_view.remove_button.clicked.connect(main_presenter.remove_match)
+
+    def get_version(self):
+        try:
+            cwd = pathlib.Path(__file__).parent
+            result = subprocess.run(
+                ["git", "describe", "--tags", "--always", "--dirty"],
+                capture_output=True,
+                text=True,
+                check=True,
+                cwd=cwd,
+            )
+            logger.info("Version: %s", result.stdout.strip())
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            logger.error("Error getting version: %s", e.stderr)
+            return "Unknown"

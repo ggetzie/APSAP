@@ -102,7 +102,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             (area_back, width_back, length_back, contour_back),
         )
 
-    def measure_pixels_3d(self, path_3d):
+    def measure_pixels_3d(self, a3dmodel):
         """This function measures the 3d model in the given path. In case it fails,
         it returns the fallback value.
 
@@ -114,14 +114,18 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # Check if the result has already been cached. If yes, directly return the result
-        cache_result = main_model.cache_3d.get(path_3d)
+        cache_result = main_model.cache_3d.get(str(a3dmodel))
         if cache_result is not None and len(cache_result) == 7:
-            logging.info("Loading %s directly from library", path_3d)
+            logging.info("Loading %s directly from library", a3dmodel)
             return cache_result
 
         # In case it is not cached, we have to measure the pixels directly.
         # Get the year, batch and piece of the 3d model.
-        (year, batch, piece) = main_presenter.get_year_batch_piece(path_3d)
+        (year, batch, piece) = (
+            a3dmodel.batch_year,
+            a3dmodel.batch_number,
+            a3dmodel.batch_piece,
+        )
 
         # Showing that we are measure the 3d models
         logging.info(
@@ -134,13 +138,14 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         QCoreApplication.processEvents()
 
         # Try to get the measurements. If there is an error, return the value
+        path3d = str(a3dmodel.get_file("sample"))
         try:
             (
                 area_3d,
                 width_3d,
                 length_3d,
                 contour_3d,
-            ) = main_presenter.get_area_width_length_contour3d(path_3d)
+            ) = main_presenter.get_area_width_length_contour3d(path3d)
 
             return_values = (
                 area_3d,
@@ -152,7 +157,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 piece,
             )
             # Caching the calculated values
-            main_model.cache_3d.set(path_3d, return_values)
+            main_model.cache_3d.set(str(a3dmodel), return_values)
         except:
             logging.error("We failed to measure the pixels in %s", path_3d)
             (

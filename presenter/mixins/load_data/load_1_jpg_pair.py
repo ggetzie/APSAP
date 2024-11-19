@@ -1,9 +1,12 @@
+import logging
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QMessageBox
 
 # from PIL.ImageQt import ImageQt
 from PIL.ImageQt import ImageQt
+
+logger = logging.getLogger(__name__)
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
@@ -21,29 +24,28 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         # 1. We check of the current selected item has text
         # 2. We check if the two supposedly existent pictures exist and are openable by the user
         # according to her access rights.
+        logger.info("Selected item: %s", selected_item)
         try:
-            find_num = main_view.finds_list.currentItem().text()
+            find_num = int(main_view.finds_list.currentItem().text())
+            logger.info("Selected find: %s", find_num)
 
         except AttributeError:
             main_view.findFrontPhoto_l.clear()
             main_view.findBackPhoto_l.clear()
             return
 
-        main_view.selected_find_widget = selected_item
+        main_model.set_selected_find_by_number(find_num)
+        selected_find = main_model.selected_find
+        main_view.selected_find_widget = selected_item.text()
 
         # Set photo directory of the current selected find
-        photos_dir = (
-            main_presenter.get_context_dir()
-            / main_model.path_variables["FINDS_SUBDIR"]
-            / find_num
-            / main_model.path_variables["FINDS_PHOTO_DIR"]
-        )
+        photos_dir = selected_find.photos_path()
 
         main_view.path_2d_picture = photos_dir
 
         try:
-            front_photo = ImageQt(main_model.open_image(str(photos_dir / "1.jpg")))
-            back_photo = ImageQt(main_model.open_image(str(photos_dir / "2.jpg")))
+            front_photo = ImageQt(selected_find.open_photo("front"))
+            back_photo = ImageQt(selected_find.open_photo("back"))
         except (
             AttributeError,
             FileNotFoundError,
@@ -68,7 +70,7 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
 
         # Set up the path so that the image can be opened at a small window
-        main_view.current_image_front = str(photos_dir / "1.jpg")
+        main_view.current_image_front = str(selected_find.photos_path() / "1.jpg")
 
         # Set up the back image to be displayed
         main_view.findBackPhoto_l.setPixmap(
@@ -78,45 +80,29 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         )
 
         # Set up the path so that the image can be opened at a small window
-        main_view.current_image_back = str(photos_dir / "2.jpg")
+        main_view.current_image_back = str(selected_find.photos_path() / "2.jpg")
 
         # Set up the selected_find's text
-        main_view.selected_find.setText(find_num)
+        main_view.selected_find.setText(str(find_num))
 
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
-        main_presenter.load_sorted_models(selected_item)
+        main_presenter.load_sorted_models()
 
-    def load_sorted_models(self, selected_item):
+    def load_sorted_models(self):
         """This function load the 3d models sorted by how similar they are with respected
         to the selected image.
-
-        Args:
-            selected_item (object): The selected object in the list that represents a find
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        selected_find = main_model.selected_find
         # We don't allow interactions with the GUI if we are loading the 3d models
         main_presenter.block_signals(True)
 
-        # Create a find_str so we can check if the current find has a 3d model already
-        # matched before
-        easting_northing_context = main_presenter.get_easting_northing_context()
-        find_str = (
-            f"{easting_northing_context[0]},{easting_northing_context[1]},",
-            f"{easting_northing_context[2]},{int(selected_item.text())}",
-        )
-
-        if (
-            find_str in main_view.dict_find_2_ply
-            and main_view.dict_find_2_ply[find_str] is not None
-        ):
-            ply_str = main_view.dict_find_2_ply[find_str]
-            (batch_year, batch_num, batch_piece) = ply_str.split(",")
+        if selected_find.is_matched:
+            batch_year, batch_number, batch_piece = selected_find.get_match()
             main_view.current_year.setText(str(batch_year))
-            main_view.current_batch.setText(str(batch_num))
+            main_view.current_batch.setText(str(batch_number))
             main_view.current_piece.setText(str(batch_piece))
-
         else:
             main_view.current_year.setText("NS")
             main_view.current_batch.setText("NS")
@@ -124,9 +110,9 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             main_presenter.clean_ply_window()
 
         # Generate a list of 3d models sorted by similarity.
-        path_2d = main_view.path_2d_picture
+        # path_2d = main_view.path_2d_picture
         models_sorted_by_similarity = (
-            main_presenter.get_potential_3d_models_sorted_by_similarity(path_2d)
+            main_presenter.get_potential_3d_models_sorted_by_similarity()
         )
 
         # Create a new model to contain these
@@ -149,22 +135,16 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             ply = QStandardItem(f"{year}, Batch {batch_num}, model: {piece_num}")
 
             # We check if the 3d model is matched with a find, if it is we set the item to be red
-            ply_str = f"{int(year)},{int(batch_num)},{int(piece_num)}"
-            if ply_str in main_view.dict_ply_2_find:
+            ply_str = f"{int(year)}-{int(batch_num):>03}-{int(piece_num):>02}"
+            a3dmodel = main_model.get_a3dmodel_from_str(ply_str)
+            if not a3dmodel:
+                logger.warning("We couldn't find the 3d model %s", ply_str)
+                continue
+            if a3dmodel and a3dmodel.is_matched:
                 ply.setForeground(QColor("red"))
 
             # We save the 3d model path to the item as well
-            whole_path = (
-                str(
-                    (
-                        main_presenter.get_context_dir()
-                        / main_model.path_variables["MODELS_FILES_DIR"]
-                    )
-                )
-                .replace("*", str(year), 1)
-                .replace("*", f"{int(batch_num):03}", 1)
-                .replace("*", f"{int(piece_num)}", 1)
-            )
+            whole_path = a3dmodel.get_file("sample")
             ply.setData(f"{whole_path}", Qt.UserRole)
 
             # Finally we add the item to the model

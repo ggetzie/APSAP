@@ -1,8 +1,8 @@
-from glob import glob
+# from glob import glob
 
 
 class Get3dModelSortedBySimilarityMixin:
-    def get_potential_3d_models_sorted_by_similarity(self, find_path):
+    def get_potential_3d_models_sorted_by_similarity(self):
         """Given a certain path of a find, we have two images, 1.jpg and 2.jpg.
         By comparing them with the 3d model, we can have a list of 3d models sorted
         by how similar that find is with respect to the 3d models. This function
@@ -17,7 +17,8 @@ class Get3dModelSortedBySimilarityMixin:
              which uniquely define a 3d model.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-
+        selected_find = main_model.selected_find
+        find_path = selected_find.photos_path()
         # Getting the path to the front and back images
         path_front = find_path / "1.jpg"
         path_back = find_path / "2.jpg"
@@ -34,13 +35,26 @@ class Get3dModelSortedBySimilarityMixin:
         similarity_scores = []
 
         # A regular expression with which that we search all relevant 3d models.
-        model_paths_re = str(
-            main_presenter.get_context_dir()
-            / main_model.path_variables["MODELS_FILES_DIR"]
-        )
+        # model_paths_re = str(
+        #     main_presenter.get_context_dir()
+        #     / main_model.path_variables["MODELS_FILES_DIR"]
+        # )
+
+        min_batch_number = int(main_view.batch_start.value())
+        max_batch_number = int(main_view.batch_end.value())
+        desired_year = int(main_view.year.value())
 
         # Iterating all 3d models
-        for path_3d in glob(model_paths_re):
+        for a3dmodel in main_model.a3dmodels_list:
+            # If the batch number is outside of the filter or the year doesn't match,
+            # we skip this 3d model!.
+            if (
+                a3dmodel.batch_number < min_batch_number
+                or a3dmodel.batch_number > max_batch_number
+                or a3dmodel.batch_year != desired_year
+            ):
+                continue
+
             # Measure all the relevant data of the 3d model
             (
                 area_3d,
@@ -50,19 +64,10 @@ class Get3dModelSortedBySimilarityMixin:
                 year,
                 batch_num,
                 piece_num,
-            ) = main_presenter.measure_pixels_3d(path_3d)
-
-            # If the batch number is outside of the filter or the year doesn't match,
-            # we skip this 3d model!.
-            if (
-                int(batch_num) < int(main_view.batch_start.value())
-                or int(batch_num) > int(main_view.batch_end.value())
-                or int(year) != int(main_view.year.value())
-            ):
-                continue
+            ) = main_presenter.measure_pixels_3d(a3dmodel)
 
             # We update the GUI to show which 3d model we are calculating the 3d model of
-            main_view.statusLabel.setText(f"Calculate the similarity with {path_3d}")
+            main_view.statusLabel.setText(f"Calculate the similarity with {a3dmodel}")
             main_view.statusLabel.repaint()
 
             # Then we calculate the similarity with respect to different criteria

@@ -58,6 +58,12 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
             return None
         return self.finds_list[self.selected_find_idx]
 
+    @property
+    def selected_context(self):
+        if self.selected_context_idx is None:
+            return None
+        return self.context_list[self.selected_context_idx]
+
     def get_hemispheres(self) -> List[str]:
         return [
             d.name
@@ -162,3 +168,19 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         if len(result) == 0:
             return None
         return result[0]
+
+    def set_selected_find_by_number(self, find_number: int):
+        for i, f in enumerate(self.finds_list):
+            if f.find_number == find_number:
+                self.selected_find_idx = i
+                return
+
+    def get_nested_a3dmodels(self):
+        by_year = {}
+        for model in self.a3dmodels_list:
+            if model.batch_year not in by_year:
+                by_year[model.batch_year] = {}
+            if model.batch_number not in by_year[model.batch_year]:
+                by_year[model.batch_year][model.batch_number] = {}
+            by_year[model.batch_year][model.batch_number][model.batch_piece] = model
+        return by_year

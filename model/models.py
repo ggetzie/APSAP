@@ -238,15 +238,20 @@ class ObjectFind:
         return (
             BASE_DATA_DIR
             / self._utm_hemisphere
-            / self._utm_zone
-            / self._area_utm_easting_meters
-            / self._area_utm_northing_meters
-            / self._context_number
+            / str(self._utm_zone)
+            / str(self._area_utm_easting_meters)
+            / str(self._area_utm_northing_meters)
+            / str(self._context_number)
             / "finds"
             / "individual"
-            / self.find_number
+            / str(self.find_number)
             / "photos"
         )
+
+    def has_photos(self) -> bool:
+        front_exists = (self.photos_path() / "1.jpg").exists()
+        back_exists = (self.photos_path() / "2.jpg").exists()
+        return front_exists and back_exists
 
     def open_photo(self, side="front"):
         name = "1.jpg" if side == "front" else "2.jpg"
@@ -271,7 +276,7 @@ class A3DModel:
         self.object_find = object_find
 
     def __str__(self):
-        return f"{self.batch_year}-{self.batch_number}-{self.batch_piece}"
+        return f"{self.batch_year}-{self.batch_number:>03}-{self.batch_piece:>02}"
 
     def __repr__(self):
         return f"<A3DModel {self}>"
@@ -282,7 +287,7 @@ class A3DModel:
     def get_folder(self):
         return (
             self.spatial_context.models_folder
-            / self.batch_year
+            / str(self.batch_year)
             / f"batch_{self.batch_number:>03}"
             / "registration_reso1_maskthres242"
             / "final_output"
@@ -303,3 +308,4 @@ class A3DModel:
                 if "sample" in f.name and "mesh" not in f.name:
                     return f
         return None
+    

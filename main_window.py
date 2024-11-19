@@ -31,7 +31,7 @@ def main():
 
     # Run the model, view and presenter one by one and count the time it takes to load each of them.
     now = time.time()
-    main_model = MainModel()
+    main_model: MainModel = MainModel()
     logging.info("main_model %s seconds have passed", (time.time() - now))
     now = time.time()
     main_view = MainView()

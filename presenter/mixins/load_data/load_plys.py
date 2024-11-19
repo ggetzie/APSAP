@@ -1,3 +1,4 @@
+import logging
 from glob import glob
 
 from PyQt5.QtCore import Qt
@@ -7,10 +8,44 @@ from PyQt5.QtGui import (
     QStandardItemModel,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class LoadPlys:
-
     def populate_models(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        self.reset_ply_selection_model()
+        main_presenter.block_signals(True)
+        nested_a3dmodels = main_model.get_nested_a3dmodels()
+        filter_year = main_view.year.value()
+        min_batch = main_view.batch_start.value()
+        max_batch = main_view.batch_end.value()
+        for batch_year in sorted(nested_a3dmodels.keys()):
+            if batch_year != int(filter_year):
+                continue
+            year_item = QStandardItem(f"{batch_year}")
+            for batch_number in sorted(nested_a3dmodels[batch_year].keys()):
+                if int(batch_number) < int(min_batch) or int(batch_number) > int(
+                    max_batch
+                ):
+                    continue
+                batch_item = QStandardItem(f"{batch_number}")
+                for piece_number in sorted(
+                    nested_a3dmodels[batch_year][batch_number].keys()
+                ):
+                    a3dmodel = nested_a3dmodels[batch_year][batch_number][piece_number]
+                    logger.info("Measuring pixels for %s", a3dmodel)
+                    main_presenter.measure_pixels_3d(a3dmodel)
+                    model_piece = QStandardItem(f"{piece_number}")
+                    model_piece.setData(str(a3dmodel.get_file("sample")), Qt.UserRole)
+                    ply_str = f"{batch_year}-{batch_number:>03}-{piece_number:>02}"
+                    if ply_str in main_model.a3dmodel_to_object_find:
+                        model_piece.setForeground(QColor("red"))
+                    batch_item.appendRow(model_piece)
+                year_item.appendRow(batch_item)
+        main_presenter.block_signals(False)
+
+    def populate_models_old(self):
         """This is one of the two functions in the whole application that populate
         3d models into the list.
 

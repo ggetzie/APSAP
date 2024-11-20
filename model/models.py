@@ -9,6 +9,23 @@ from model.constants import BASE_DATA_DIR
 logger = logging.getLogger(__name__)
 
 
+class InvalidSpatialContextString(Exception):
+    pass
+
+
+def parse_context_string(context_str: str):
+    m = re.match(r"([NS])-(\d+)-(\d+)-(\d+)-(\d+)", context_str)
+    if not m:
+        raise InvalidSpatialContextString
+    return (
+        m.group(1),
+        m.group(2),
+        m.group(3),
+        m.group(4),
+        m.group(5),
+    )
+
+
 class SpatialContext:
 
     def __init__(
@@ -143,6 +160,10 @@ class SpatialContext:
 TEST_SC = SpatialContext("N", 38, 478130, 4419430, 109)
 
 
+def year_batch_piece_str(year: int, batch: int, piece: int) -> str:
+    return f"{year}-{batch:>03}-{piece:>02}"
+
+
 class ObjectFind:
 
     def __init__(
@@ -183,6 +204,7 @@ class ObjectFind:
     def __repr__(self):
         return f"<ObjectFind {self}>"
 
+    @property
     def is_matched(self) -> bool:
         return (
             self._batch_year is not None
@@ -230,8 +252,10 @@ class ObjectFind:
         return self._batch_year, self._batch_number, self._batch_piece
 
     def get_match_str(self):
-        if self.is_matched():
-            return f"{self._batch_year}-{self._batch_number}-{self._batch_piece}"
+        if self.is_matched:
+            return year_batch_piece_str(
+                self._batch_year, self._batch_number, self._batch_piece
+            )
         return ""
 
     def photos_path(self) -> pathlib.Path:
@@ -276,13 +300,12 @@ class A3DModel:
         self.object_find = object_find
 
     def __str__(self):
-        return f"{self.batch_year}-{self.batch_number:>03}-{self.batch_piece:>02}"
+        return year_batch_piece_str(
+            self.batch_year, self.batch_number, self.batch_piece
+        )
 
     def __repr__(self):
         return f"<A3DModel {self}>"
-
-    def is_matched(self) -> bool:
-        return self.object_find is not None and self.object_find.is_matched()
 
     def get_folder(self):
         return (
@@ -308,4 +331,3 @@ class A3DModel:
                 if "sample" in f.name and "mesh" not in f.name:
                     return f
         return None
-    

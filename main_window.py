@@ -6,8 +6,7 @@ import getpass
 from time import ctime
 
 from PyQt5.QtWidgets import QApplication
-from model.main_model import MainModel
-from view.main_view import MainView
+
 from presenter.main_presenter import MainPresenter
 
 
@@ -30,19 +29,15 @@ def main():
     app.setStyle("Fusion")
 
     # Run the model, view and presenter one by one and count the time it takes to load each of them.
+    logging.info("Initializing...")
     now = time.time()
-    main_model: MainModel = MainModel()
-    logging.info("main_model %s seconds have passed", (time.time() - now))
-    now = time.time()
-    main_view = MainView()
-    logging.info("main_view %s seconds have passed", (time.time() - now))
-    now = time.time()
-    main_presenter = MainPresenter(main_model, main_view)
+
+    presenter = MainPresenter()
     logging.info("main_presenter %s seconds have passed", (time.time() - now))
     logging.info("")
 
     # Show the GUI application
-    main_view.show()
+    presenter.main_view.show()
     sys.exit(app.exec_())
 
 

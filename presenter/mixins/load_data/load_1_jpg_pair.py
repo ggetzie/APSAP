@@ -3,6 +3,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QMessageBox
 
+from model.models import year_batch_piece_str
+
 # from PIL.ImageQt import ImageQt
 from PIL.ImageQt import ImageQt
 
@@ -131,21 +133,20 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
             ) > int(main_view.batch_end.value()):
                 continue
 
+            title = year_batch_piece_str(int(year), int(batch_num), int(piece_num))
             # Now the 3d model is guaranteed to be a legitimate one, we add it to the an item
-            ply = QStandardItem(f"{year}, Batch {batch_num}, model: {piece_num}")
+            ply = QStandardItem(title)
 
             # We check if the 3d model is matched with a find, if it is we set the item to be red
-            ply_str = f"{int(year)}-{int(batch_num):>03}-{int(piece_num):>02}"
-            a3dmodel = main_model.get_a3dmodel_from_str(ply_str)
-            if not a3dmodel:
-                logger.warning("We couldn't find the 3d model %s", ply_str)
+            a3dmodel = main_model.a3dmodels_dict.get(title, None)
+            if a3dmodel is None:
+                logger.warning("The 3d model %s is not found", title)
                 continue
-            if a3dmodel and a3dmodel.is_matched:
+            if main_model.is_a3dmodel_matched(title):
                 ply.setForeground(QColor("red"))
 
             # We save the 3d model path to the item as well
-            whole_path = a3dmodel.get_file("sample")
-            ply.setData(f"{whole_path}", Qt.UserRole)
+            ply.setData(str(a3dmodel), Qt.UserRole)
 
             # Finally we add the item to the model
             model.appendRow(ply)

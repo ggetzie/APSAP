@@ -1,7 +1,8 @@
-from pathlib import Path
 import logging
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor
+
+logger = logging.getLogger(__name__)
 
 
 class LoadFinds:

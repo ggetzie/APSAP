@@ -64,11 +64,9 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
     def set_context_to_str(self, context_str: str):
         try:
             h, z, e, n, c = parse_context_string(context_str)
-            print(h, z, e, n, c)
             self.hemisphere_list = self.get_hemispheres()
             self.selected_hemisphere_idx = self.hemisphere_list.index(h)
             self.zone_list = self.get_zones(h)
-            print(self.zone_list)
             self.selected_zone_idx = self.zone_list.index(z)
             self.easting_list = self.get_eastings(h, z)
             self.selected_easting_idx = self.easting_list.index(e)
@@ -126,6 +124,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
 
     def set_zone_index(self, idx):
         self.selected_zone_idx = idx
+
         self.easting_list = self.get_eastings(
             self.hemisphere_list[self.selected_hemisphere_idx],
             self.zone_list[self.selected_zone_idx],
@@ -138,6 +137,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
 
     def set_easting_index(self, idx):
         self.selected_easting_idx = idx
+
         self.northing_list = self.get_northings(
             self.hemisphere_list[self.selected_hemisphere_idx],
             self.zone_list[self.selected_zone_idx],

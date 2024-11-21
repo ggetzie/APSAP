@@ -3,7 +3,6 @@ import pathlib
 import re
 from typing import List
 
-from PIL import Image
 from model.constants import BASE_DATA_DIR
 
 logger = logging.getLogger(__name__)
@@ -272,15 +271,14 @@ class ObjectFind:
             / "photos"
         )
 
+    def photo_path(self, side="front") -> pathlib.Path:
+        name = "1.jpg" if side == "front" else "2.jpg"
+        return self.photos_path() / name
+
     def has_photos(self) -> bool:
         front_exists = (self.photos_path() / "1.jpg").exists()
         back_exists = (self.photos_path() / "2.jpg").exists()
         return front_exists and back_exists
-
-    def open_photo(self, side="front"):
-        name = "1.jpg" if side == "front" else "2.jpg"
-        path = self.photos_path() / name
-        return Image.open(path).resize((450, 300), Image.LANCZOS).convert("RGB")
 
 
 class A3DModel:

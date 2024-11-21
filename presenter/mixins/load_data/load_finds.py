@@ -1,28 +1,11 @@
 import logging
-from PyQt5.QtWidgets import QListWidgetItem
-from PyQt5.QtGui import QColor
+
 
 logger = logging.getLogger(__name__)
 
 
 class LoadFinds:
-
-    def populate_finds(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_presenter.block_signals(True)
-        min_find = int(main_view.find_start.value())
-        max_find = int(main_view.find_end.value())
-        finds_list = [
-            f
-            for f in main_model.finds_list
-            if (min_find <= f.find_number <= max_find) and f.has_photos()
-        ]
-
-        for find in finds_list:
-            item = QListWidgetItem(str(find.find_number))
-            if find.is_matched:
-                item.setForeground(QColor("red"))
-            main_view.finds_list.addItem(item)
+    pass
 
     # def populate_finds_old(self):
     #     """This function adds all the finds onto the finds list"""

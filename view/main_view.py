@@ -1,14 +1,16 @@
-import ctypes
-
+# import ctypes
 import logging
 import pathlib
 import subprocess
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
-from PyQt5.QtCore import QThreadPool
-from PyQt5.QtWidgets import QMainWindow
+
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from PyQt5.QtGui import QPixmap
 from PyQt5 import uic
+from PIL import Image
+from PIL.ImageQt import ImageQt
 
 from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
@@ -38,9 +40,11 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
 
         self.set_up_ply_window()
         self.set_up_images_pop_up()
-        self.threadpool = QThreadPool()
-        version = self.get_version()
+        self.current_image_front = ""
+        self.current_image_back = ""
+
         ## append the version to the window title
+        version = self.get_version()
         self.setWindowTitle(f"Sherd Match Assistance Version: {version}")
 
     def get_version(self):
@@ -59,3 +63,45 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
             logger.error("Error getting version: %s", e.stderr)
             return "Unknown"
 
+    def display_error(self, message: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("Error")
+        msg.setInformativeText(message)
+        msg.setWindowTitle("Error")
+        msg.exec_()
+
+    def display_find_photo(self, side: str, photo_path: pathlib.Path):
+        """This function displays the photo of the selected find on the GUI
+
+        Args:
+            side (str): The side of the photo to display. Must be "front" or "back"
+        """
+        try:
+            photo = (
+                Image.open(photo_path).resize((450, 300), Image.LANCZOS).convert("RGB")
+            )
+        except (FileNotFoundError, IOError, OSError, TypeError, ValueError) as e:
+            logger.error("Error opening photo at %s: %s", photo_path, e)
+            self.clear_find_photos()
+            self.display_error(f"Error opening photo: {e}")
+            return
+
+        im_qt = ImageQt(photo)
+        pix_map = QPixmap.fromImage(im_qt)
+        if side == "front":
+            self.findFrontPhoto_l.setPixmap(
+                pix_map.scaledToWidth(self.findFrontPhoto_l.width())
+            )
+            self.current_image_front = str(photo_path)
+        else:
+            self.findBackPhoto_l.setPixmap(
+                pix_map.scaledToWidth(self.findBackPhoto_l.width())
+            )
+            self.current_image_back = str(photo_path)
+
+    def clear_find_photos(self):
+        self.findFrontPhoto_l.clear()
+        self.findBackPhoto_l.clear()
+        self.current_image_front = ""
+        self.current_image_back = ""

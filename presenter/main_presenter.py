@@ -1,4 +1,8 @@
 import logging
+
+from PyQt5.QtWidgets import QListWidgetItem
+from PyQt5.QtGui import QColor
+
 from model.main_model import MainModel
 from view.main_view import MainView
 from presenter.mixins.choose_directory.main_choose_directory import ChooseDirectoryMixin
@@ -86,7 +90,7 @@ class MainPresenter(
         )
 
         # Connecting the select list of of finds with its handler
-        main_view.finds_list.currentItemChanged.connect(main_presenter.load_find_images)
+        main_view.finds_list.currentItemChanged.connect(main_presenter.on_select_find)
 
         # Connecting the batch and find filters's four toggles to their handlers
         main_view.batch_start.valueChanged.connect(main_presenter.batch_start_change)
@@ -116,6 +120,11 @@ class MainPresenter(
 
         self.main_view.setDisabled(boolean)
 
+    ##########################################################################
+    #  Populate: Functions that populate the select options of the GUI       #
+    #  Data is retrieved from the main_model and entered into the main_view  #
+    ##########################################################################
+
     def populate_hemispheres(self):
         """Set the select options of hemisphere as the hemispheres in the root folder"""
         main_model, main_view, _ = self.get_model_view_presenter()
@@ -123,7 +132,7 @@ class MainPresenter(
 
         options = main_model.hemisphere_list
         main_view.hemisphere_cb.addItems(options)
-        main_view.hemisphere_cb.setCurrentIndex(main_model.selected_hemisphere_idx)
+        # main_view.hemisphere_cb.setCurrentIndex(main_model.selected_hemisphere_idx)
         main_view.hemisphere_cb.setEnabled(len(options) > 1)
         self.populate_zones()
 
@@ -133,7 +142,7 @@ class MainPresenter(
         options = main_model.zone_list
         main_view.zone_cb.clear()
         main_view.zone_cb.addItems(options)
-        main_view.zone_cb.setCurrentIndex(main_model.selected_zone_idx)
+        # main_view.zone_cb.setCurrentIndex(main_model.selected_zone_idx)
         main_view.zone_cb.setEnabled(len(options) > 1)
         self.populate_eastings()
 
@@ -143,7 +152,7 @@ class MainPresenter(
         options = main_model.easting_list
         main_view.easting_cb.clear()
         main_view.easting_cb.addItems(options)
-        main_view.easting_cb.setCurrentIndex(main_model.selected_easting_idx)
+        # main_view.easting_cb.setCurrentIndex(main_model.selected_easting_idx)
         main_view.easting_cb.setEnabled(len(options) > 1)
         self.populate_northings()
 
@@ -153,7 +162,7 @@ class MainPresenter(
         options = main_model.northing_list
         main_view.northing_cb.clear()
         main_view.northing_cb.addItems(options)
-        main_view.northing_cb.setCurrentIndex(main_model.selected_northing_idx)
+        # main_view.northing_cb.setCurrentIndex(main_model.selected_northing_idx)
         main_view.northing_cb.setEnabled(len(options) > 1)
         self.populate_contexts()
 
@@ -163,8 +172,30 @@ class MainPresenter(
         options = [str(sc.context_number) for sc in main_model.context_list]
         main_view.context_cb.clear()
         main_view.context_cb.addItems(options)
-        main_view.context_cb.setCurrentIndex(main_model.selected_context_idx)
+        # main_view.context_cb.setCurrentIndex(main_model.selected_context_idx)
         main_view.context_cb.setEnabled(len(options) > 1)
+
+    def populate_finds(self):
+        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_presenter.block_signals(True)
+        min_find = int(main_view.find_start.value())
+        max_find = int(main_view.find_end.value())
+        finds_list = [
+            f
+            for f in main_model.finds_list
+            if (min_find <= f.find_number <= max_find) and f.has_photos()
+        ]
+
+        for find in finds_list:
+            item = QListWidgetItem(str(find.find_number))
+            if find.is_matched:
+                item.setForeground(QColor("red"))
+            main_view.finds_list.addItem(item)
+
+    ##########################################################################
+    #  onChange: Functions called in response to the user changing a select  #
+    #  These functions update the main_model and repopulate the selects      #
+    ##########################################################################
 
     def on_hemisphere_change(self):
         """This function is called when the user changes the hemisphere select"""
@@ -209,3 +240,46 @@ class MainPresenter(
             main_model.set_context_index(new_index)
             main_view.contextDisplay.setText(main_presenter.get_context_string())
             self.set_filter()
+
+    def on_select_find(self, selected_item):
+        """This function would try to load the two images into the GUI and after finishing its operations,
+        load the sorted 3d models.
+
+        Args:
+            selected_item (_type_): _description_
+        """
+        # Set the currently selected item
+
+        # We test two things to see if we discard the subsequent operations of this function
+        # 1. We check of the current selected item has text
+        # 2. We check if the two supposedly existent pictures exist and are openable by the user
+        # according to her access rights.
+        main_view = self.main_view
+        main_model = self.main_model
+        logger.info("Selected item: %s", selected_item)
+        try:
+            find_num = int(selected_item.text())
+            logger.info("Selected find: %s", find_num)
+
+        except AttributeError:
+            main_view.clear_find_photos()
+            return
+
+        main_model.set_selected_find_by_number(find_num)
+        selected_find = main_model.selected_find
+        main_view.selected_find_widget = selected_item.text()
+
+        # Set photo directory of the current selected find
+        photos_dir = selected_find.photos_path()
+
+        main_view.path_2d_picture = photos_dir
+
+        main_view.display_find_photo("front", selected_find.photo_path("front"))
+        main_view.display_find_photo("back", selected_find.photo_path("back"))
+
+        # Set up the selected_find's text
+        main_view.selected_find.setText(str(find_num))
+
+        # We immediately try to load all 3d models but sorted according to their
+        # similarity with the current find
+        self.load_sorted_models()

@@ -12,84 +12,85 @@ logger = logging.getLogger(__name__)
 
 
 class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
-    def load_find_images(self, selected_item):
-        """This function would try to load the two images into the GUI and after finishing its operations,
-        load the sorted 3d models.
 
-        Args:
-            selected_item (_type_): _description_
-        """
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        # Set the currently selected item
+    # def load_find_images(self, selected_item):
+    #     """This function would try to load the two images into the GUI and after finishing its operations,
+    #     load the sorted 3d models.
 
-        # We test two things to see if we discard the subsequent operations of this function
-        # 1. We check of the current selected item has text
-        # 2. We check if the two supposedly existent pictures exist and are openable by the user
-        # according to her access rights.
-        logger.info("Selected item: %s", selected_item)
-        try:
-            find_num = int(main_view.finds_list.currentItem().text())
-            logger.info("Selected find: %s", find_num)
+    #     Args:
+    #         selected_item (_type_): _description_
+    #     """
+    #     main_model, main_view, main_presenter = self.get_model_view_presenter()
+    #     # Set the currently selected item
 
-        except AttributeError:
-            main_view.findFrontPhoto_l.clear()
-            main_view.findBackPhoto_l.clear()
-            return
+    #     # We test two things to see if we discard the subsequent operations of this function
+    #     # 1. We check of the current selected item has text
+    #     # 2. We check if the two supposedly existent pictures exist and are openable by the user
+    #     # according to her access rights.
+    #     logger.info("Selected item: %s", selected_item)
+    #     try:
+    #         find_num = int(main_view.finds_list.currentItem().text())
+    #         logger.info("Selected find: %s", find_num)
 
-        main_model.set_selected_find_by_number(find_num)
-        selected_find = main_model.selected_find
-        main_view.selected_find_widget = selected_item.text()
+    #     except AttributeError:
+    #         main_view.findFrontPhoto_l.clear()
+    #         main_view.findBackPhoto_l.clear()
+    #         return
 
-        # Set photo directory of the current selected find
-        photos_dir = selected_find.photos_path()
+    #     main_model.set_selected_find_by_number(find_num)
+    #     selected_find = main_model.selected_find
+    #     main_view.selected_find_widget = selected_item.text()
 
-        main_view.path_2d_picture = photos_dir
+    #     # Set photo directory of the current selected find
+    #     photos_dir = selected_find.photos_path()
 
-        try:
-            front_photo = ImageQt(selected_find.open_photo("front"))
-            back_photo = ImageQt(selected_find.open_photo("back"))
-        except (
-            AttributeError,
-            FileNotFoundError,
-            IOError,
-            OSError,
-            TypeError,
-            ValueError,
-        ) as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error")
-            msg.setInformativeText(f"The jpegs in {photos_dir} are not openable: {e}")
-            msg.setWindowTitle("Error")
-            msg.exec_()
-            return
+    #     main_view.path_2d_picture = photos_dir
 
-        # Set up the front image to be displayed
-        main_view.findFrontPhoto_l.setPixmap(
-            QPixmap.fromImage(front_photo).scaledToWidth(
-                main_view.findFrontPhoto_l.width()
-            )
-        )
+    #     try:
+    #         front_photo = ImageQt(selected_find.open_photo("front"))
+    #         back_photo = ImageQt(selected_find.open_photo("back"))
+    #     except (
+    #         AttributeError,
+    #         FileNotFoundError,
+    #         IOError,
+    #         OSError,
+    #         TypeError,
+    #         ValueError,
+    #     ) as e:
+    #         msg = QMessageBox()
+    #         msg.setIcon(QMessageBox.Critical)
+    #         msg.setText("Error")
+    #         msg.setInformativeText(f"The jpegs in {photos_dir} are not openable: {e}")
+    #         msg.setWindowTitle("Error")
+    #         msg.exec_()
+    #         return
 
-        # Set up the path so that the image can be opened at a small window
-        main_view.current_image_front = str(selected_find.photos_path() / "1.jpg")
+    #     # Set up the front image to be displayed
+    #     main_view.findFrontPhoto_l.setPixmap(
+    #         QPixmap.fromImage(front_photo).scaledToWidth(
+    #             main_view.findFrontPhoto_l.width()
+    #         )
+    #     )
 
-        # Set up the back image to be displayed
-        main_view.findBackPhoto_l.setPixmap(
-            QPixmap.fromImage(back_photo).scaledToWidth(
-                main_view.findBackPhoto_l.width()
-            )
-        )
+    #     # Set up the path so that the image can be opened at a small window
+    #     main_view.current_image_front = str(selected_find.photos_path() / "1.jpg")
 
-        # Set up the path so that the image can be opened at a small window
-        main_view.current_image_back = str(selected_find.photos_path() / "2.jpg")
+    #     # Set up the back image to be displayed
+    #     main_view.findBackPhoto_l.setPixmap(
+    #         QPixmap.fromImage(back_photo).scaledToWidth(
+    #             main_view.findBackPhoto_l.width()
+    #         )
+    #     )
 
-        # Set up the selected_find's text
-        main_view.selected_find.setText(str(find_num))
+    #     # Set up the path so that the image can be opened at a small window
+    #     main_view.current_image_back = str(selected_find.photos_path() / "2.jpg")
 
-        # We immediately try to load all 3d models but sorted according to their
-        # similarity with the current find
-        main_presenter.load_sorted_models()
+    #     # Set up the selected_find's text
+    #     main_view.selected_find.setText(str(find_num))
+
+    #     # We immediately try to load all 3d models but sorted according to their
+    #     # similarity with the current find
+    #     main_presenter.load_sorted_models()
 
     def load_sorted_models(self):
         """This function load the 3d models sorted by how similar they are with respected

@@ -176,8 +176,9 @@ class MainPresenter(
         main_view.context_cb.setEnabled(len(options) > 1)
 
     def populate_finds(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
-        main_presenter.block_signals(True)
+        main_model, main_view, _ = self.get_model_view_presenter()
+        self.clear_selected_find()
+        self.block_signals(True)
         min_find = int(main_view.find_start.value())
         max_find = int(main_view.find_end.value())
         finds_list = [
@@ -204,7 +205,6 @@ class MainPresenter(
         if new_index != main_model.selected_hemisphere_idx:
             main_model.set_hemisphere_index(new_index)
             main_presenter.populate_zones()
-            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
     def on_zone_change(self):
         """This function is called when the user changes the zone select"""
@@ -213,7 +213,6 @@ class MainPresenter(
         if new_index != main_model.selected_zone_idx:
             main_model.set_zone_index(new_index)
             main_presenter.populate_eastings()
-            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
     def on_easting_change(self):
         """This function is called when the user changes the easting select"""
@@ -222,7 +221,6 @@ class MainPresenter(
         if new_index != main_model.selected_easting_idx:
             main_model.set_easting_index(new_index)
             main_presenter.populate_northings()
-            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
     def on_northing_change(self):
         """This function is called when the user changes the northing select"""
@@ -231,14 +229,13 @@ class MainPresenter(
         if new_index != main_model.selected_northing_idx:
             main_model.set_northing_index(new_index)
             main_presenter.populate_contexts()
-            main_view.contextDisplay.setText(main_presenter.get_context_string())
 
     def on_context_change(self):
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view, _ = self.get_model_view_presenter()
         new_index = main_view.context_cb.currentIndex()
         if new_index != main_model.selected_context_idx:
             main_model.set_context_index(new_index)
-            main_view.contextDisplay.setText(main_presenter.get_context_string())
+            main_view.contextDisplay.setText(self.get_context_string())
             self.set_filter()
 
     def on_select_find(self, selected_item):
@@ -280,6 +277,33 @@ class MainPresenter(
         # Set up the selected_find's text
         main_view.selected_find.setText(str(find_num))
 
+        if selected_find.is_matched:
+            batch_year, batch_number, batch_piece = selected_find.get_match()
+            main_view.current_year.setText(str(batch_year))
+            main_view.current_batch.setText(str(batch_number))
+            main_view.current_piece.setText(str(batch_piece))
+        else:
+            main_view.current_year.setText("NS")
+            main_view.current_batch.setText("NS")
+            main_view.current_piece.setText("NS")
+            self.clean_ply_window()
+        find_info = "\n".join(
+            [
+                f"Find: {find_num}",
+                f"Material: {selected_find.material}",
+                f"Category: {selected_find.category}",
+            ]
+        )
+        main_view.selected_find_info.setText(f"\n{find_info}")
+
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
         self.load_sorted_models()
+
+    def clear_selected_find(self):
+        self.main_model.selected_find_number = None
+        self.main_view.selected_find_info.setText("")
+        self.main_view.selected_find.setText("")
+        self.main_view.current_batch.setText("")
+        self.main_view.current_year.setText("")
+        self.main_view.current_piece.setText("")

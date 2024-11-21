@@ -1,12 +1,16 @@
 import logging
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QMessageBox
+
+from PyQt5.QtGui import QColor, QStandardItem, QStandardItemModel
+
+# from PyQt5.QtGui import QColor, QPixmap, QStandardItem, QStandardItemModel
+
+# from PyQt5.QtWidgets import QMessageBox
 
 from model.models import year_batch_piece_str
 
 # from PIL.ImageQt import ImageQt
-from PIL.ImageQt import ImageQt
+# from PIL.ImageQt import ImageQt
 
 logger = logging.getLogger(__name__)
 
@@ -97,20 +101,20 @@ class Load1jpgPairMixin:  # bridging the view(gui) and the model(data)
         to the selected image.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        selected_find = main_model.selected_find
+        # selected_find = main_model.selected_find
         # We don't allow interactions with the GUI if we are loading the 3d models
         main_presenter.block_signals(True)
 
-        if selected_find.is_matched:
-            batch_year, batch_number, batch_piece = selected_find.get_match()
-            main_view.current_year.setText(str(batch_year))
-            main_view.current_batch.setText(str(batch_number))
-            main_view.current_piece.setText(str(batch_piece))
-        else:
-            main_view.current_year.setText("NS")
-            main_view.current_batch.setText("NS")
-            main_view.current_piece.setText("NS")
-            main_presenter.clean_ply_window()
+        # if selected_find.is_matched:
+        #     batch_year, batch_number, batch_piece = selected_find.get_match()
+        #     main_view.current_year.setText(str(batch_year))
+        #     main_view.current_batch.setText(str(batch_number))
+        #     main_view.current_piece.setText(str(batch_piece))
+        # else:
+        #     main_view.current_year.setText("NS")
+        #     main_view.current_batch.setText("NS")
+        #     main_view.current_piece.setText("NS")
+        #     main_presenter.clean_ply_window()
 
         # Generate a list of 3d models sorted by similarity.
         # path_2d = main_view.path_2d_picture

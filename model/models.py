@@ -185,8 +185,8 @@ class ObjectFind:
         self._area_utm_northing_meters = area_utm_northing_meters
         self._context_number = context_number
         self.find_number = find_number
-        self._material = material
-        self._category = category
+        self.material = material
+        self.category = category
         self._batch_year = batch_year
         self._batch_number = batch_number
         self._batch_piece = batch_piece

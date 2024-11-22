@@ -35,18 +35,18 @@ class SpatialContext:
         area_utm_northing_meters: int,
         context_number: int,
     ):
-        self._utm_hemisphere = utm_hemisphere
-        self._utm_zone = utm_zone
-        self._area_utm_easting_meters = area_utm_easting_meters
-        self._area_utm_northing_meters = area_utm_northing_meters
+        self.utm_hemisphere = utm_hemisphere
+        self.utm_zone = utm_zone
+        self.area_utm_easting_meters = area_utm_easting_meters
+        self.area_utm_northing_meters = area_utm_northing_meters
         self.context_number = context_number
 
     def __str__(self):
         return (
-            f"{self._utm_hemisphere}-"
-            f"{self._utm_zone}-"
-            f"{self._area_utm_easting_meters}-"
-            f"{self._area_utm_northing_meters}-"
+            f"{self.utm_hemisphere}-"
+            f"{self.utm_zone}-"
+            f"{self.area_utm_easting_meters}-"
+            f"{self.area_utm_northing_meters}-"
             f"{self.context_number}"
         )
 
@@ -57,10 +57,10 @@ class SpatialContext:
     def path(self) -> pathlib.Path:
         return (
             BASE_DATA_DIR
-            / self._utm_hemisphere
-            / str(self._utm_zone)
-            / str(self._area_utm_easting_meters)
-            / str(self._area_utm_northing_meters)
+            / self.utm_hemisphere
+            / str(self.utm_zone)
+            / str(self.area_utm_easting_meters)
+            / str(self.area_utm_northing_meters)
             / str(self.context_number)
         )
 
@@ -88,10 +88,10 @@ class SpatialContext:
         cursor.execute(
             query,
             (
-                self._utm_hemisphere,
-                self._utm_zone,
-                self._area_utm_easting_meters,
-                self._area_utm_northing_meters,
+                self.utm_hemisphere,
+                self.utm_zone,
+                self.area_utm_easting_meters,
+                self.area_utm_northing_meters,
                 self.context_number,
                 min_find,
                 max_find,
@@ -101,10 +101,10 @@ class SpatialContext:
 
         result = [
             ObjectFind(
-                utm_hemisphere=self._utm_hemisphere,
-                utm_zone=self._utm_zone,
-                area_utm_easting_meters=self._area_utm_easting_meters,
-                area_utm_northing_meters=self._area_utm_northing_meters,
+                utm_hemisphere=self.utm_hemisphere,
+                utm_zone=self.utm_zone,
+                area_utm_easting_meters=self.area_utm_easting_meters,
+                area_utm_northing_meters=self.area_utm_northing_meters,
                 context_number=self.context_number,
                 find_number=row[0],
                 material=row[1],
@@ -146,13 +146,13 @@ class SpatialContext:
                         for piece_number in piece_numbers:
                             result.append(
                                 A3DModel(
+                                    spatial_context=self,
                                     batch_year=int(batch_year),
                                     batch_number=batch_number,
                                     batch_piece=int(piece_number),
-                                    spatial_context=self,
                                 )
                             )
-
+        logger.info("Found %d models in %s", len(result), self.models_folder)
         return result
 
 
@@ -289,13 +289,12 @@ class A3DModel:
         batch_number: int,
         batch_piece: int,
         spatial_context: SpatialContext,
-        object_find: ObjectFind = None,
     ):
+        self.spatial_context = spatial_context
         self.batch_year = batch_year
         self.batch_number = batch_number
         self.batch_piece = batch_piece
-        self.spatial_context = spatial_context
-        self.object_find = object_find
+        self.matched_finds = []
 
     def __str__(self):
         return year_batch_piece_str(
@@ -304,6 +303,10 @@ class A3DModel:
 
     def __repr__(self):
         return f"<A3DModel {self}>"
+
+    @property
+    def is_matched(self):
+        return len(self.matched_finds) > 0
 
     def get_folder(self):
         return (
@@ -329,3 +332,35 @@ class A3DModel:
                 if "sample" in f.name and "mesh" not in f.name:
                     return f
         return None
+
+    def get_matches(self, cursor):
+        query = """
+        SELECT find_number
+        FROM object.finds
+        WHERE
+        utm_hemisphere = %s AND
+        utm_zone = %s AND
+        area_utm_easting_meters = %s AND
+        area_utm_northing_meters = %s AND
+        context_number = %s AND
+        "3d_batch_year" = %s AND
+        "3d_batch_number" = %s AND
+        "3d_batch_piece" = %s;
+        """
+        cursor.execute(
+            query,
+            (
+                self.spatial_context.utm_hemisphere,
+                self.spatial_context.utm_zone,
+                self.spatial_context.area_utm_easting_meters,
+                self.spatial_context.area_utm_northing_meters,
+                self.spatial_context.context_number,
+                self.batch_year,
+                self.batch_number,
+                self.batch_piece,
+            ),
+        )
+        rows = cursor.fetchall()
+        result = [row[0] for row in rows]
+        logger.info("Found %d matched finds for %s", len(result), self)
+        return result

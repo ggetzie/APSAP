@@ -66,17 +66,17 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         return self.finds_dict.get(self.selected_find_number, None)
 
     @property
-    def selected_context(self):
+    def selected_context(self) -> SpatialContext:
         if self.selected_context_idx is None:
             return None
         return self.context_list[self.selected_context_idx]
 
     @property
-    def finds_list(self):
+    def finds_list(self) -> List[ObjectFind]:
         return sorted(self.finds_dict.values(), key=attrgetter("find_number"))
 
     @property
-    def a3dmodels_list(self):
+    def a3dmodels_list(self) -> List[A3DModel]:
         return sorted(
             self.a3dmodels_dict.values(),
             key=attrgetter("batch_year", "batch_number", "batch_piece"),
@@ -170,7 +170,6 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_find_number = (
             list(self.finds_dict.keys())[0] if self.finds_dict else None
         )
-        self.object_find_to_a3dmodel = {}
         for f in self.finds_list:
             if f.is_matched:
                 self.object_find_to_a3dmodel[str(f)] = f.get_match_str()
@@ -180,9 +179,8 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_a3dmodel = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
-        for model in self.a3dmodels_list:
-            if str(model) in self.a3dmodel_to_object_find:
-                model.object_find = self.get_object_find_from_str(str(model))
+        for a3dmodel in self.a3dmodels_list:
+            a3dmodel.matched_finds = a3dmodel.get_matches(self.conn.cursor())
 
     def get_object_find_from_str(self, find_str) -> ObjectFind:
         result = [f for f in self.finds_list if str(f) == find_str]
@@ -207,4 +205,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         return by_year
 
     def is_a3dmodel_matched(self, model_str: str) -> bool:
-        return model_str in self.a3dmodel_to_object_find
+        a3dmodel = self.a3dmodels_dict.get(model_str, None)
+        if a3dmodel is None:
+            return False
+        return a3dmodel.is_matched

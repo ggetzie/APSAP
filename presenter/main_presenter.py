@@ -102,6 +102,11 @@ class MainPresenter(
         main_view.update_button.clicked.connect(self.on_update_clicked)
         main_view.remove_button.clicked.connect(self.remove_match)
 
+        main_view.initialize_unsorted_models()
+        main_view.modelList.selectionModel().currentChanged.connect(
+            self.change_3d_model
+        )
+
         # Connect events for when the user selects a model
         # main_view.sorted_model_list.selectionModel().currentChanged.connect(
         #     main_presenter.change_3d_model
@@ -197,42 +202,43 @@ class MainPresenter(
 
     def on_hemisphere_change(self):
         """This function is called when the user changes the hemisphere select"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
         new_index = main_view.hemisphere_cb.currentIndex()
         if new_index != main_model.selected_hemisphere_idx:
             main_model.set_hemisphere_index(new_index)
-            main_presenter.populate_zones()
+            self.populate_zones()
 
     def on_zone_change(self):
         """This function is called when the user changes the zone select"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
         new_index = main_view.zone_cb.currentIndex()
         if new_index != main_model.selected_zone_idx:
             main_model.set_zone_index(new_index)
-            main_presenter.populate_eastings()
+            self.populate_eastings()
 
     def on_easting_change(self):
         """This function is called when the user changes the easting select"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
         new_index = main_view.easting_cb.currentIndex()
         if new_index != main_model.selected_easting_idx:
             main_model.set_easting_index(new_index)
-            main_presenter.populate_northings()
+            self.populate_northings()
 
     def on_northing_change(self):
         """This function is called when the user changes the northing select"""
-        main_model, main_view, main_presenter = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
         new_index = main_view.northing_cb.currentIndex()
         if new_index != main_model.selected_northing_idx:
             main_model.set_northing_index(new_index)
-            main_presenter.populate_contexts()
+            self.populate_contexts()
 
     def on_context_change(self):
         """This function is called when the user changes the context select"""
-        new_index = self.main_view.context_cb.currentIndex()
+        main_model, main_view = self.main_model, self.main_view
+        new_index = main_view.context_cb.currentIndex()
         if new_index != self.main_model.selected_context_idx:
-            self.main_model.set_context_index(new_index)
-            self.main_view.contextDisplay.setText(self.get_context_string())
+            main_model.set_context_index(new_index)
+            main_view.contextDisplay.setText(str(main_model.selected_context))
             self.set_filter()
 
     def on_select_find(self, selected_item):
@@ -313,10 +319,11 @@ class MainPresenter(
         )
         if selected_a3dmodel.is_matched:
             current_match = selected_a3dmodel.matched_finds[0]
-            message += "\nModel ({selected_a3dmodel}) is already matched to find ({current_match})"
             message += (
-                "\nAfter this operation, find ({current_match}) will be unmatched"
+                f"\nModel {selected_a3dmodel} is already matched to find {current_match}"
+                f"\nAfter this operation, find {current_match} will be unmatched"
             )
+
         self.main_view.confirm(message, self.on_update_confirmed)
 
     def on_update_confirmed(self, e):
@@ -328,17 +335,17 @@ class MainPresenter(
         Args:
             (button): The button that get clicked on.
         """
-        main_model, main_view, _ = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
 
         # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
         if not e.text() == "OK":
             logging.info("The user did not confirm the match: %s", e.text())
             return
-        selected_find = self.main_model.selected_find
-        old_a3dmodel = self.main_model.a3dmodels_dict.get(
+        selected_find = main_model.selected_find
+        old_a3dmodel = main_model.a3dmodels_dict.get(
             selected_find.get_match_str(), None
         )
-        selected_a3dmodel = self.main_model.selected_a3dmodel
+        selected_a3dmodel = main_model.selected_a3dmodel
         old_find_number = None
         if selected_find is None or selected_a3dmodel is None:
             logging.error("No find or 3d model selected")
@@ -347,11 +354,11 @@ class MainPresenter(
         ##Updating the database
         if selected_a3dmodel.is_matched:
             old_find_number = selected_a3dmodel.matched_finds[0]
-            success = self.main_model.clear_match_for_find(old_find_number)
+            success = main_model.clear_match_for_find(old_find_number)
             if not success:
                 logging.error("Failed to clear match for find %s", old_find_number)
 
-        success = self.main_model.match_selected_find_with_selected_a3dmodel()
+        success = main_model.match_selected_find_with_selected_a3dmodel()
         if not success:
             logging.error("There was an error updating the database")
             return

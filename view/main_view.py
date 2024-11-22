@@ -8,7 +8,7 @@ import time
 # ctypes.cdll.LoadLibrary(opengl_path)
 
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QListWidget, QTreeView
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel
 from PyQt5 import uic, QtCore
 from PIL import Image
 from PIL.ImageQt import ImageQt
@@ -40,6 +40,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.finds_list: QListWidget = None
         self.modelList: QTreeView = None
         self.sorted_model_list: QTreeView = None
+        self.current_pcd = None
         logger.info("Loading MainWindow.ui")
         now = time.time()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
@@ -163,3 +164,41 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         for i in range(q_model.rowCount()):
             if q_model.item(i).text() == model_str:
                 q_model.item(i).setForeground(QColor(color))
+
+    def clear_interface(self):
+        """Clear all the texts, and selects, images displayed and 3d models from the interface."""
+
+        self.findFrontPhoto_l.clear()
+        self.findBackPhoto_l.clear()
+        self.statusLabel.setText("")
+        self.selected_find.setText("")
+        self.current_batch.setText("")
+        self.current_year.setText("")
+        self.current_piece.setText("")
+        self.new_batch.setText("")
+        self.new_piece.setText("")
+        self.new_year.setText("")
+        self.contextDisplay.setText(self.get_context_string())
+        if hasattr(self, "current_pcd"):
+            self.ply_window.remove_geometry(getattr(self, "current_pcd"))
+            setattr(self, "current_pcd", None)
+
+        model = QStandardItemModel(self)
+        self.sorted_model_list.setModel(model)
+        self.reset_ply_selection_model()
+        self.finds_list.setCurrentItem(None)
+        self.finds_list.clear()
+
+    def initialize_unsorted_models(self):
+        model = QStandardItemModel(self)
+        model.setHorizontalHeaderLabels(["Models"])
+        self.modelList.setModel(model)
+
+    def clear_unsorted_models(self):
+        """This function ensures that there is a empty modelList
+        in the view
+        """
+
+        self.modelList.selectionModel().model().removeRows(
+            0, self.modelList.selectionModel().model().rowCount()
+        )

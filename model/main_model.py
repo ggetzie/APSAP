@@ -7,11 +7,7 @@ from model.mixins.database import DatabaseMixin
 from model.mixins.initial_load import InitialLoadMixin
 from model.mixins.copy_file import CopyFileMixin
 from model.constants import BASE_DATA_DIR
-from model.models import (
-    SpatialContext,
-    A3DModel,
-    ObjectFind,
-)
+from model.models import SpatialContext, A3DModel, ObjectFind, year_batch_piece_str
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +90,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_hemispheres_index(self, idx):
-        logger.info("Setting hemisphere index to %s", idx)
+
         self.selected_hemisphere_idx = idx
         self.zone_list = self.get_zones(
             self.hemisphere_list[self.selected_hemisphere_idx]
@@ -110,7 +106,6 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_zone_index(self, idx):
-        logger.info("Setting zone index to %s", idx)
         self.selected_zone_idx = idx
         self.easting_list = self.get_eastings(
             self.hemisphere_list[self.selected_hemisphere_idx],
@@ -123,7 +118,6 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         return [d.name for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()]
 
     def set_easting_index(self, idx):
-        logger.info("Setting easting index to %s", idx)
         self.selected_easting_idx = idx
         self.northing_list = self.get_northings(
             self.hemisphere_list[self.selected_hemisphere_idx],
@@ -139,7 +133,6 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_northing_index(self, idx):
-        logger.info("Setting northing index to %s", idx)
         self.selected_northing_idx = idx
         self.context_list = [
             SpatialContext(
@@ -180,8 +173,42 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_a3dmodel_str = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
-        for a3dmodel in self.a3dmodels_list:
-            a3dmodel.matched_finds = a3dmodel.get_matches(self.conn.cursor())
+        for m in self.a3dmodels_list:
+            m.matched_finds = m.get_matches(self.conn.cursor())
+
+    def get_all_matches(self):
+        sc = self.selected_context
+        if sc is None:
+            return
+        query = """
+        SELECT "3d_batch_year", "3d_batch_number", "3d_batch_piece", "find_number"
+        FROM object.finds
+        WHERE utm_hemisphere = %s AND utm_zone = %s AND area_utm_easting_meters = %s AND area_utm_northing_meters = %s AND context_number = %s
+        AND "3d_batch_year" IS NOT NULL AND "3d_batch_number" IS NOT NULL AND "3d_batch_piece" IS NOT NULL;
+        """
+
+        try:
+            self.conn.cursor().execute(
+                query,
+                (
+                    sc.utm_hemisphere,
+                    sc.utm_zone,
+                    sc.area_utm_easting_meters,
+                    sc.area_utm_northing_meters,
+                    sc.context_number,
+                ),
+            )
+            rows = self.conn.cursor().fetchall()
+        except Exception as e:
+            logger.error("Error fetching matches: %s", e)
+            return
+        logger.info("Found %s matches", len(rows))
+        for row in rows:
+            a3dmodel_str = year_batch_piece_str(*row[:3])
+            find_number = row[3]
+            a3dmodel = self.a3dmodels_dict.get(a3dmodel_str, None)
+            if a3dmodel is not None:
+                a3dmodel.matched_finds.append(find_number)
 
     def get_nested_a3dmodels(self):
         by_year = {}

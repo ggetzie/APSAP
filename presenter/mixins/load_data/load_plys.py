@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class LoadPlys:
     def populate_models(self):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        self.reset_ply_selection_model()
+        main_view.clear_unsorted_models()
         main_presenter.block_signals(True)
         nested_a3dmodels = main_model.get_nested_a3dmodels()
         filter_year = main_view.year.value()

@@ -123,37 +123,32 @@ class SpatialContext:
         result = []
         if not self.models_folder.exists():
             return result
-        for batch_year_dir in self.models_folder.iterdir():
-            if batch_year_dir.is_dir() and re.match(r"\d{4}", batch_year_dir.name):
-                batch_year = batch_year_dir.name
-                for batch_num_dir in batch_year_dir.iterdir():
-                    if batch_num_dir.is_dir() and re.match(
-                        r"^batch_\d{3}$", batch_num_dir.name
-                    ):
-                        batch_number = int(batch_num_dir.name.split("_")[1])
-                        batch_piece_dir = (
-                            batch_num_dir
-                            / "registration_reso1_maskthres242"
-                            / "final_output"
-                        )
-                        number_set = set()
-                        for piece_file in batch_piece_dir.glob("piece_*.ply"):
-                            m = re.match(r"piece_(\d+)_", piece_file.name)
-                            if not m:
-                                continue
-                            piece_number = int(m.group(1))
-                            number_set.add(piece_number)
-                        piece_numbers = sorted(list(number_set))
+        for year_dir in self.models_folder.iterdir():
+            if not (year_dir.is_dir() and re.match(r"\d{4}", year_dir.name)):
+                continue
+            batch_year = year_dir.name
+            for num_dir in year_dir.iterdir():
+                if not (num_dir.is_dir() and re.match(r"^batch_\d{3}$", num_dir.name)):
+                    continue
+                batch_number = int(num_dir.name.split("_")[1])
+                piece_dir = num_dir / "registration_reso1_maskthres242" / "final_output"
+                number_set = set()
+                for piece_file in piece_dir.glob("piece_*.ply"):
+                    m = re.match(r"piece_(\d+)_", piece_file.name)
+                    if not m:
+                        continue
+                    piece_number = int(m.group(1))
+                    number_set.add(piece_number)
+                piece_numbers = sorted(list(number_set))
 
-                        for piece_number in piece_numbers:
-                            result.append(
-                                A3DModel(
-                                    spatial_context=self,
-                                    batch_year=int(batch_year),
-                                    batch_number=batch_number,
-                                    batch_piece=int(piece_number),
-                                )
-                            )
+                for piece_number in piece_numbers:
+                    a3dmodel = A3DModel(
+                        spatial_context=self,
+                        batch_year=int(batch_year),
+                        batch_number=batch_number,
+                        batch_piece=int(piece_number),
+                    )
+                    result.append(a3dmodel)
         logger.info("Found %d models in %s", len(result), self.models_folder)
         return result
 

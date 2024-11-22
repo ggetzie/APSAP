@@ -7,9 +7,9 @@ import time
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
 
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
-from PyQt5.QtGui import QPixmap
-from PyQt5 import uic
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QListWidget, QTreeView
+from PyQt5.QtGui import QPixmap, QColor
+from PyQt5 import uic, QtCore
 from PIL import Image
 from PIL.ImageQt import ImageQt
 
@@ -37,6 +37,9 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         and make it the images pop when you click on them.
         """
         super().__init__()
+        self.finds_list: QListWidget = None
+        self.modelList: QTreeView = None
+        self.sorted_model_list: QTreeView = None
         logger.info("Loading MainWindow.ui")
         now = time.time()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
@@ -114,3 +117,49 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.findBackPhoto_l.clear()
         self.current_image_front = ""
         self.current_image_back = ""
+
+    def clear_find_info(self):
+        self.clear_find_photos()
+        self.selected_find_info.setText("")
+        self.selected_find.setText("")
+        self.current_batch.setText("")
+        self.current_year.setText("")
+        self.current_piece.setText("")
+
+    def confirm(self, message: str, on_confirm):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Question)
+        msg.setText("Confirm")
+        msg.setInformativeText(message)
+        msg.setWindowTitle("Confirm")
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.buttonClicked.connect(on_confirm)
+        msg.exec_()
+
+    def set_find_color(self, find_number: int, color: str):
+        find_item = self.finds_list.findItems(str(find_number), QtCore.Qt.MatchExactly)[
+            0
+        ]
+        find_item.setForeground(QColor(color))
+
+    def set_unsorted_model_color(
+        self, batch_year: int, batch_number: int, batch_piece: int, color: str
+    ):
+        # set the piece number to color in the tree view under batch_year -> batch_number
+        q_model = self.modelList.model()
+        for i in range(q_model.rowCount()):
+            for j in range(q_model.item(i).rowCount()):
+                for k in range(q_model.item(i).child(j).rowCount()):
+                    if (
+                        int(q_model.item(i).text()) == batch_year
+                        and int(q_model.item(i).child(j).text()) == batch_number
+                        and int(q_model.item(i).child(j).child(k).text()) == batch_piece
+                    ):
+                        q_model.item(i).child(j).child(k).setForeground(QColor(color))
+
+    def set_sorted_model_color(self, model_str: str, color: str):
+        # set the piece number to color in the tree view under batch_year -> batch_number
+        q_model = self.sorted_model_list.model()
+        for i in range(q_model.rowCount()):
+            if q_model.item(i).text() == model_str:
+                q_model.item(i).setForeground(QColor(color))

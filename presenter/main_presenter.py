@@ -99,7 +99,7 @@ class MainPresenter(
         main_view.loadAll.clicked.connect(self.load_images_plys)
 
         # Connecting the buttons that remove and update match to their handlers
-        main_view.update_button.clicked.connect(self.add_match)
+        main_view.update_button.clicked.connect(self.on_update_clicked)
         main_view.remove_button.clicked.connect(self.remove_match)
 
         # Connect events for when the user selects a model
@@ -259,7 +259,7 @@ class MainPresenter(
             main_view.clear_find_photos()
             return
 
-        main_model.set_selected_find_by_number(find_num)
+        main_model.select_find(find_num)
         selected_find = main_model.selected_find
         main_view.selected_find_widget = selected_item.text()
 
@@ -294,8 +294,113 @@ class MainPresenter(
 
     def clear_selected_find(self):
         self.main_model.selected_find_number = None
-        self.main_view.selected_find_info.setText("")
-        self.main_view.selected_find.setText("")
-        self.main_view.current_batch.setText("")
-        self.main_view.current_year.setText("")
-        self.main_view.current_piece.setText("")
+        self.main_view.clear_find_info()
+
+    def on_update_clicked(self):
+        """This function is called when the user clicks on the update button"""
+        selected_find = self.main_model.selected_find
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+
+        if selected_find is None:
+            self.main_view.display_error("Please select a find first")
+            return
+        if selected_a3dmodel is None:
+            self.main_view.display_error("Please select a 3d model first")
+            return
+
+        message = (
+            f"Update find ({selected_find}) to match 3d model ({selected_a3dmodel})?"
+        )
+        if selected_a3dmodel.is_matched:
+            current_match = selected_a3dmodel.matched_finds[0]
+            message += "\nModel ({selected_a3dmodel}) is already matched to find ({current_match})"
+            message += (
+                "\nAfter this operation, find ({current_match}) will be unmatched"
+            )
+        self.main_view.confirm(message, self.on_update_confirmed)
+
+    def on_update_confirmed(self, e):
+        """This function tries to do two things when the ok button is clicked for add_match.
+        First, it tries to update the database to reflect the matched result.
+        Second, it tries to fix the added ceramic sherds and put them to the find folder.
+        These sherds include the original-sized one and the
+
+        Args:
+            (button): The button that get clicked on.
+        """
+        main_model, main_view, _ = self.get_model_view_presenter()
+
+        # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
+        if not e.text() == "OK":
+            logging.info("The user did not confirm the match: %s", e.text())
+            return
+        selected_find = self.main_model.selected_find
+        old_a3dmodel = self.main_model.a3dmodels_dict.get(
+            selected_find.get_match_str(), None
+        )
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+        old_find_number = None
+        if selected_find is None or selected_a3dmodel is None:
+            logging.error("No find or 3d model selected")
+            return
+
+        ##Updating the database
+        if selected_a3dmodel.is_matched:
+            old_find_number = selected_a3dmodel.matched_finds[0]
+            success = self.main_model.clear_match_for_find(old_find_number)
+            if not success:
+                logging.error("Failed to clear match for find %s", old_find_number)
+
+        success = self.main_model.match_selected_find_with_selected_a3dmodel()
+        if not success:
+            logging.error("There was an error updating the database")
+            return
+
+        # Create the folder in which we will put the 3d models (a subfolder in the find folder)
+        models_dir = selected_find.models_directory()
+        models_dir.mkdir(parents=True, exist_ok=True)
+
+        mesh_path = selected_a3dmodel.get_file("mesh")
+        orig_path = selected_a3dmodel.get_file("full")
+        original_destination = models_dir / "a.ply"
+        mesh_destination = models_dir / "a_0_3_mesh.ply"
+
+        # We copy the files to the destination
+        logging.info("Copying file from %s to %s", orig_path, original_destination)
+        main_model.fix_and_copy_ply(str(orig_path), str(original_destination))
+        logging.info("Copying file from %s to %s", mesh_path, mesh_destination)
+        main_model.fix_and_copy_ply(str(mesh_path), str(mesh_destination))
+
+        # We update the GUI to show that the find is matched to the 3d model
+        main_view.set_find_color(selected_find.find_number, "red")
+        if old_find_number is not None:
+            main_view.set_find_color(old_find_number, "black")
+
+        main_view.set_unsorted_model_color(
+            selected_a3dmodel.batch_year,
+            selected_a3dmodel.batch_number,
+            selected_a3dmodel.batch_piece,
+            "red",
+        )
+
+        main_view.set_sorted_model_color(
+            str(selected_a3dmodel),
+            "red",
+        )
+        if old_a3dmodel is not None:
+            main_view.set_unsorted_model_color(
+                old_a3dmodel.batch_year,
+                old_a3dmodel.batch_number,
+                old_a3dmodel.batch_piece,
+                "black",
+            )
+            main_view.set_sorted_model_color(
+                str(old_a3dmodel),
+                "black",
+            )
+
+        # Update on the GUI that the find has the new matched 3d model
+        new_year, new_batch, new_piece = str(selected_a3dmodel).split("-")
+        main_view.current_year.setText(new_year)
+        main_view.current_batch.setText(new_batch)
+        main_view.current_piece.setText(new_piece)

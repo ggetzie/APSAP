@@ -3,6 +3,8 @@ import pathlib
 import re
 from typing import List
 
+import psycopg2
+
 from model.constants import BASE_DATA_DIR
 
 logger = logging.getLogger(__name__)
@@ -211,7 +213,7 @@ class ObjectFind:
             and self._batch_piece is not None
         )
 
-    def set_match(self, cursor, batch_year: int, batch_number: int, batch_piece: int):
+    def set_match(self, conn, batch_year: int, batch_number: int, batch_piece: int):
         if (
             self._batch_year == batch_year
             and self._batch_number == batch_number
@@ -221,6 +223,8 @@ class ObjectFind:
         self._batch_year = batch_year
         self._batch_number = batch_number
         self._batch_piece = batch_piece
+        logger.info("Matching %s to %s", self, self.get_match_str())
+        logger.info("Updating database")
         query = """
         UPDATE object.finds
         SET "3d_batch_year" = %s, "3d_batch_number" = %s, "3d_batch_piece" = %s
@@ -232,20 +236,38 @@ class ObjectFind:
         context_number = %s AND
         find_number = %s;
         """
-        cursor.execute(
-            query,
-            (
-                batch_year,
-                batch_number,
-                batch_piece,
-                self._utm_hemisphere,
-                self._utm_zone,
-                self._area_utm_easting_meters,
-                self._area_utm_northing_meters,
-                self._context_number,
-                self.find_number,
-            ),
-        )
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                query,
+                (
+                    self._batch_year,
+                    self._batch_number,
+                    self._batch_piece,
+                    self._utm_hemisphere,
+                    self._utm_zone,
+                    self._area_utm_easting_meters,
+                    self._area_utm_northing_meters,
+                    self._context_number,
+                    self.find_number,
+                ),
+            )
+            logger.info("Matched %s to %s", self, self.get_match_str())
+            conn.commit()
+        except psycopg2.Error as e:
+            logger.error("Failed to match %s to %s", self, self.get_match_str())
+            logger.error(e)
+            conn.rollback()
+        finally:
+            cursor.close()
+
+    def clear_match(self, cursor):
+        if not self.is_matched:
+            return
+        logger.info("Clearing match for %s", self)
+        self._batch_number = None
+        self._batch_piece = None
+        self.set_match(cursor, self._batch_year, None, None)
 
     def get_match(self):
         return self._batch_year, self._batch_number, self._batch_piece
@@ -257,7 +279,7 @@ class ObjectFind:
             )
         return ""
 
-    def photos_path(self) -> pathlib.Path:
+    def directory(self) -> pathlib.Path:
         return (
             BASE_DATA_DIR
             / self._utm_hemisphere
@@ -268,8 +290,10 @@ class ObjectFind:
             / "finds"
             / "individual"
             / str(self.find_number)
-            / "photos"
         )
+
+    def photos_path(self) -> pathlib.Path:
+        return self.directory() / "photos"
 
     def photo_path(self, side="front") -> pathlib.Path:
         name = "1.jpg" if side == "front" else "2.jpg"
@@ -279,6 +303,9 @@ class ObjectFind:
         front_exists = (self.photos_path() / "1.jpg").exists()
         back_exists = (self.photos_path() / "2.jpg").exists()
         return front_exists and back_exists
+
+    def models_directory(self):
+        return self.directory() / "3d" / "gp"
 
 
 class A3DModel:
@@ -294,7 +321,9 @@ class A3DModel:
         self.batch_year = batch_year
         self.batch_number = batch_number
         self.batch_piece = batch_piece
-        self.matched_finds = []
+
+        # the find numbers that are matched to this model
+        self.matched_finds: List[int] = []
 
     def __str__(self):
         return year_batch_piece_str(
@@ -321,8 +350,19 @@ class A3DModel:
         return list(self.get_folder().glob(f"piece_{self.batch_piece}_*.ply"))
 
     def get_file(self, filetype="full") -> pathlib.Path:
+        """There are three .ply files for each model:
+        - full:   piece_1_world.ply
+        - mesh:   piece_1_world_sample0_3_mesh.ply
+        - sample: piece_1_world_sample0_3.ply
+
+        Args:
+            filetype (str, optional): Which file to get Defaults to "full".
+
+        Returns:
+            pathlib.Path: Path to the selected file
+        """
         if filetype == "full":
-            return self.get_folder() / f"piece_{self.batch_piece:>03}_world.ply"
+            return self.get_folder() / f"piece_{self.batch_piece}_world.ply"
         if filetype == "mesh":
             for f in self.list_files():
                 if "mesh" in f.name:
@@ -362,5 +402,6 @@ class A3DModel:
         )
         rows = cursor.fetchall()
         result = [row[0] for row in rows]
-        logger.info("Found %d matched finds for %s", len(result), self)
+        if len(result) > 1:
+            logger.error("Found %d finds matched to %s! %s", len(result), self, result)
         return result

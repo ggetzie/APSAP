@@ -62,6 +62,7 @@ class AddAndRemoveMatchMixin:
 
         # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
         if not e.text() == "OK":
+            logging.info("The user did not confirm the match: %s", e.text())
             return
 
         # Get all needed to update the database

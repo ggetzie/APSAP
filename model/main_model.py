@@ -1,7 +1,7 @@
 # In MVP, Model View Presenter architecture, Model represents the data in the application.
 import logging
 from operator import attrgetter
-from typing import List
+from typing import List, Dict
 from model.mixins.file_IO import FileIOMixin
 from model.mixins.database import DatabaseMixin
 from model.mixins.initial_load import InitialLoadMixin
@@ -34,15 +34,13 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
     def __init__(self):
         super().__init__()
 
-        self.object_find_to_a3dmodel = {}  # mapping from object find to a3dmodel
-        self.a3dmodel_to_object_find = {}  # mapping from a3dmodel to object find
-        self.finds_dict = {}
-
+        self.finds_dict: Dict[int:ObjectFind] = {}  # find_number: int -> ObjectFind
         self.selected_find_number: int = None
-        self.a3dmodels_dict = {}
 
-        self.selected_a3dmodel: str = None  # identify by year-batch-piece
-        self.context_list = []
+        self.a3dmodels_dict: Dict[str:A3DModel] = {}  # a3dmodel_str: str -> A3DModel
+        self.selected_a3dmodel_str: str = None  # identify by year-batch-piece
+
+        self.context_list: List[SpatialContext] = []
         self.selected_context_idx: int = None
         self.northing_list: List[str] = []
         self.selected_northing_idx: int = None
@@ -50,20 +48,26 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_easting_idx: int = None
         self.zone_list: List[str] = []
         self.selected_zone_idx = None
-        # self.set_context_to_str(initial_context)
 
         ## calling set_hemispheres_index() will cascade through zone/easting/northing/context
         ## to get the available options and set default index to 0 for each
-        self.hemisphere_list = self.get_hemispheres()
+        self.hemisphere_list: List[str] = self.get_hemispheres()
         self.selected_hemisphere_idx = 0
         self.set_hemispheres_index(self.hemisphere_list.index("N"))
 
-    def select_find(self, find_number):
+    def select_find(self, find_number: int):
         self.selected_find_number = find_number
 
     @property
-    def selected_find(self):
+    def selected_find(self) -> ObjectFind:
         return self.finds_dict.get(self.selected_find_number, None)
+
+    def select_a3dmodel(self, a3dmodel_str: str):
+        self.selected_a3dmodel_str = a3dmodel_str
+
+    @property
+    def selected_a3dmodel(self) -> A3DModel:
+        return self.a3dmodels_dict.get(self.selected_a3dmodel_str, None)
 
     @property
     def selected_context(self) -> SpatialContext:
@@ -170,29 +174,14 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_find_number = (
             list(self.finds_dict.keys())[0] if self.finds_dict else None
         )
-        for f in self.finds_list:
-            if f.is_matched:
-                self.object_find_to_a3dmodel[str(f)] = f.get_match_str()
-                self.a3dmodel_to_object_find[f.get_match_str()] = str(f)
+
         self.a3dmodels_dict = {str(m): m for m in self.selected_context.list_models()}
 
-        self.selected_a3dmodel = (
+        self.selected_a3dmodel_str = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
         for a3dmodel in self.a3dmodels_list:
             a3dmodel.matched_finds = a3dmodel.get_matches(self.conn.cursor())
-
-    def get_object_find_from_str(self, find_str) -> ObjectFind:
-        result = [f for f in self.finds_list if str(f) == find_str]
-        if len(result) == 0:
-            return None
-        return result[0]
-
-    def get_a3dmodel_from_str(self, model_str) -> A3DModel:
-        return self.a3dmodels_dict.get(model_str, None)
-
-    def set_selected_find_by_number(self, find_number: int):
-        self.selected_find_number = find_number
 
     def get_nested_a3dmodels(self):
         by_year = {}
@@ -204,8 +193,32 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
             by_year[model.batch_year][model.batch_number][model.batch_piece] = model
         return by_year
 
-    def is_a3dmodel_matched(self, model_str: str) -> bool:
-        a3dmodel = self.a3dmodels_dict.get(model_str, None)
-        if a3dmodel is None:
+    def clear_match_for_find(self, find_number: int) -> bool:
+        find = self.finds_dict.get(find_number, None)
+        if find is None:
             return False
-        return a3dmodel.is_matched
+        old_match = self.a3dmodels_dict[find.get_match_str()]
+        if old_match is None:
+            return False
+        find.clear_match(self.conn.cursor())
+        old_match.matched_finds = old_match.get_matches(self.conn.cursor())
+        return True
+
+    def match_selected_find_with_selected_a3dmodel(self) -> bool:
+        find = self.selected_find
+        a3dmodel = self.selected_a3dmodel
+        if find is None or a3dmodel is None:
+            logger.error("No find or model selected")
+            return False
+        if find.is_matched:
+            logger.error("Attempted to set a match for a find that already has one")
+            logger.error("call clear_match_for_find first")
+            return False
+        find.set_match(
+            self.conn,
+            a3dmodel.batch_year,
+            a3dmodel.batch_number,
+            a3dmodel.batch_piece,
+        )
+        a3dmodel.matched_finds = a3dmodel.get_matches(self.conn.cursor())
+        return True

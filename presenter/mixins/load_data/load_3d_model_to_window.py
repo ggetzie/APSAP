@@ -24,7 +24,8 @@ class Load3dModelToWindowMixin:
         _, main_view, main_presenter = self.get_model_view_presenter()
         # Get the saved path in the selected item
         ply_str = current.data(Qt.UserRole)
-        a3dmodel = self.main_model.a3dmodels_dict.get(ply_str, None)
+        self.main_model.select_a3dmodel(ply_str)
+        a3dmodel = self.main_model.selected_a3dmodel
         if a3dmodel is None:
             logger.error("The 3d model %s is not found", ply_str)
             return

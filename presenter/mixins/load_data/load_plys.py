@@ -6,7 +6,6 @@ from PyQt5.QtGui import (
     QStandardItem,
     QStandardItemModel,
 )
-from model.models import year_batch_piece_str
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +36,8 @@ class LoadPlys:
                     logger.info("Measuring pixels for %s", a3dmodel)
                     main_presenter.measure_pixels_3d(a3dmodel)
                     model_piece = QStandardItem(f"{piece_number}")
-
-                    ply_str = year_batch_piece_str(
-                        batch_year, batch_number, piece_number
-                    )
-                    model_piece.setData(ply_str, Qt.UserRole)
-                    if main_model.is_a3dmodel_matched(ply_str):
+                    model_piece.setData(str(a3dmodel), Qt.UserRole)
+                    if a3dmodel.is_matched:
                         model_piece.setForeground(QColor("red"))
                     batch_item.appendRow(model_piece)
                 year_item.appendRow(batch_item)

@@ -97,23 +97,24 @@ class InitialLoadMixin:
         Returns:
             boolean: True if all the tests are passed. False Otherwise
         """
+        settings_path = Path("./configs/settings.json")
         # Test 1: Check if the file exists
-        setting_json_found = Path("./configs/settings.json").is_file()
-        if not setting_json_found:
+        if not settings_path.is_file():
             return False
 
         # Test 2: Check if the json file has valid json
         try:
-            setting_dict = json.load(open("./configs/settings.json", encoding="utf-8"))
-        except:
+            with settings_path.open(encoding="utf-8") as f:
+                settings = json.load(f)
+        except json.JSONDecodeError:
             return False
 
         # Test 3: Check if the key FILE_ROOT is in the json object
-        if "FILE_ROOT" not in setting_dict:
+        if "FILE_ROOT" not in settings:
             return False
 
         # Test 4: Check if the FILE_ROOT designated is a valid directory.
-        if not Path(setting_dict["FILE_ROOT"]).is_dir():
+        if not Path(settings["FILE_ROOT"]).is_dir():
             return False
 
         # All Tests are passed, so we have a valid setting file

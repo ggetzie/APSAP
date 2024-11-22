@@ -2,6 +2,7 @@
 import logging
 import pathlib
 import subprocess
+import time
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
@@ -36,10 +37,18 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         and make it the images pop when you click on them.
         """
         super().__init__()
+        logger.info("Loading MainWindow.ui")
+        now = time.time()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
-
+        logger.info("MainWindow.ui loaded in %s seconds", (f"{time.time() - now:0.4f}"))
+        now = time.time()
+        logger.info("Setting up ply window")
         self.set_up_ply_window()
+        logger.info("Ply window set up in %s seconds", (f"{time.time() - now:0.4f}"))
+        logger.info("Setting up images pop up")
+        now = time.time()
         self.set_up_images_pop_up()
+        logger.info("Images pop up set up in %s seconds", (f"{time.time() - now:0.4f}"))
         self.current_image_front = ""
         self.current_image_back = ""
 

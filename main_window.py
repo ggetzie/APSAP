@@ -29,12 +29,11 @@ def main():
     app.setStyle("Fusion")
 
     # Run the model, view and presenter one by one and count the time it takes to load each of them.
-    logging.info("Initializing...")
+    logging.info("Starting up...")
     now = time.time()
 
     presenter = MainPresenter()
-    logging.info("main_presenter %s seconds have passed", (time.time() - now))
-    logging.info("")
+    logging.info("Started up in %s seconds", f"{time.time() - now:0.4f}")
 
     # Show the GUI application
     presenter.main_view.show()

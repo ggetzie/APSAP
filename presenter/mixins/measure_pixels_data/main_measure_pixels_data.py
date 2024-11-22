@@ -51,8 +51,8 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         Returns:
             tuple: Tuple of the measured values
         """
+        main_model, _, main_presenter = self.get_model_view_presenter()
         try:
-            main_model, _, main_presenter = self.get_model_view_presenter()
 
             (
                 area_front,

@@ -1,4 +1,5 @@
 import logging
+import time
 
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor
@@ -39,21 +40,26 @@ class MainPresenter(
     """
 
     def __init__(self):
-        main_presenter = self
 
         # Bind both the model and view into the presenter
+        now = time.time()
+        logger.info("loading main model")
         self.main_model: MainModel = MainModel()
+        logger.info("loaded main model in %s seconds", f"{time.time() - now:0.4f}")
+        now = time.time()
+        logger.info("loading main view")
         self.main_view: MainView = MainView()
+        logger.info("loaded main view in %s seconds", f"{time.time() - now:0.4f}")
 
         # Loading all the initial data of configuration
         self.main_model.prepare_data(self.main_view)
 
         self.set_up_view_presenter_connection()
-        logger.info("Selected context: %s", self.main_model.selected_context)
+
         # Loading the first context
         self.populate_hemispheres()
-        self.main_view.contextDisplay.setText(main_presenter.get_context_string())
-        logger.info("Selected context: %s", self.main_model.selected_context)
+        self.main_view.contextDisplay.setText(str(self.main_model.selected_context))
+
         super().__init__()
 
     def get_model_view_presenter(self):
@@ -70,40 +76,31 @@ class MainPresenter(
 
         """
         main_view = self.main_view
-        main_presenter = self
 
         # Connecting the selects of hemisphere, zone, easting, northing and context
         # with their handlers
-        main_view.hemisphere_cb.currentIndexChanged.connect(
-            main_presenter.on_hemisphere_change
-        )
-        main_view.zone_cb.currentIndexChanged.connect(main_presenter.on_zone_change)
-        main_view.easting_cb.currentIndexChanged.connect(
-            main_presenter.on_easting_change
-        )
-        main_view.northing_cb.currentIndexChanged.connect(
-            main_presenter.on_northing_change
-        )
+        main_view.hemisphere_cb.currentIndexChanged.connect(self.on_hemisphere_change)
+        main_view.zone_cb.currentIndexChanged.connect(self.on_zone_change)
+        main_view.easting_cb.currentIndexChanged.connect(self.on_easting_change)
+        main_view.northing_cb.currentIndexChanged.connect(self.on_northing_change)
         # main_view.context_cb.currentIndexChanged.connect(main_presenter.set_filter)
-        main_view.context_cb.currentIndexChanged.connect(
-            main_presenter.on_context_change
-        )
+        main_view.context_cb.currentIndexChanged.connect(self.on_context_change)
 
         # Connecting the select list of of finds with its handler
-        main_view.finds_list.currentItemChanged.connect(main_presenter.on_select_find)
+        main_view.finds_list.currentItemChanged.connect(self.on_select_find)
 
         # Connecting the batch and find filters's four toggles to their handlers
-        main_view.batch_start.valueChanged.connect(main_presenter.batch_start_change)
-        main_view.batch_end.valueChanged.connect(main_presenter.batch_end_change)
-        main_view.find_start.valueChanged.connect(main_presenter.find_start_change)
-        main_view.find_end.valueChanged.connect(main_presenter.find_end_change)
+        main_view.batch_start.valueChanged.connect(self.batch_start_change)
+        main_view.batch_end.valueChanged.connect(self.batch_end_change)
+        main_view.find_start.valueChanged.connect(self.find_start_change)
+        main_view.find_end.valueChanged.connect(self.find_end_change)
 
         # Connecting the button to the function that load the images and 3d models
-        main_view.loadAll.clicked.connect(main_presenter.load_images_plys)
+        main_view.loadAll.clicked.connect(self.load_images_plys)
 
         # Connecting the buttons that remove and update match to their handlers
-        main_view.update_button.clicked.connect(main_presenter.add_match)
-        main_view.remove_button.clicked.connect(main_presenter.remove_match)
+        main_view.update_button.clicked.connect(self.add_match)
+        main_view.remove_button.clicked.connect(self.remove_match)
 
         # Connect events for when the user selects a model
         # main_view.sorted_model_list.selectionModel().currentChanged.connect(
@@ -231,11 +228,11 @@ class MainPresenter(
             main_presenter.populate_contexts()
 
     def on_context_change(self):
-        main_model, main_view, _ = self.get_model_view_presenter()
-        new_index = main_view.context_cb.currentIndex()
-        if new_index != main_model.selected_context_idx:
-            main_model.set_context_index(new_index)
-            main_view.contextDisplay.setText(self.get_context_string())
+        """This function is called when the user changes the context select"""
+        new_index = self.main_view.context_cb.currentIndex()
+        if new_index != self.main_model.selected_context_idx:
+            self.main_model.set_context_index(new_index)
+            self.main_view.contextDisplay.setText(self.get_context_string())
             self.set_filter()
 
     def on_select_find(self, selected_item):
@@ -243,7 +240,7 @@ class MainPresenter(
         load the sorted 3d models.
 
         Args:
-            selected_item (_type_): _description_
+            selected_item (QListWidgetItem): The selected item in the finds_list
         """
         # Set the currently selected item
 
@@ -253,7 +250,7 @@ class MainPresenter(
         # according to her access rights.
         main_view = self.main_view
         main_model = self.main_model
-        logger.info("Selected item: %s", selected_item)
+        logger.info("Selected item: %s type: %s", selected_item, type(selected_item))
         try:
             find_num = int(selected_item.text())
             logger.info("Selected find: %s", find_num)
@@ -265,11 +262,6 @@ class MainPresenter(
         main_model.set_selected_find_by_number(find_num)
         selected_find = main_model.selected_find
         main_view.selected_find_widget = selected_item.text()
-
-        # Set photo directory of the current selected find
-        photos_dir = selected_find.photos_path()
-
-        main_view.path_2d_picture = photos_dir
 
         main_view.display_find_photo("front", selected_find.photo_path("front"))
         main_view.display_find_photo("back", selected_find.photo_path("back"))

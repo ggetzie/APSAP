@@ -11,13 +11,12 @@ from model.models import (
     SpatialContext,
     A3DModel,
     ObjectFind,
-    parse_context_string,
-    InvalidSpatialContextString,
 )
 
 logger = logging.getLogger(__name__)
 
 
+# initial_context="N-38-478130-4419430-109"
 class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
     """The MainModel contains data-related libraries and functions, imported from various mixins.
 
@@ -32,7 +31,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         opens a 3d model, fixes it, then save it to another place.
     """
 
-    def __init__(self, initial_context="N-38-478130-4419430-109"):
+    def __init__(self):
         super().__init__()
 
         self.object_find_to_a3dmodel = {}  # mapping from object find to a3dmodel
@@ -51,33 +50,16 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_easting_idx: int = None
         self.zone_list: List[str] = []
         self.selected_zone_idx = None
-        self.hemisphere_list = []
-        self.selected_hemisphere_idx = None
-        self.set_context_to_str(initial_context)
+        # self.set_context_to_str(initial_context)
 
         ## calling set_hemispheres_index() will cascade through zone/easting/northing/context
         ## to get the available options and set default index to 0 for each
+        self.hemisphere_list = self.get_hemispheres()
+        self.selected_hemisphere_idx = 0
+        self.set_hemispheres_index(self.hemisphere_list.index("N"))
 
     def select_find(self, find_number):
         self.selected_find_number = find_number
-
-    def set_context_to_str(self, context_str: str):
-        try:
-            h, z, e, n, c = parse_context_string(context_str)
-            self.hemisphere_list = self.get_hemispheres()
-            self.selected_hemisphere_idx = self.hemisphere_list.index(h)
-            self.zone_list = self.get_zones(h)
-            self.selected_zone_idx = self.zone_list.index(z)
-            self.easting_list = self.get_eastings(h, z)
-            self.selected_easting_idx = self.easting_list.index(e)
-            self.northing_list = self.get_northings(h, z, e)
-            northing_idx = self.northing_list.index(n)
-            self.set_northing_index(northing_idx)
-            context_numbers = [c.context_number for c in self.context_list]
-            self.set_context_index(context_numbers.index(int(c)))
-
-        except InvalidSpatialContextString:
-            logger.error("Invalid context string: %s", context_str)
 
     @property
     def selected_find(self):
@@ -108,6 +90,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_hemispheres_index(self, idx):
+        logger.info("Setting hemisphere index to %s", idx)
         self.selected_hemisphere_idx = idx
         self.zone_list = self.get_zones(
             self.hemisphere_list[self.selected_hemisphere_idx]
@@ -123,8 +106,8 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_zone_index(self, idx):
+        logger.info("Setting zone index to %s", idx)
         self.selected_zone_idx = idx
-
         self.easting_list = self.get_eastings(
             self.hemisphere_list[self.selected_hemisphere_idx],
             self.zone_list[self.selected_zone_idx],
@@ -136,8 +119,8 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         return [d.name for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()]
 
     def set_easting_index(self, idx):
+        logger.info("Setting easting index to %s", idx)
         self.selected_easting_idx = idx
-
         self.northing_list = self.get_northings(
             self.hemisphere_list[self.selected_hemisphere_idx],
             self.zone_list[self.selected_zone_idx],
@@ -152,6 +135,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ]
 
     def set_northing_index(self, idx):
+        logger.info("Setting northing index to %s", idx)
         self.selected_northing_idx = idx
         self.context_list = [
             SpatialContext(

@@ -47,9 +47,8 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
 
         ## calling set_hemispheres_index() will cascade through zone/easting/northing/context
         ## to get the available options and set default index to 0 for each
-        self.hemisphere_list: List[str] = self.get_hemispheres()
-        self.selected_hemisphere_idx = 0
-        self.set_hemispheres_index(self.hemisphere_list.index("N"))
+        self.hemisphere_list: List[str] = []
+        self.selected_hemisphere_idx = None
 
     def select_find(self, find_number: int):
         self.selected_find_number = find_number
@@ -82,84 +81,107 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
             key=attrgetter("batch_year", "batch_number", "batch_piece"),
         )
 
-    def get_hemispheres(self) -> List[str]:
-        return [
-            d.name
-            for d in BASE_DATA_DIR.iterdir()
-            if d.is_dir() and d.name in ["N", "S"]
-        ]
+    def get_hemispheres(self):
+        self.hemisphere_list = sorted(
+            [
+                d.name
+                for d in BASE_DATA_DIR.iterdir()
+                if d.is_dir() and d.name in ["N", "S"]
+            ]
+        )
 
     def set_hemispheres_index(self, idx):
-
         self.selected_hemisphere_idx = idx
-        self.zone_list = self.get_zones(
-            self.hemisphere_list[self.selected_hemisphere_idx]
-        )
-        self.set_zone_index(0)
 
-    def get_zones(self, hemisphere) -> List[str]:
+    def get_zones(self):
+        try:
+            hemisphere = self.hemisphere_list[self.selected_hemisphere_idx]
+        except IndexError:
+            self.zone_list = []
+            return
         hemisphere_dir = BASE_DATA_DIR / hemisphere
-        return [
-            d.name
-            for d in hemisphere_dir.iterdir()
-            if d.is_dir() and d.name.isnumeric()
-        ]
+        self.zone_list = sorted(
+            [
+                d.name
+                for d in hemisphere_dir.iterdir()
+                if d.is_dir() and d.name.isnumeric()
+            ],
+            key=int,
+        )
 
     def set_zone_index(self, idx):
         self.selected_zone_idx = idx
-        self.easting_list = self.get_eastings(
-            self.hemisphere_list[self.selected_hemisphere_idx],
-            self.zone_list[self.selected_zone_idx],
-        )
-        self.set_easting_index(0)
 
-    def get_eastings(self, hemisphere, zone) -> List[str]:
+    def get_eastings(self):
+        try:
+            hemisphere = self.hemisphere_list[self.selected_hemisphere_idx]
+            zone = self.zone_list[self.selected_zone_idx]
+        except IndexError:
+            self.easting_list = []
+            return
+
         zone_dir = BASE_DATA_DIR / hemisphere / zone
-        return [d.name for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()]
+        self.easting_list = sorted(
+            [d.name for d in zone_dir.iterdir() if d.is_dir() and d.name.isnumeric()],
+            key=int,
+        )
 
     def set_easting_index(self, idx):
         self.selected_easting_idx = idx
-        self.northing_list = self.get_northings(
-            self.hemisphere_list[self.selected_hemisphere_idx],
-            self.zone_list[self.selected_zone_idx],
-            self.easting_list[self.selected_easting_idx],
-        )
-        self.set_northing_index(0)
 
-    def get_northings(self, hemisphere, zone, easting) -> List[str]:
+    def get_northings(self) -> List[str]:
+        try:
+            hemisphere = self.hemisphere_list[self.selected_hemisphere_idx]
+            zone = self.zone_list[self.selected_zone_idx]
+            easting = self.easting_list[self.selected_easting_idx]
+        except IndexError:
+            self.northing_list = []
+            return
+
         easting_dir = BASE_DATA_DIR / hemisphere / zone / easting
-        return [
-            d.name for d in easting_dir.iterdir() if d.is_dir() and d.name.isnumeric()
-        ]
+        self.northing_list = sorted(
+            [
+                d.name
+                for d in easting_dir.iterdir()
+                if d.is_dir() and d.name.isnumeric()
+            ],
+            key=int,
+        )
 
     def set_northing_index(self, idx):
         self.selected_northing_idx = idx
-        self.context_list = [
-            SpatialContext(
-                utm_hemisphere=self.hemisphere_list[self.selected_hemisphere_idx],
-                utm_zone=int(self.zone_list[self.selected_zone_idx]),
-                area_utm_easting_meters=int(
-                    self.easting_list[self.selected_easting_idx]
-                ),
-                area_utm_northing_meters=int(
-                    self.northing_list[self.selected_northing_idx]
-                ),
-                context_number=int(d.name),
-            )
-            for d in (
-                BASE_DATA_DIR
-                / self.hemisphere_list[self.selected_hemisphere_idx]
-                / self.zone_list[self.selected_zone_idx]
-                / self.easting_list[self.selected_easting_idx]
-                / self.northing_list[self.selected_northing_idx]
-            ).iterdir()
-            if d.is_dir() and d.name.isnumeric()
-        ]
-        self.context_list.sort(key=attrgetter("context_number"))
-        self.set_context_index(0)
+
+    def get_contexts(self):
+        try:
+            hemisphere = self.hemisphere_list[self.selected_hemisphere_idx]
+            zone = self.zone_list[self.selected_zone_idx]
+            easting = self.easting_list[self.selected_easting_idx]
+            northing = self.northing_list[self.selected_northing_idx]
+        except IndexError:
+            self.context_list = []
+            return
+
+        self.context_list = sorted(
+            [
+                SpatialContext(
+                    utm_hemisphere=hemisphere,
+                    utm_zone=int(zone),
+                    area_utm_easting_meters=int(easting),
+                    area_utm_northing_meters=int(northing),
+                    context_number=int(d.name),
+                )
+                for d in (
+                    BASE_DATA_DIR / hemisphere / zone / easting / northing
+                ).iterdir()
+                if d.is_dir() and d.name.isnumeric()
+            ],
+            key=attrgetter("context_number"),
+        )
 
     def set_context_index(self, idx):
         self.selected_context_idx = idx
+
+    def load_finds(self):
         self.finds_dict = {
             f.find_number: f
             for f in self.selected_context.list_finds(self.conn.cursor())
@@ -168,13 +190,13 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
             list(self.finds_dict.keys())[0] if self.finds_dict else None
         )
 
+    def load_a3dmodels(self):
         self.a3dmodels_dict = {str(m): m for m in self.selected_context.list_models()}
-
         self.selected_a3dmodel_str = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
         for m in self.a3dmodels_list:
-            m.matched_finds = m.get_matches(self.conn.cursor())
+            m.matched_finds = m.get_matches(self.conn.cursor)
 
     def get_all_matches(self):
         sc = self.selected_context

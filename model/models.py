@@ -74,6 +74,34 @@ class SpatialContext:
     def models_folder(self) -> pathlib.Path:
         return self.path / "finds" / "3dbatch"
 
+    def list_find_dirs(self):
+        return sorted(
+            [
+                d.name
+                for d in self.finds_folder.iterdir()
+                if d.is_dir() and d.name.isnumeric()
+            ],
+            key=int,
+        )
+
+    def list_batch_years(self):
+        return sorted(
+            [
+                int(d.name)
+                for d in self.models_folder.iterdir()
+                if d.is_dir() and re.match(r"\d{4}", d.name)
+            ]
+        )
+
+    def list_batch_numbers(self, year: str) -> List[str]:
+        return sorted(
+            [
+                int(d.name.split("_")[1])
+                for d in (self.models_folder / year).iterdir()
+                if d.is_dir() and re.match(r"^batch_\d{3}$", d.name)
+            ]
+        )
+
     def list_finds(self, cursor, min_find=0, max_find=9999):
         query = """
         SELECT find_number, material, category, "3d_batch_year", "3d_batch_number", "3d_batch_piece"

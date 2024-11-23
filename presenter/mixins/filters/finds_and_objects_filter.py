@@ -16,12 +16,10 @@ class FindsAndObjectsFilter:
         subfolders(which have values like 2022, 2021, 2023)"""
 
         main_model, main_view, _ = self.get_model_view_presenter()
-        years = {
-            m.batch_year for m in main_model.a3dmodels_list
-        }  # set of unique batch_years
-
-        # if there is not a single year folder in the current path, we disable the filter and return
-        if not years:
+        try:
+            selected_context = main_model.selected_context
+            years = selected_context.list_batch_years()
+        except AttributeError:
             main_view.year.setMinimum(0)
             main_view.year.setMaximum(0)
             main_view.year.setReadOnly(True)

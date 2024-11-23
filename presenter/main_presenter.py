@@ -129,56 +129,54 @@ class MainPresenter(
 
     def populate_hemispheres(self):
         """Set the select options of hemisphere as the hemispheres in the root folder"""
-        main_model, main_view, _ = self.get_model_view_presenter()
-        main_view.hemisphere_cb.clear()
 
-        options = main_model.hemisphere_list
-        main_view.hemisphere_cb.addItems(options)
-        # main_view.hemisphere_cb.setCurrentIndex(main_model.selected_hemisphere_idx)
-        main_view.hemisphere_cb.setEnabled(len(options) > 1)
-        self.populate_zones()
+        self.main_view.hemisphere_cb.clear()
+        self.main_model.get_hemispheres()
+        options = self.main_model.hemisphere_list
+        self.main_view.hemisphere_cb.addItems(options)
+        self.main_model.set_hemispheres_index(options.index("N"))
+        # setting the index for the hemisphere selector will trigger
+        # on_hemisphere_change, which will populate the zones and so on
+        self.main_view.hemisphere_cb.setCurrentIndex(
+            self.main_model.selected_hemisphere_idx
+        )
+        self.main_view.hemisphere_cb.setEnabled(len(options) > 1)
 
     def populate_zones(self):
         """Set the select options of zones as the zones under the current hemisphere"""
-        main_model, main_view, _ = self.get_model_view_presenter()
-        options = main_model.zone_list
-        main_view.zone_cb.clear()
-        main_view.zone_cb.addItems(options)
-        # main_view.zone_cb.setCurrentIndex(main_model.selected_zone_idx)
-        main_view.zone_cb.setEnabled(len(options) > 1)
-        self.populate_eastings()
+        self.main_model.get_zones()
+        options = self.main_model.zone_list
+        self.main_view.zone_cb.clear()
+        self.main_view.zone_cb.addItems(options)
+        self.main_view.zone_cb.setEnabled(len(options) > 1)
 
     def populate_eastings(self):
         """Set the select options of eastings as the eastings under the current zones"""
-        main_model, main_view, _ = self.get_model_view_presenter()
-        options = main_model.easting_list
-        main_view.easting_cb.clear()
-        main_view.easting_cb.addItems(options)
-        # main_view.easting_cb.setCurrentIndex(main_model.selected_easting_idx)
-        main_view.easting_cb.setEnabled(len(options) > 1)
-        self.populate_northings()
+        self.main_model.get_eastings()
+        options = self.main_model.easting_list
+        self.main_view.easting_cb.clear()
+        self.main_view.easting_cb.addItems(options)
+        self.main_view.easting_cb.setEnabled(len(options) > 1)
 
     def populate_northings(self):
         """Set the select options of northings as the northings under the current eastings"""
-        main_model, main_view, _ = self.get_model_view_presenter()
-        options = main_model.northing_list
-        main_view.northing_cb.clear()
-        main_view.northing_cb.addItems(options)
-        # main_view.northing_cb.setCurrentIndex(main_model.selected_northing_idx)
-        main_view.northing_cb.setEnabled(len(options) > 1)
-        self.populate_contexts()
+        self.main_model.get_northings()
+        options = self.main_model.northing_list
+        self.main_view.northing_cb.clear()
+        self.main_view.northing_cb.addItems(options)
+        self.main_view.northing_cb.setEnabled(len(options) > 1)
 
     def populate_contexts(self):
         """Set the select options of contexts as the contexts under the current northing"""
-        main_model, main_view, _ = self.get_model_view_presenter()
-        options = [str(sc.context_number) for sc in main_model.context_list]
-        main_view.context_cb.clear()
-        main_view.context_cb.addItems(options)
+        self.main_model.get_contexts()
+        options = [str(sc.context_number) for sc in self.main_model.context_list]
+        self.main_view.context_cb.clear()
+        self.main_view.context_cb.addItems(options)
         # main_view.context_cb.setCurrentIndex(main_model.selected_context_idx)
-        main_view.context_cb.setEnabled(len(options) > 1)
+        self.main_view.context_cb.setEnabled(len(options) > 1)
 
     def populate_finds(self):
-        main_model, main_view, _ = self.get_model_view_presenter()
+        main_model, main_view = self.main_model, self.main_view
         self.clear_selected_find()
         self.block_signals(True)
         min_find = int(main_view.find_start.value())
@@ -194,6 +192,7 @@ class MainPresenter(
             if find.is_matched:
                 item.setForeground(QColor("red"))
             main_view.finds_list.addItem(item)
+        self.block_signals(False)
 
     ##########################################################################
     #  onChange: Functions called in response to the user changing a select  #
@@ -205,7 +204,7 @@ class MainPresenter(
         main_model, main_view = self.main_model, self.main_view
         new_index = main_view.hemisphere_cb.currentIndex()
         if new_index != main_model.selected_hemisphere_idx:
-            main_model.set_hemisphere_index(new_index)
+            main_model.set_hemispheres_index(new_index)
             self.populate_zones()
 
     def on_zone_change(self):

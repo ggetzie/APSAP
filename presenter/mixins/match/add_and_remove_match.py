@@ -89,7 +89,7 @@ class AddAndRemoveMatchMixin:
 
         # We go through the unsorted model list and if it is the previous matched item,
         # we blacken it.
-        mod = main_view.modelList.model()
+        mod = main_view.unsorted_model_list.model()
         for i in range(mod.rowCount()):
             for j in range(mod.item(i).rowCount()):
                 for k in range(mod.item(i).child(j).rowCount()):

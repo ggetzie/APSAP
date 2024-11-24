@@ -100,8 +100,10 @@ class MainPresenter(
         main_view.update_button.clicked.connect(self.on_update_clicked)
         main_view.remove_button.clicked.connect(self.remove_match)
 
-        main_view.initialize_unsorted_models()
-        main_view.modelList.selectionModel().currentChanged.connect(
+        main_view.unsorted_model_list.selectionModel().currentChanged.connect(
+            self.change_3d_model
+        )
+        main_view.sorted_model_list.selectionModel().currentChanged.connect(
             self.change_3d_model
         )
 

@@ -38,12 +38,15 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         """
         super().__init__()
         self.finds_list: QListWidget = None
-        self.modelList: QTreeView = None
+        self.unsorted_model_list: QTreeView = None
         self.sorted_model_list: QTreeView = None
+
         self.current_pcd = None
         logger.info("Loading MainWindow.ui")
         now = time.time()
         uic.loadUi("view/ui_files/MainWindow.ui", self)
+        self.initialize_sorted_models()
+        self.initialize_unsorted_models()
         logger.info("MainWindow.ui loaded in %s seconds", (f"{time.time() - now:0.4f}"))
         now = time.time()
         logger.info("Setting up ply window")
@@ -147,7 +150,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self, batch_year: int, batch_number: int, batch_piece: int, color: str
     ):
         # set the piece number to color in the tree view under batch_year -> batch_number
-        q_model = self.modelList.model()
+        q_model = self.unsorted_model_list.model()
         for i in range(q_model.rowCount()):
             for j in range(q_model.item(i).rowCount()):
                 for k in range(q_model.item(i).child(j).rowCount()):
@@ -193,15 +196,21 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
     def initialize_unsorted_models(self):
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Models"])
-        self.modelList.setModel(model)
+        self.unsorted_model_list.setModel(model)
 
     def clear_unsorted_models(self):
-        """This function ensures that there is a empty modelList
-        in the view
-        """
+        self.unsorted_model_list.selectionModel().model().removeRows(
+            0, self.unsorted_model_list.selectionModel().model().rowCount()
+        )
 
-        self.modelList.selectionModel().model().removeRows(
-            0, self.modelList.selectionModel().model().rowCount()
+    def initialize_sorted_models(self):
+        model = QStandardItemModel(self)
+        model.setHorizontalHeaderLabels(["Models"])
+        self.sorted_model_list.setModel(model)
+
+    def clear_sorted_models(self):
+        self.sorted_model_list.selectionModel().model().removeRows(
+            0, self.sorted_model_list.selectionModel().model().rowCount()
         )
 
     def clear_finds_list(self):

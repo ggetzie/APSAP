@@ -501,7 +501,7 @@
             </font>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="model_list_tab">
             <attribute name="title">
@@ -509,7 +509,7 @@
             </attribute>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QTreeView" name="modelList">
+              <widget class="QTreeView" name="unsorted_model_list">
                <property name="font">
                 <font>
                  <pointsize>9</pointsize>

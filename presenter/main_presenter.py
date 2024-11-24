@@ -21,8 +21,6 @@ from presenter.mixins.measure_pixels_data.main_measure_pixels_data import (
     MeasurePixelsDataMixin,
 )
 
-# from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
-
 logger = logging.getLogger(__name__)
 
 
@@ -96,7 +94,6 @@ class MainPresenter(
         main_view.find_end.valueChanged.connect(self.on_find_end_change)
 
         # Connecting the button to the function that load the images and 3d models
-        # main_view.loadAll.clicked.connect(self.load_images_plys)
         main_view.loadAll.clicked.connect(self.on_load_all_clicked)
 
         # Connecting the buttons that remove and update match to their handlers

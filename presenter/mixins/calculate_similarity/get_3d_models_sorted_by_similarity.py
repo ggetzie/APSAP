@@ -33,12 +33,7 @@ class Get3dModelSortedBySimilarityMixin:
         # The list will be append with [similarity_mean, batch_num, piece_num, year] of
         # all 3d models we want to compare with
         similarity_scores = []
-
-        # A regular expression with which that we search all relevant 3d models.
-        # model_paths_re = str(
-        #     main_presenter.get_context_dir()
-        #     / main_model.path_variables["MODELS_FILES_DIR"]
-        # )
+        
 
         min_batch_number = int(main_view.batch_start.value())
         max_batch_number = int(main_view.batch_end.value())

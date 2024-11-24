@@ -178,14 +178,15 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.new_batch.setText("")
         self.new_piece.setText("")
         self.new_year.setText("")
-        self.contextDisplay.setText(self.get_context_string())
+        self.contextDisplay.setText("")
         if hasattr(self, "current_pcd"):
             self.ply_window.remove_geometry(getattr(self, "current_pcd"))
             setattr(self, "current_pcd", None)
 
         model = QStandardItemModel(self)
         self.sorted_model_list.setModel(model)
-        self.reset_ply_selection_model()
+        self.clear_unsorted_models()
+        # self.reset_ply_selection_model()
         self.finds_list.setCurrentItem(None)
         self.finds_list.clear()
 
@@ -202,3 +203,6 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.modelList.selectionModel().model().removeRows(
             0, self.modelList.selectionModel().model().rowCount()
         )
+
+    def clear_finds_list(self):
+        self.finds_list.clear()

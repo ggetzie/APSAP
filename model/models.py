@@ -75,6 +75,8 @@ class SpatialContext:
         return self.path / "finds" / "3dbatch"
 
     def list_find_dirs(self):
+        if not self.finds_folder.exists():
+            return []
         return sorted(
             [
                 d.name
@@ -85,6 +87,8 @@ class SpatialContext:
         )
 
     def list_batch_years(self):
+        if not self.models_folder.exists():
+            return []
         return sorted(
             [
                 int(d.name)
@@ -94,10 +98,13 @@ class SpatialContext:
         )
 
     def list_batch_numbers(self, year: str) -> List[str]:
+        folder = self.models_folder / year
+        if not folder.exists():
+            return []
         return sorted(
             [
                 int(d.name.split("_")[1])
-                for d in (self.models_folder / year).iterdir()
+                for d in folder.iterdir()
                 if d.is_dir() and re.match(r"^batch_\d{3}$", d.name)
             ]
         )

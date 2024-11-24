@@ -196,7 +196,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
         for m in self.a3dmodels_list:
-            m.matched_finds = m.get_matches(self.conn.cursor)
+            m.matched_finds = m.get_matches(self.conn.cursor())
 
     def get_all_matches(self):
         sc = self.selected_context

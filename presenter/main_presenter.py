@@ -20,7 +20,8 @@ from presenter.mixins.calculate_similarity.calculate_individual_similarities imp
 from presenter.mixins.measure_pixels_data.main_measure_pixels_data import (
     MeasurePixelsDataMixin,
 )
-from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
+
+# from presenter.mixins.filters.finds_and_objects_filter import FindsAndObjectsFilter
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,6 @@ class MainPresenter(
     CalculateIndividualSimilaritiesMixin,
     LoadDataMixin,
     AddAndRemoveMatchMixin,
-    FindsAndObjectsFilter,
 ):
     """This main_presenter inherits all the mixins' methods to handle the interactive
     behaviors of the applications, such that when you click on a button or choose an
@@ -90,13 +90,14 @@ class MainPresenter(
         main_view.finds_list.currentItemChanged.connect(self.on_select_find)
 
         # Connecting the batch and find filters's four toggles to their handlers
-        main_view.batch_start.valueChanged.connect(self.batch_start_change)
-        main_view.batch_end.valueChanged.connect(self.batch_end_change)
-        main_view.find_start.valueChanged.connect(self.find_start_change)
-        main_view.find_end.valueChanged.connect(self.find_end_change)
+        main_view.batch_start.valueChanged.connect(self.on_batch_start_change)
+        main_view.batch_end.valueChanged.connect(self.on_batch_end_change)
+        main_view.find_start.valueChanged.connect(self.on_find_start_change)
+        main_view.find_end.valueChanged.connect(self.on_find_end_change)
 
         # Connecting the button to the function that load the images and 3d models
-        main_view.loadAll.clicked.connect(self.load_images_plys)
+        # main_view.loadAll.clicked.connect(self.load_images_plys)
+        main_view.loadAll.clicked.connect(self.on_load_all_clicked)
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(self.on_update_clicked)
@@ -178,6 +179,8 @@ class MainPresenter(
     def populate_finds(self):
         main_model, main_view = self.main_model, self.main_view
         self.clear_selected_find()
+        main_view.clear_finds_list()
+
         self.block_signals(True)
         min_find = int(main_view.find_start.value())
         max_find = int(main_view.find_end.value())
@@ -237,8 +240,9 @@ class MainPresenter(
         new_index = main_view.context_cb.currentIndex()
         if new_index != self.main_model.selected_context_idx:
             main_model.set_context_index(new_index)
+            main_view.clear_interface()
             main_view.contextDisplay.setText(str(main_model.selected_context))
-            self.set_filter()
+            self.set_filters()
 
     def on_select_find(self, selected_item):
         """This function would try to load the two images into the GUI and after finishing its operations,
@@ -410,3 +414,63 @@ class MainPresenter(
         main_view.current_year.setText(new_year)
         main_view.current_batch.setText(new_batch)
         main_view.current_piece.setText(new_piece)
+
+    def set_filters(self):
+        selected_context = self.main_model.selected_context
+        if not selected_context:
+            logger.warning("Tried setting filters without a selected context")
+            return
+
+        # set the find numbers filter
+        find_numbers = [int(f) for f in selected_context.list_find_dirs()] or [0]
+        self.main_view.find_start.setMinimum(min(find_numbers))
+        self.main_view.find_start.setMaximum(max(find_numbers))
+        self.main_view.find_start.setValue(min(find_numbers))
+        self.main_view.find_end.setMinimum(min(find_numbers))
+        self.main_view.find_end.setMaximum(max(find_numbers))
+        self.main_view.find_end.setValue(max(find_numbers))
+
+        # set the years filter. years will be an empty list if there are no batch folders
+        years = selected_context.list_batch_years() or [0]
+        self.main_view.year.setMinimum(min(years))
+        self.main_view.year.setMaximum(max(years))
+        if years != [0]:
+            self.main_view.year.setValue(min(years))
+        self.main_view.year.setReadOnly(years == [0])
+        self.on_year_change()
+
+    def on_year_change(self):
+        selected_context = self.main_model.selected_context
+        if not selected_context:
+            logger.warning("Tried setting batch filters without a selected context")
+            return
+        year = self.main_view.year.value()
+        batch_numbers = selected_context.list_batch_numbers(str(year)) or [0]
+        self.main_view.batch_start.setMinimum(min(batch_numbers))
+        self.main_view.batch_start.setMaximum(max(batch_numbers))
+        self.main_view.batch_start.setValue(min(batch_numbers))
+        self.main_view.batch_end.setMinimum(min(batch_numbers))
+        self.main_view.batch_end.setMaximum(max(batch_numbers))
+        self.main_view.batch_end.setValue(max(batch_numbers))
+
+    def on_batch_start_change(self):
+        self.main_view.batch_end.setMinimum(self.main_view.batch_start.value())
+
+    def on_batch_end_change(self):
+        self.main_view.batch_start.setMaximum(self.main_view.batch_end.value())
+
+    def on_find_start_change(self):
+        self.main_view.find_end.setMinimum(self.main_view.find_start.value())
+
+    def on_find_end_change(self):
+        self.main_view.find_start.setMaximum(self.main_view.find_end.value())
+
+    def on_load_all_clicked(self):
+        selected_context = self.main_model.selected_context
+        if not selected_context:
+            logger.error("Tried to load finds and models without context selected")
+            return
+        self.main_model.load_finds()
+        self.main_model.load_a3dmodels()
+        self.populate_finds()
+        self.populate_models()

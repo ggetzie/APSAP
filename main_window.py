@@ -39,21 +39,23 @@ def main():
     Path(log_folder).mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
-        level=args.log_level,
+        level=LOG_LEVELS[args.log_level],
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.FileHandler(log_path), logging.StreamHandler()],
     )
+
+    logger = logging.getLogger(__name__)
 
     # Setting the basic style
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
     # Run the model, view and presenter one by one and count the time it takes to load each of them.
-    logging.info("Starting up...")
+    logger.info("Starting up...")
     now = time.time()
 
     presenter = MainPresenter()
-    logging.info("Started up in %s seconds", f"{time.time() - now:0.4f}")
+    logger.info("Started up in %s seconds", f"{time.time() - now:0.4f}")
 
     # Show the GUI application
     presenter.main_view.show()

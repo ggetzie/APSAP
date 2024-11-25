@@ -98,7 +98,7 @@ class MainPresenter(
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(self.on_update_clicked)
-        main_view.remove_button.clicked.connect(self.remove_match)
+        main_view.remove_button.clicked.connect(self.on_remove_clicked)
 
         main_view.unsorted_model_list.selectionModel().currentChanged.connect(
             self.change_3d_model
@@ -304,6 +304,11 @@ class MainPresenter(
         self.main_model.selected_find_number = None
         self.main_view.clear_find_info()
 
+    ##########################################################################
+    #  on_clicked: Functions called in response to the user clicking a       #
+    #  button.                                                               #
+    ##########################################################################
+
     def on_update_clicked(self):
         """This function is called when the user clicks on the update button"""
         selected_find = self.main_model.selected_find
@@ -341,7 +346,7 @@ class MainPresenter(
 
         # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
         if not e.text() == "OK":
-            logging.info("The user did not confirm the match: %s", e.text())
+            logger.debug("The user did not confirm the match: %s", e.text())
             return
         selected_find = main_model.selected_find
         old_a3dmodel = main_model.a3dmodels_dict.get(
@@ -350,7 +355,7 @@ class MainPresenter(
         selected_a3dmodel = main_model.selected_a3dmodel
         old_find_number = None
         if selected_find is None or selected_a3dmodel is None:
-            logging.error("No find or 3d model selected")
+            logger.error("No find or 3d model selected")
             return
 
         ##Updating the database
@@ -358,11 +363,11 @@ class MainPresenter(
             old_find_number = selected_a3dmodel.matched_finds[0]
             success = main_model.clear_match_for_find(old_find_number)
             if not success:
-                logging.error("Failed to clear match for find %s", old_find_number)
+                logger.error("Failed to clear match for find %s", old_find_number)
 
         success = main_model.match_selected_find_with_selected_a3dmodel()
         if not success:
-            logging.error("There was an error updating the database")
+            logger.error("There was an error updating the database")
             return
 
         # Create the folder in which we will put the 3d models (a subfolder in the find folder)
@@ -375,9 +380,9 @@ class MainPresenter(
         mesh_destination = models_dir / "a_0_3_mesh.ply"
 
         # We copy the files to the destination
-        logging.info("Copying file from %s to %s", orig_path, original_destination)
+        logger.info("Copying file from %s to %s", orig_path, original_destination)
         main_model.fix_and_copy_ply(str(orig_path), str(original_destination))
-        logging.info("Copying file from %s to %s", mesh_path, mesh_destination)
+        logger.info("Copying file from %s to %s", mesh_path, mesh_destination)
         main_model.fix_and_copy_ply(str(mesh_path), str(mesh_destination))
 
         # We update the GUI to show that the find is matched to the 3d model
@@ -413,6 +418,51 @@ class MainPresenter(
         main_view.current_year.setText(new_year)
         main_view.current_batch.setText(new_batch)
         main_view.current_piece.setText(new_piece)
+
+    def on_remove_clicked(self):
+        """This function is called when the user clicks on the remove button.
+        Confirm that they really want to remove the match"""
+        selected_find = self.main_model.selected_find
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+
+        if selected_find is None:
+            self.main_view.display_error("Please select a find first")
+            return
+        if selected_a3dmodel is None:
+            self.main_view.display_error("Please select a 3d model first")
+            return
+
+        message = f"Remove match between find ({selected_find}) and 3d model ({selected_a3dmodel})?"
+
+        self.main_view.confirm(message, self.on_remove_confirmed)
+
+    def on_remove_confirmed(self, e):
+        if not e.text() == "OK":
+            logger.debug("The user did not confirm the match: %s", e.text())
+            return
+        selected_find = self.main_model.selected_find
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+        if not selected_find:
+            logger.error("No find selected")
+            return
+        # remove the match in the model
+        self.main_model.clear_match_for_find(selected_find.find_number)
+
+        # update the GUI
+        self.main_view.set_find_color(selected_find.find_number, "black")
+        self.main_view.set_unsorted_model_color(
+            selected_a3dmodel.batch_year,
+            selected_a3dmodel.batch_number,
+            selected_a3dmodel.batch_piece,
+            "black",
+        )
+        self.main_view.set_sorted_model_color(
+            str(selected_a3dmodel),
+            "black",
+        )
+        self.main_view.current_year.setText("NS")
+        self.main_view.current_batch.setText("NS")
+        self.main_view.current_piece.setText("NS")
 
     def set_filters(self):
         selected_context = self.main_model.selected_context

@@ -1,15 +1,16 @@
 import sys
 import logging
 
+from PyQt5.QtCore import QCoreApplication
 
 from presenter.mixins.measure_pixels_data.measure_2d import Measure2DMixin
 from presenter.mixins.measure_pixels_data.measure_3d import Measure3dMixin
 from computation.nn_segmentation import MaskPredictor
 
-from PyQt5.QtCore import QCoreApplication
-
 
 sys.path.insert(0, "../../..")
+
+logger = logging.getLogger(__name__)
 
 
 class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
@@ -116,7 +117,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         # Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(a3dmodel.cache_key)
         if cache_result is not None and len(cache_result) == 7:
-            logging.info("Loading %s directly from library", a3dmodel)
+            logger.info("Loading %s directly from library", a3dmodel)
             return cache_result
 
         # In case it is not cached, we have to measure the pixels directly.
@@ -128,7 +129,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         )
 
         # Showing that we are measure the 3d models
-        logging.info(
+        logger.info(
             "Measuring 3d model: Year %s, Batch: %s, Piece: %s ", year, batch, piece
         )
         main_view.statusLabel.setText(

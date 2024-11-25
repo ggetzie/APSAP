@@ -367,6 +367,10 @@ class A3DModel:
     def is_matched(self):
         return len(self.matched_finds) > 0
 
+    @property
+    def cache_key(self) -> str:
+        return f"{self.spatial_context}-{self}"
+
     def get_folder(self):
         return (
             self.spatial_context.models_folder

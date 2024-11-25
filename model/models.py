@@ -253,8 +253,8 @@ class ObjectFind:
         self._batch_year = batch_year
         self._batch_number = batch_number
         self._batch_piece = batch_piece
-        logger.info("Matching %s to %s", self, self.get_match_str())
-        logger.info("Updating database")
+        logger.debug("Matching %s to %s", self, self.get_match_str())
+        logger.debug("Updating database")
         query = """
         UPDATE object.finds
         SET "3d_batch_year" = %s, "3d_batch_number" = %s, "3d_batch_piece" = %s
@@ -282,7 +282,7 @@ class ObjectFind:
                     self.find_number,
                 ),
             )
-            logger.info("Matched %s to %s", self, self.get_match_str())
+            logger.debug("Matched %s to %s", self, self.get_match_str())
             conn.commit()
         except psycopg2.Error as e:
             logger.error("Failed to match %s to %s", self, self.get_match_str())
@@ -294,7 +294,7 @@ class ObjectFind:
     def clear_match(self, cursor):
         if not self.is_matched:
             return
-        logger.info("Clearing match for %s", self)
+        logger.debug("Clearing match for %s", self)
         self._batch_number = None
         self._batch_piece = None
         self.set_match(cursor, self._batch_year, None, None)

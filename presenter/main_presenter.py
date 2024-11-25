@@ -258,10 +258,10 @@ class MainPresenter(
         # according to her access rights.
         main_view = self.main_view
         main_model = self.main_model
-        logger.info("Selected item: %s type: %s", selected_item, type(selected_item))
+        logger.debug("Selected item: %s type: %s", selected_item, type(selected_item))
         try:
             find_num = int(selected_item.text())
-            logger.info("Selected find: %s", find_num)
+            logger.debug("Selected find: %s", find_num)
 
         except AttributeError:
             main_view.clear_find_photos()

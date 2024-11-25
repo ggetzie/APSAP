@@ -30,7 +30,7 @@ class Load3dModelToWindowMixin:
             logger.error("The 3d model %s is not found", ply_str)
             return
         current_model_path = a3dmodel.get_file("sample")
-        logger.info("Current model path: %s", current_model_path)
+        logger.debug("Current model path: %s", current_model_path)
 
         # If the path exists, we try to read it and display it
         if current_model_path:

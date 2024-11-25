@@ -1,5 +1,6 @@
-import sys
+import argparse
 import logging
+import sys
 import time
 from pathlib import Path
 import getpass
@@ -9,9 +10,28 @@ from PyQt5.QtWidgets import QApplication
 
 from presenter.main_presenter import MainPresenter
 
+LOG_LEVELS = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "error": logging.ERROR,
+    "warning": logging.WARNING,
+    "critical": logging.CRITICAL,
+}
+
 
 def main():
     """Main function."""
+
+    # add a command line argument to set the log level
+    parser = argparse.ArgumentParser(description="Run the Sherds Match Assistance")
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        choices=LOG_LEVELS.keys(),
+        default="info",
+        help="Set the logging level",
+    )
+    args = parser.parse_args()
 
     # Setting the logger and logging file, and make sure logging information goes to both the file and
     log_folder = f"./logs/{getpass.getuser()}"
@@ -19,7 +39,7 @@ def main():
     Path(log_folder).mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
-        level=logging.INFO,
+        level=args.log_level,
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[logging.FileHandler(log_path), logging.StreamHandler()],
     )

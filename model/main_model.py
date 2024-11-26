@@ -8,6 +8,7 @@ from model.mixins.initial_load import InitialLoadMixin
 from model.mixins.copy_file import CopyFileMixin
 from model.constants import BASE_DATA_DIR
 from model.models import SpatialContext, A3DModel, ObjectFind, year_batch_piece_str
+from model.measure.segmentation import MaskPredictor
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,12 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
 
     def __init__(self):
         super().__init__()
+
+        self.predictors = {
+            "colorgrid": MaskPredictor(mask_type="colorgrid"),
+            "colorgrid_24": MaskPredictor(mask_type="colorgrid_24"),
+            "ceramics": MaskPredictor(mask_type="ceramics"),
+        }
 
         self.finds_dict: Dict[int:ObjectFind] = {}  # find_number: int -> ObjectFind
         self.selected_find_number: int = None
@@ -243,13 +250,15 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         return by_year
 
     def clear_match_for_find(self, find_number: int) -> bool:
-        find = self.finds_dict.get(find_number, None)
+        find: ObjectFind = self.finds_dict.get(find_number, None)
         if find is None:
+            logger.debug("No find with number %s", find_number)
             return False
-        old_match = self.a3dmodels_dict[find.get_match_str()]
+        old_match: A3DModel = self.a3dmodels_dict[find.get_match_str()]
         if old_match is None:
+            logger.debug("No 3d model with %s", find.get_match_str())
             return False
-        find.clear_match(self.conn.cursor())
+        find.clear_match(self.conn)
         old_match.matched_finds = old_match.get_matches(self.conn.cursor())
         return True
 

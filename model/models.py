@@ -249,12 +249,12 @@ class ObjectFind:
             and self._batch_number == batch_number
             and self._batch_piece == batch_piece
         ):
+            logger.debug("No changes to match for %s to %s, %s, %s", self, batch_year, batch_number, batch_piece)
             return  # no changes
         self._batch_year = batch_year
         self._batch_number = batch_number
         self._batch_piece = batch_piece
-        logger.debug("Matching %s to %s", self, self.get_match_str())
-        logger.debug("Updating database")
+        logger.debug("Updating database to match %s to %s", self, self.get_match_str())
         query = """
         UPDATE object.finds
         SET "3d_batch_year" = %s, "3d_batch_number" = %s, "3d_batch_piece" = %s
@@ -291,13 +291,12 @@ class ObjectFind:
         finally:
             cursor.close()
 
-    def clear_match(self, cursor):
+    def clear_match(self, conn):
         if not self.is_matched:
+            logger.warning("No match to clear for %s", self)
             return
         logger.debug("Clearing match for %s", self)
-        self._batch_number = None
-        self._batch_piece = None
-        self.set_match(cursor, self._batch_year, None, None)
+        self.set_match(conn, None, None, None)
 
     def get_match(self):
         return self._batch_year, self._batch_number, self._batch_piece

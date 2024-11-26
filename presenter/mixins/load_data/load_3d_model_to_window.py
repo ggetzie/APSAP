@@ -22,7 +22,7 @@ class Load3dModelToWindowMixin:
             current (object): The current selected item in the 3d model
         """
         _, main_view, main_presenter = self.get_model_view_presenter()
-        # Get the saved path in the selected item
+        # Get the path to the selected model
         ply_str = current.data(Qt.UserRole)
         self.main_model.select_a3dmodel(ply_str)
         a3dmodel = self.main_model.selected_a3dmodel
@@ -45,10 +45,6 @@ class Load3dModelToWindowMixin:
             main_view.ply_window.add_geometry(main_view.current_pcd)
             main_view.ply_window.update_geometry(main_view.current_pcd)
 
-            # We get the 3d model's information (year, batch, piece number) and display them
-            # (year, batch, piece) = main_presenter.get_year_batch_piece(
-            #     current_model_path
-            # )
             main_view.new_year.setText(f"{a3dmodel.batch_year}")
             main_view.new_batch.setText(f"{a3dmodel.batch_number:>03}")
             main_view.new_piece.setText(f"{a3dmodel.batch_piece:>02}")

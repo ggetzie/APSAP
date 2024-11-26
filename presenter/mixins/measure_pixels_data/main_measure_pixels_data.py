@@ -160,7 +160,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             # Caching the calculated values
             main_model.cache_3d.set(a3dmodel.cache_key, return_values)
         except:
-            logging.error("We failed to measure the pixels in %s", path_3d)
+            logging.error("We failed to measure the pixels in %s", path3d)
             (
                 area_3d,
                 width_3d,

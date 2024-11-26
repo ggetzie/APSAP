@@ -6,9 +6,7 @@ from PyQt5.QtGui import QColor
 
 from model.main_model import MainModel
 from view.main_view import MainView
-from presenter.mixins.choose_directory.main_choose_directory import ChooseDirectoryMixin
 from presenter.mixins.load_data.main_load_data import LoadDataMixin
-from presenter.mixins.match.add_and_remove_match import AddAndRemoveMatchMixin
 
 from presenter.mixins.calculate_similarity.get_3d_models_sorted_by_similarity import (
     Get3dModelSortedBySimilarityMixin,
@@ -25,12 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class MainPresenter(
-    ChooseDirectoryMixin,
     MeasurePixelsDataMixin,
     Get3dModelSortedBySimilarityMixin,
     CalculateIndividualSimilaritiesMixin,
     LoadDataMixin,
-    AddAndRemoveMatchMixin,
 ):
     """This main_presenter inherits all the mixins' methods to handle the interactive
     behaviors of the applications, such that when you click on a button or choose an
@@ -280,8 +276,8 @@ class MainPresenter(
         if selected_find.is_matched:
             batch_year, batch_number, batch_piece = selected_find.get_match()
             main_view.current_year.setText(str(batch_year))
-            main_view.current_batch.setText(str(batch_number))
-            main_view.current_piece.setText(str(batch_piece))
+            main_view.current_batch.setText(f"{batch_number:>03}")
+            main_view.current_piece.setText(f"{batch_piece:>02}")
         else:
             main_view.current_year.setText("NS")
             main_view.current_batch.setText("NS")
@@ -294,7 +290,7 @@ class MainPresenter(
                 f"Category: {selected_find.category}",
             ]
         )
-        main_view.selected_find_info.setText(f"\n{find_info}")
+        main_view.selected_find_info.setText(f"{find_info}")
 
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
@@ -445,7 +441,7 @@ class MainPresenter(
         if not selected_find:
             logger.error("No find selected")
             return
-        # remove the match in the model
+        # remove the match in the model, updating the database
         self.main_model.clear_match_for_find(selected_find.find_number)
 
         # update the GUI

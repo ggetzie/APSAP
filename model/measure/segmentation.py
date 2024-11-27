@@ -51,7 +51,9 @@ MODEL_PATHS = {
     "colorgrid_24": COMPUTATION_PATH / "Different_colro_grid.pt",
 }
 
-if not all([path.exists() for path in MODEL_PATHS.values()]):
+REFERENCE_IMAGE_PATH = COMPUTATION_PATH / "reference_placeholder.jpg"
+
+if not all((path.exists() for path in MODEL_PATHS.values())):
     raise ModelNotAvailable(
         f"Model files are not available, please save them in {COMPUTATION_PATH}"
     )
@@ -74,7 +76,7 @@ class MaskPredictor:
 
         loaded_model = get_model_instance_segmentation(2)
         if not torch.cuda.is_available():
-            logger.debug("CUDA not available, loading model on CPU")
+            logger.warning("CUDA not available, loading model on CPU")
             loaded_model.load_state_dict(
                 torch.load(model_path, map_location=torch.device("cpu"))
             )
@@ -82,12 +84,12 @@ class MaskPredictor:
             loaded_model.load_state_dict(torch.load(model_path))
         loaded_model.eval()
         self.loaded_model = loaded_model.to(self.device)
-        self.Transform = get_transform(train=False)
+        self.transform = get_transform(train=False)
 
-    def predict(self, image: Image.Image):
+    def predict(self, image: Image.Image) -> Image.Image:
         # image: An pil image is expected to be the input
 
-        image, _ = self.Transform(
+        image, _ = self.transform(
             image, image
         )  # Transform requires input and target, we dont have target
         with torch.no_grad():

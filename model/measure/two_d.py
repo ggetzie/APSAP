@@ -1,4 +1,7 @@
+import pathlib
+
 import numpy as np
+from PIL import Image
 import cv2
 
 from .segmentation import MaskPredictor, InvalidMaskType
@@ -36,3 +39,67 @@ def get_mm_per_pixel(image, color_grid_predictor: MaskPredictor):
     # We get the distance of the color grid in actual millimeters
     # (we can google the value)
     return mm_difference_x / pixel_difference_x
+
+
+def get_ceramic_mask(image_path: pathlib.Path, ceramic_predictor: MaskPredictor):
+    """This functions open an image in 450 x 300.
+
+    Args:
+        image_path (str): The path of the image to be opened
+
+    Returns:
+        Pillow Image: A Pil image object
+    """
+    image = Image.open(image_path)
+    return ceramic_predictor.predict(image)
+
+
+def get_contour(ceramic_mask: Image.Image):
+    _, thresh = cv2.threshold(np.array(ceramic_mask), 127, 255, 0)
+    contours, _ = cv2.findContours(thresh, 2, 1)
+    return contours[0]
+
+
+def get_ceramic_width_length(ceramic_mask: np.ndarray, mm_per_pixel: float):
+    """This function gets the width and length of the ceramic in mm
+
+    Args:
+        ceramic_mask (np.ndarray): The mask of the ceramic
+        mm_per_pixel (float): The ratio between 1 mm in real life and 1 pixel
+
+    Returns:
+        tuple: The width and length of the ceramic in mm
+    """
+    # old method
+    # ceramic_mask_bool = (np.array(ceramic_mask)).astype(bool)
+    # indices = np.nonzero(ceramic_mask_bool)
+    # y_diff = abs(max(indices[0]) - min(indices[0])) * mm_per_pixel
+    # x_diff = abs(max(indices[1]) - min(indices[1])) * mm_per_pixel
+    # width = min(y_diff, x_diff)
+    # length = max(y_diff, x_diff)
+
+    contour = get_contour(ceramic_mask)
+    _, _, bb_w, bb_h = cv2.boundingRect(contour)
+    # convert to mm
+    bb_w_mm = bb_w * mm_per_pixel
+    bb_h_mm = bb_h * mm_per_pixel
+    # width is the short side, length is the long side
+    width = min(bb_w_mm, bb_h_mm)
+    length = max(bb_w_mm, bb_h_mm)
+    return width, length
+
+
+def get_ceramic_area(ceramic_mask: Image.Image, mm_per_pixel: float) -> float:
+    """This function gets the area of the ceramic in mm^2
+
+    Args:
+        ceramic_mask (np.ndarray): The mask of the ceramic
+        mm_per_pixel (float): The ratio between 1 mm in real life and 1 pixel
+
+    Returns:
+        double: The area of the ceramic in mm^2
+    """
+    ceramic_mask_bool = (np.array(ceramic_mask)).astype(bool)
+    area_mm2 = np.sum(ceramic_mask_bool) * mm_per_pixel**2
+    area_cm2 = area_mm2 / 100
+    return area_cm2

@@ -214,7 +214,7 @@ class MainPresenter(
                     nested_a3dmodels[batch_year][batch_number].keys()
                 ):
                     a3dmodel = nested_a3dmodels[batch_year][batch_number][piece_number]
-                    logger.debug("Measuring pixels for %s", a3dmodel)
+                    # logger.debug("Measuring pixels for %s", a3dmodel)
                     self.measure_pixels_3d(a3dmodel)
                     model_piece = QStandardItem(f"{piece_number}")
                     model_piece.setData(str(a3dmodel), Qt.UserRole)

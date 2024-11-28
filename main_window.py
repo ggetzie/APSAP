@@ -1,10 +1,10 @@
 import argparse
+import datetime
 import logging
+import os
 import sys
 import time
 from pathlib import Path
-import getpass
-from time import ctime
 
 from PyQt5.QtWidgets import QApplication
 
@@ -34,17 +34,19 @@ def main():
     args = parser.parse_args()
 
     # Setting the logger and logging file, and make sure logging information goes to both the file and
-    log_folder = f"./logs/{getpass.getuser()}"
-    log_path = f"{log_folder}/{ctime().replace(':','')}.txt"
-    Path(log_folder).mkdir(parents=True, exist_ok=True)
+    log_folder = Path(f"./logs/{os.getlogin()}")
+    log_folder.mkdir(parents=True, exist_ok=True)
+    log_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    log_path = log_folder / log_filename
 
     logging.basicConfig(
         level=LOG_LEVELS[args.log_level],
         format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[logging.FileHandler(log_path), logging.StreamHandler()],
+        handlers=[logging.FileHandler(str(log_path)), logging.StreamHandler()],
     )
 
     logger = logging.getLogger(__name__)
+    logger.info("Log file: %s", log_path)
 
     # Setting the basic style
     app = QApplication(sys.argv)

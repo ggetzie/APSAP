@@ -16,6 +16,7 @@
     "dbatch",
     "dbro",
     "dbrw",
+    "getlogin",
     "hzenc",
     "maskthres",
     "plys",

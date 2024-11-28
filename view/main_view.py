@@ -7,7 +7,16 @@ import time
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
 
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QListWidget, QTreeView
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QMessageBox,
+    QListWidget,
+    QTreeView,
+    QSpinBox,
+    QToolButton,
+    QLabel,
+    QComboBox,
+)
 from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel
 from PyQt5 import uic, QtCore
 from PIL import Image
@@ -37,9 +46,20 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         and make it the images pop when you click on them.
         """
         super().__init__()
+
+        # declare the widgets that will be used. These will be filled in when MainWindow.ui is loaded
         self.finds_list: QListWidget = None
         self.unsorted_model_list: QTreeView = None
         self.sorted_model_list: QTreeView = None
+        self.find_start: QSpinBox = None
+        self.find_end: QSpinBox = None
+        self.year: QSpinBox = None
+        self.batch_start: QSpinBox = None
+        self.batch_end: QSpinBox = None
+        self.loadAll: QToolButton = None
+        self.selected_find: QLabel = None
+        self.statusLabel: QLabel = None
+        self.color_grid_select: QComboBox = None
 
         self.current_pcd = None
         logger.info("Loading MainWindow.ui")
@@ -73,8 +93,9 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
                 check=True,
                 cwd=cwd,
             )
-            logger.info("Version: %s", result.stdout.strip())
-            return result.stdout.strip()
+            version = result.stdout.strip()
+            logger.info("Version: %s", version)
+            return version
         except subprocess.CalledProcessError as e:
             logger.error("Error getting version: %s", e.stderr)
             return "Unknown"
@@ -215,3 +236,28 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
 
     def clear_finds_list(self):
         self.finds_list.clear()
+
+    def set_status(self, text: str):
+        self.statusLabel.setText(text)
+
+    def set_find_year_filters(
+        self, min_year: int, max_year: int, min_find: int, max_find: int
+    ):
+        self.find_start.setMinimum(min_find)
+        self.find_start.setMaximum(max_find)
+        self.find_start.setValue(min_find)
+        self.find_end.setMinimum(min_find)
+        self.find_end.setMaximum(max_find)
+        self.find_end.setValue(max_find)
+        self.year.setMinimum(min_year)
+        self.year.setMaximum(max_year)
+        self.year.setValue(min_year)
+        self.year.setReadOnly(min_year == max_year)
+
+    def set_batch_filters(self, min_batch: int, max_batch: int):
+        self.batch_start.setMinimum(min_batch)
+        self.batch_start.setMaximum(max_batch)
+        self.batch_start.setValue(min_batch)
+        self.batch_end.setMinimum(min_batch)
+        self.batch_end.setMaximum(max_batch)
+        self.batch_end.setValue(max_batch)

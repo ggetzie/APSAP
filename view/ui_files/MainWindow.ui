@@ -1283,7 +1283,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="color_grid_select">
              <property name="iconSize">
               <size>
                <width>51</width>

@@ -1,8 +1,9 @@
 import logging
 import time
 
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
 from view.main_view import MainView
@@ -190,6 +191,40 @@ class MainPresenter(
             if find.is_matched:
                 item.setForeground(QColor("red"))
             main_view.finds_list.addItem(item)
+        self.block_signals(False)
+
+    def populate_unsorted_models(self):
+        self.main_view.clear_unsorted_models()
+        self.block_signals(True)
+        nested_a3dmodels = self.main_model.get_nested_a3dmodels()
+        filter_year = self.main_view.year.value()
+        min_batch = self.main_view.batch_start.value()
+        max_batch = self.main_view.batch_end.value()
+        for batch_year in sorted(nested_a3dmodels.keys()):
+            if batch_year != int(filter_year):
+                continue
+            year_item = QStandardItem(f"{batch_year}")
+            for batch_number in sorted(nested_a3dmodels[batch_year].keys()):
+                if int(batch_number) < int(min_batch) or int(batch_number) > int(
+                    max_batch
+                ):
+                    continue
+                batch_item = QStandardItem(f"{batch_number}")
+                for piece_number in sorted(
+                    nested_a3dmodels[batch_year][batch_number].keys()
+                ):
+                    a3dmodel = nested_a3dmodels[batch_year][batch_number][piece_number]
+                    logger.debug("Measuring pixels for %s", a3dmodel)
+                    self.measure_pixels_3d(a3dmodel)
+                    model_piece = QStandardItem(f"{piece_number}")
+                    model_piece.setData(str(a3dmodel), Qt.UserRole)
+                    if a3dmodel.is_matched:
+                        model_piece.setForeground(QColor("red"))
+                    batch_item.appendRow(model_piece)
+                year_item.appendRow(batch_item)
+            self.main_view.unsorted_model_list.selectionModel().model().appendRow(
+                year_item
+            )
         self.block_signals(False)
 
     ##########################################################################
@@ -465,23 +500,11 @@ class MainPresenter(
         if not selected_context:
             logger.warning("Tried setting filters without a selected context")
             return
-
-        # set the find numbers filter
         find_numbers = [int(f) for f in selected_context.list_find_dirs()] or [0]
-        self.main_view.find_start.setMinimum(min(find_numbers))
-        self.main_view.find_start.setMaximum(max(find_numbers))
-        self.main_view.find_start.setValue(min(find_numbers))
-        self.main_view.find_end.setMinimum(min(find_numbers))
-        self.main_view.find_end.setMaximum(max(find_numbers))
-        self.main_view.find_end.setValue(max(find_numbers))
-
-        # set the years filter. years will be an empty list if there are no batch folders
         years = selected_context.list_batch_years() or [0]
-        self.main_view.year.setMinimum(min(years))
-        self.main_view.year.setMaximum(max(years))
-        if years != [0]:
-            self.main_view.year.setValue(min(years))
-        self.main_view.year.setReadOnly(years == [0])
+        self.main_view.set_find_year_filters(
+            min(years), max(years), min(find_numbers), max(find_numbers)
+        )
         self.on_year_change()
 
     def on_year_change(self):
@@ -491,12 +514,7 @@ class MainPresenter(
             return
         year = self.main_view.year.value()
         batch_numbers = selected_context.list_batch_numbers(str(year)) or [0]
-        self.main_view.batch_start.setMinimum(min(batch_numbers))
-        self.main_view.batch_start.setMaximum(max(batch_numbers))
-        self.main_view.batch_start.setValue(min(batch_numbers))
-        self.main_view.batch_end.setMinimum(min(batch_numbers))
-        self.main_view.batch_end.setMaximum(max(batch_numbers))
-        self.main_view.batch_end.setValue(max(batch_numbers))
+        self.main_view.set_batch_filters(min(batch_numbers), max(batch_numbers))
 
     def on_batch_start_change(self):
         self.main_view.batch_end.setMinimum(self.main_view.batch_start.value())
@@ -518,4 +536,4 @@ class MainPresenter(
         self.main_model.load_finds()
         self.main_model.load_a3dmodels()
         self.populate_finds()
-        self.populate_models()
+        self.populate_unsorted_models()

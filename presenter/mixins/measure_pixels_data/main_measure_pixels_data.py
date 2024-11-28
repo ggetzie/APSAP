@@ -69,11 +69,12 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 contour_back,
             ) = main_presenter.get_area_width_length_contour2d(path_back)
 
-        except:
+        except Exception as e:
             logging.error(
-                "We failed to measure for either the paths: %s and %s",
+                "We failed to measure for either the paths: %s and %s. Error: %s",
                 path_front,
                 path_back,
+                e,
             )
             (
                 area_front,
@@ -117,7 +118,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         # Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(a3dmodel.cache_key)
         if cache_result is not None and len(cache_result) == 7:
-            logger.info("Loading %s directly from library", a3dmodel)
+            # logger.info("Loading %s directly from library", a3dmodel)
             return cache_result
 
         # In case it is not cached, we have to measure the pixels directly.
@@ -139,7 +140,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         QCoreApplication.processEvents()
 
         # Try to get the measurements. If there is an error, return the value
-        path3d = str(a3dmodel.get_file("sample"))
+        path3d = str(a3dmodel.get_file("full"))
         try:
             (
                 area_3d,
@@ -159,8 +160,8 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
             )
             # Caching the calculated values
             main_model.cache_3d.set(a3dmodel.cache_key, return_values)
-        except:
-            logging.error("We failed to measure the pixels in %s", path3d)
+        except Exception as e:
+            logging.error("We failed to measure the pixels in %s: Error %s", path3d, e)
             (
                 area_3d,
                 width_3d,

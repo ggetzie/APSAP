@@ -42,7 +42,7 @@ class Measure2DMixin:  # bridging the view(gui) and the model(data)
         # The predicted pixels of the color grid in the image, 0 means 0% chance the
         # pixel is color grid 255 means 100%, we take 200 as a threshold
 
-        if main_view.comboBox.currentText() != "24ColorCard":
+        if main_view.color_grid_select.currentText() != "24ColorCard":
             color_grid_pixels = np.array(
                 main_presenter.colorgrid_predictor.predict(image)
             )
@@ -58,7 +58,7 @@ class Measure2DMixin:  # bridging the view(gui) and the model(data)
         pixel_difference_x = x_coordinates_mask[-15] - x_coordinates_mask[5]
 
         # We get the distance of the color grid in actual millimeters(we can google the value)
-        if main_view.comboBox.currentText() != "24ColorCard":
+        if main_view.color_grid_select.currentText() != "24ColorCard":
             mm_difference_x = 53.98
         else:
             mm_difference_x = 50.8

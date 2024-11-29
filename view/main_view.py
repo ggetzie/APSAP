@@ -3,10 +3,12 @@ import logging
 import pathlib
 import subprocess
 import time
+from typing import List
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
 
+import open3d as o3d
 from PyQt5.QtWidgets import (
     QMainWindow,
     QMessageBox,
@@ -16,19 +18,23 @@ from PyQt5.QtWidgets import (
     QToolButton,
     QLabel,
     QComboBox,
+    QWidget,
 )
-from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel
+
+from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel, QWindow, QStandardItem
 from PyQt5 import uic, QtCore
+from PyQt5.QtCore import QTimer
 from PIL import Image
 from PIL.ImageQt import ImageQt
+import win32gui
 
-from view.mixins.ply_window import PlyWindowMixin
 from view.mixins.image_window import OpenImageMixin
+from model.models import A3DModel
 
 logger = logging.getLogger(__name__)
 
 
-class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
+class MainView(QMainWindow, OpenImageMixin):
     """The MainView contains all the GUI related functions and classes
 
     Args:
@@ -56,10 +62,11 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.year: QSpinBox = None
         self.batch_start: QSpinBox = None
         self.batch_end: QSpinBox = None
-        self.loadAll: QToolButton = None
+        self.load_all: QToolButton = None
         self.selected_find: QLabel = None
-        self.statusLabel: QLabel = None
+        self.status_label: QLabel = None
         self.color_grid_select: QComboBox = None
+        self.model: QLabel = None
 
         self.current_pcd = None
         logger.info("Loading MainWindow.ui")
@@ -115,9 +122,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
             side (str): The side of the photo to display. Must be "front" or "back"
         """
         try:
-            photo = (
-                Image.open(photo_path).resize((450, 300), Image.LANCZOS).convert("RGB")
-            )
+            photo = Image.open(photo_path).convert("RGB")
         except (FileNotFoundError, IOError, OSError, TypeError, ValueError) as e:
             logger.error("Error opening photo at %s: %s", photo_path, e)
             self.clear_find_photos()
@@ -194,7 +199,7 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
 
         self.findFrontPhoto_l.clear()
         self.findBackPhoto_l.clear()
-        self.statusLabel.setText("")
+        self.status_label.setText("")
         self.selected_find.setText("")
         self.current_batch.setText("")
         self.current_year.setText("")
@@ -234,11 +239,23 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
             0, self.sorted_model_list.selectionModel().model().rowCount()
         )
 
+    def list_sorted_models(self, sorted_models: List[A3DModel]):
+        model = QStandardItemModel(self)
+        model.setHorizontalHeaderLabels(["Models"])
+        for a3dmodel in sorted_models:
+            title = str(a3dmodel)
+            item = QStandardItem(title)
+            item.setData(title, QtCore.Qt.UserRole)
+            if a3dmodel.is_matched:
+                item.setForeground(QColor("red"))
+            model.appendRow(item)
+        self.sorted_model_list.setModel(model)
+
     def clear_finds_list(self):
         self.finds_list.clear()
 
     def set_status(self, text: str):
-        self.statusLabel.setText(text)
+        self.status_label.setText(text)
 
     def set_find_year_filters(
         self, min_year: int, max_year: int, min_find: int, max_find: int
@@ -261,3 +278,33 @@ class MainView(QMainWindow, PlyWindowMixin, OpenImageMixin):
         self.batch_end.setMinimum(min_batch)
         self.batch_end.setMaximum(max_batch)
         self.batch_end.setValue(max_batch)
+
+    def set_up_ply_window(self):
+        """This function set up the window that displays the point cloud ply fie."""
+        # 0. Get the widget that we want to display our 3d model in
+        widget = self.model
+
+        # 1. Setting up a window of Open3d to display the 3d model
+        self.ply_window = o3d.visualization.Visualizer()
+        self.ply_window.create_window(visible=False)
+        self.ply_window.get_render_option().light_on = False
+        self.ply_window.get_render_option().point_size = 20
+
+        # 2.Attaching the open3d window we just created to our application
+        hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
+        window = QWindow.fromWinId(hwnd)
+        window_container = QWidget.createWindowContainer(window, widget)
+        window_container.setMinimumSize(430, 390)
+
+        timer = QTimer(self)
+        timer.timeout.connect(self.update_ply_window)
+        timer.start(100)
+
+    def update_ply_window(self):
+        """This function periodically updates the little window that displays the 3d model"""
+        self.ply_window.poll_events()
+        self.ply_window.update_renderer()
+
+    def clear_ply_window(self):
+        self.current_pcd = None
+        self.ply_window.clear_geometries()

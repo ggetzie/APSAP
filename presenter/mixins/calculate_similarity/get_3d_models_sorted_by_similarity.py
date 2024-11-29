@@ -8,10 +8,6 @@ class Get3dModelSortedBySimilarityMixin:
         by how similar that find is with respect to the 3d models. This function
         gets such a sorted list
 
-        Args:
-            find_path (str): The path to the find in which we have 1.jpg and 2.jpg.
-            We compare the 3d models
-
         Returns:
              list[batch_num, piece_num, year]: A list of batch_num piece_num, year,
              which uniquely define a 3d model.
@@ -33,7 +29,6 @@ class Get3dModelSortedBySimilarityMixin:
         # The list will be append with [similarity_mean, batch_num, piece_num, year] of
         # all 3d models we want to compare with
         similarity_scores = []
-        
 
         min_batch_number = int(main_view.batch_start.value())
         max_batch_number = int(main_view.batch_end.value())
@@ -62,8 +57,8 @@ class Get3dModelSortedBySimilarityMixin:
             ) = main_presenter.measure_pixels_3d(a3dmodel)
 
             # We update the GUI to show which 3d model we are calculating the 3d model of
-            main_view.statusLabel.setText(f"Calculate the similarity with {a3dmodel}")
-            main_view.statusLabel.repaint()
+            main_view.status_label.setText(f"Calculate the similarity with {a3dmodel}")
+            main_view.status_label.repaint()
 
             # Then we calculate the similarity with respect to different criteria
             area_similarity = main_presenter.get_area_similarity(
@@ -91,7 +86,14 @@ class Get3dModelSortedBySimilarityMixin:
                 + contour_similarity * 0.7
             )
             # We append the similarity and 3d model data to the list we defined
-            similarity_scores.append([similarity_mean, batch_num, piece_num, year])
+            similarity_scores.append(
+                [
+                    similarity_mean,
+                    year,
+                    batch_num,
+                    piece_num,
+                ]
+            )
 
         # We return a list of 3d model sorted by their similarity_mean, we ignore similarity_mean
         # so we effectively are returning a list of [batch_num, piece_num, year]

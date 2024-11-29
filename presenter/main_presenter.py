@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
+from model.models import year_batch_piece_str
 from view.main_view import MainView
 from presenter.mixins.load_data.main_load_data import LoadDataMixin
 
@@ -91,7 +92,7 @@ class MainPresenter(
         main_view.find_end.valueChanged.connect(self.on_find_end_change)
 
         # Connecting the button to the function that load the images and 3d models
-        main_view.loadAll.clicked.connect(self.on_load_all_clicked)
+        main_view.load_all.clicked.connect(self.on_load_all_clicked)
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(self.on_update_clicked)
@@ -227,6 +228,31 @@ class MainPresenter(
             )
         self.block_signals(False)
 
+    def populate_sorted_models(self):
+        models_sorted_by_similarity = (
+            self.get_potential_3d_models_sorted_by_similarity()
+        )
+        self.main_view.clear_sorted_models()
+        self.main_view.clear_ply_window()
+        self.block_signals(True)
+        filter_year = self.main_view.year.value()
+        min_batch = self.main_view.batch_start.value()
+        max_batch = self.main_view.batch_end.value()
+        filtered_models = [
+            self.main_model.a3dmodels_dict.get(year_batch_piece_str(year, batch, piece))
+            for year, batch, piece in models_sorted_by_similarity
+            if (year == filter_year)
+            and (int(batch) >= int(min_batch))
+            and (int(batch) <= int(max_batch))
+        ]
+
+        self.main_view.list_sorted_models(filtered_models)
+        self.main_view.sorted_model_list.selectionModel().currentChanged.connect(
+            self.change_3d_model
+        )
+
+        self.block_signals(False)
+
     ##########################################################################
     #  onChange: Functions called in response to the user changing a select  #
     #  These functions update the main_model and repopulate the selects      #
@@ -329,7 +355,7 @@ class MainPresenter(
 
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
-        self.load_sorted_models()
+        self.populate_sorted_models()
 
     def clear_selected_find(self):
         self.main_model.selected_find_number = None

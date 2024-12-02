@@ -117,6 +117,8 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         # Check if the result has already been cached. If yes, directly return the result
         cache_result = main_model.cache_3d.get(a3dmodel.cache_key)
+        # temporarily disable cache
+        # cache_result = None
         if cache_result is not None and len(cache_result) == 7:
             # logger.info("Loading %s directly from library", a3dmodel)
             return cache_result

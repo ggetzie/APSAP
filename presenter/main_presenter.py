@@ -216,7 +216,7 @@ class MainPresenter(
                 ):
                     a3dmodel = nested_a3dmodels[batch_year][batch_number][piece_number]
                     # logger.debug("Measuring pixels for %s", a3dmodel)
-                    self.measure_pixels_3d(a3dmodel)
+                    # self.measure_pixels_3d(a3dmodel)
                     model_piece = QStandardItem(f"{piece_number}")
                     model_piece.setData(str(a3dmodel), Qt.UserRole)
                     if a3dmodel.is_matched:
@@ -229,8 +229,11 @@ class MainPresenter(
         self.block_signals(False)
 
     def populate_sorted_models(self):
-        models_sorted_by_similarity = (
-            self.get_potential_3d_models_sorted_by_similarity()
+        # models_sorted_by_similarity = (
+        #     self.get_potential_3d_models_sorted_by_similarity()
+        # )
+        models_sorted_by_similarity = self.main_model.list_a3dmodels_by_similarity(
+            self.main_model.selected_find.find_number
         )
         self.main_view.clear_sorted_models()
         self.main_view.clear_ply_window()
@@ -559,7 +562,10 @@ class MainPresenter(
         if not selected_context:
             logger.error("Tried to load finds and models without context selected")
             return
-        self.main_model.load_finds()
+
+        self.main_model.load_finds(
+            color_grid=self.main_view.color_grid_select.currentText()
+        )
         self.main_model.load_a3dmodels()
         self.populate_finds()
         self.populate_unsorted_models()

@@ -1,5 +1,3 @@
-import pathlib
-
 import numpy as np
 from PIL import Image
 import cv2
@@ -7,7 +5,7 @@ import cv2
 from .segmentation import MaskPredictor, InvalidMaskType
 
 
-def get_mm_per_pixel(image, color_grid_predictor: MaskPredictor):
+def get_mm_per_pixel(image: Image.Image, color_grid_predictor: MaskPredictor):
     """This function gets the the ratio between 1 mm in real life and 1 pixel
 
     Args:
@@ -41,16 +39,15 @@ def get_mm_per_pixel(image, color_grid_predictor: MaskPredictor):
     return mm_difference_x / pixel_difference_x
 
 
-def get_ceramic_mask(image_path: pathlib.Path, ceramic_predictor: MaskPredictor):
+def get_ceramic_mask(image: Image.Image, ceramic_predictor: MaskPredictor):
     """This functions open an image in 450 x 300.
 
     Args:
-        image_path (str): The path of the image to be opened
+        image (PIL.Image.Image): A PIL image object to extract the ceramic mask from
 
     Returns:
-        Pillow Image: A Pil image object
+        Pillow Image: A PIL image object containing the ceramic mask
     """
-    image = Image.open(image_path)
     return ceramic_predictor.predict(image)
 
 
@@ -103,3 +100,7 @@ def get_ceramic_area(ceramic_mask: Image.Image, mm_per_pixel: float) -> float:
     area_mm2 = np.sum(ceramic_mask_bool) * mm_per_pixel**2
     area_cm2 = area_mm2 / 100
     return area_cm2
+
+
+def get_masked_image(image: Image.Image, mask: Image.Image):
+    return Image.composite(image, Image.new("RGB", image.size, (255, 255, 255)), mask)

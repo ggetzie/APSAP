@@ -3,9 +3,16 @@ import pathlib
 import re
 from typing import List
 
+import numpy as np
+from PIL import Image
 import psycopg2
 
+from model.measure import two_d, three_d
 from model.constants import BASE_DATA_DIR
+from model.measure.segmentation import MaskPredictor
+from model.measure.two_d import get_ceramic_mask, get_masked_image
+from model.measure.core import get_features, serialize_keypoints, deserialize_keypoints
+import model.measure.three_d as three_d
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +31,23 @@ def parse_context_string(context_str: str):
         m.group(3),
         m.group(4),
         m.group(5),
+    )
+
+
+def valid_cv2_cache_result(cache_result):
+    if cache_result is None:
+        return False
+    return "descriptors" in cache_result and "keypoints" in cache_result
+
+
+def valid_measure_cache_result(cache_result):
+    if cache_result is None:
+        return False
+    return (
+        "area" in cache_result
+        and "width" in cache_result
+        and "length" in cache_result
+        and "contour" in cache_result
     )
 
 
@@ -222,6 +246,17 @@ class ObjectFind:
         self._batch_year = batch_year
         self._batch_number = batch_number
         self._batch_piece = batch_piece
+        self.width_front: float = None
+        self.length_front: float = None
+        self.width_back: float = None
+        self.length_back: float = None
+        self.area_front: float = None
+        self.contour_front: np.ndarray = None
+        self.countour_back: np.ndarray = None
+        self.keypoints_front = None
+        self.descriptors_front = None
+        self.keypoints_back = None
+        self.descriptors_back = None
 
     def __str__(self):
         return (
@@ -249,7 +284,13 @@ class ObjectFind:
             and self._batch_number == batch_number
             and self._batch_piece == batch_piece
         ):
-            logger.debug("No changes to match for %s to %s, %s, %s", self, batch_year, batch_number, batch_piece)
+            logger.debug(
+                "No changes to match for %s to %s, %s, %s",
+                self,
+                batch_year,
+                batch_number,
+                batch_piece,
+            )
             return  # no changes
         self._batch_year = batch_year
         self._batch_number = batch_number
@@ -336,6 +377,142 @@ class ObjectFind:
     def models_directory(self):
         return self.directory() / "3d" / "gp"
 
+    def measure(
+        self,
+        ceramic_predictor: MaskPredictor,
+        color_grid_predictor: MaskPredictor,
+        cache,
+    ):
+        front_key = f"{self}-front"
+        back_key = f"{self}-back"
+        cache_result_front = cache.get(front_key)
+        cache_result_back = cache.get(back_key)
+        if valid_measure_cache_result(cache_result_front):
+            logger.debug("Loading measurements for %s from cache", self)
+            self.width_front = cache_result_front["width"]
+            self.length_front = cache_result_front["length"]
+            self.area_front = cache_result_front["area"]
+            self.contour_front = cache_result_front["contour"]
+
+            self.width_back = cache_result_back["width"]
+            self.length_back = cache_result_back["length"]
+            self.area_back = cache_result_back["area"]
+            self.contour_back = cache_result_back["contour"]
+
+            return
+        try:
+            with Image.open(self.photo_path()) as front_image, Image.open(
+                self.photo_path("back")
+            ) as back_image:
+                # front measurements
+                ceramic_mask_front = two_d.get_ceramic_mask(
+                    front_image, ceramic_predictor
+                )
+                mm_per_pixel_front = two_d.get_mm_per_pixel(
+                    front_image, color_grid_predictor
+                )
+                self.area_front = two_d.get_ceramic_area(
+                    ceramic_mask_front, mm_per_pixel_front
+                )
+                self.width_front, self.length_front = two_d.get_ceramic_width_length(
+                    ceramic_mask_front, mm_per_pixel_front
+                )
+                self.contour_front = two_d.get_contour(ceramic_mask_front)
+
+                # back measurements
+                ceramic_mask_back = two_d.get_ceramic_mask(
+                    back_image, ceramic_predictor
+                )
+                mm_per_pixel_back = two_d.get_mm_per_pixel(
+                    back_image, color_grid_predictor
+                )
+                self.area_back = two_d.get_ceramic_area(
+                    ceramic_mask_back, mm_per_pixel_back
+                )
+                self.width_back, self.length_back = two_d.get_ceramic_width_length(
+                    ceramic_mask_back, mm_per_pixel_back
+                )
+                self.contour_back = two_d.get_contour(ceramic_mask_back)
+                logger.debug(
+                    "In Find Measured %s: width=%f, length=%f, area=%f",
+                    self,
+                    self.width_front,
+                    self.length_front,
+                    self.area_front,
+                )
+                cache[front_key] = {
+                    "width": self.width_front,
+                    "length": self.length_front,
+                    "area": self.area_front,
+                    "contour": self.contour_front,
+                }
+                cache[back_key] = {
+                    "width": self.width_back,
+                    "length": self.length_back,
+                    "area": self.area_back,
+                    "contour": self.contour_back,
+                }
+        except Exception as e:
+            logger.error("Failed to measure %s", self)
+            logger.error(e)
+
+    @property
+    def is_measured(self):
+        return all(
+            (
+                x is not None
+                for x in (
+                    self.width_front,
+                    self.length_front,
+                    self.area_front,
+                    self.contour_front,
+                )
+            )
+        )
+
+    def set_features(self, ceramic_predictor: MaskPredictor, cache):
+        logger.debug("Setting features for %s", self)
+        front_key = f"{self}-front"
+        back_key = f"{self}-back"
+        cache_front = cache.get(front_key)
+        cache_back = cache.get(back_key)
+        if valid_cv2_cache_result(cache_front) and valid_cv2_cache_result(cache_back):
+            logger.debug("Loading features for %s from cache", self)
+            self.keypoints_front = deserialize_keypoints(cache_front["keypoints"])
+            self.descriptors_front = cache_front["descriptors"]
+            self.keypoints_back = deserialize_keypoints(cache_back["keypoints"])
+            self.descriptors_back = cache_back["descriptors"]
+            return
+        logger.debug("Measuring features for %s", self)
+        front_path = self.photo_path()
+        back_path = self.photo_path("back")
+        if not front_path.exists() or not back_path.exists():
+            logger.error("No photo files found for %s", self)
+            return
+        with Image.open(front_path) as front_image, Image.open(back_path) as back_image:
+            front_mask = get_ceramic_mask(front_image, ceramic_predictor)
+            back_mask = get_ceramic_mask(back_image, ceramic_predictor)
+            front_masked = get_masked_image(front_image, front_mask)
+            back_masked = get_masked_image(back_image, back_mask)
+            self.keypoints_front, self.descriptors_front = get_features(front_masked)
+            self.keypoints_back, self.descriptors_back = get_features(back_masked)
+            cache[front_key] = {
+                "keypoints": serialize_keypoints(self.keypoints_front),
+                "descriptors": self.descriptors_front,
+            }
+            cache[back_key] = {
+                "keypoints": serialize_keypoints(self.keypoints_back),
+                "descriptors": self.descriptors_back,
+            }
+
+    def has_features(self):
+        return (
+            self.keypoints_front is not None
+            and self.descriptors_front is not None
+            and self.keypoints_back is not None
+            and self.descriptors_back is not None
+        )
+
 
 class A3DModel:
 
@@ -353,6 +530,15 @@ class A3DModel:
 
         # the find numbers that are matched to this model
         self.matched_finds: List[int] = []
+
+        # measurements
+        self.width: float = None
+        self.length: float = None
+        self.area: float = None
+        self.contour: np.ndarray = None
+
+        self.keypoints = None
+        self.descriptors = None
 
     def __str__(self):
         return year_batch_piece_str(
@@ -408,9 +594,7 @@ class A3DModel:
 
     def get_matches(self, cursor):
         query = """
-        SELECT find_number
-        FROM object.finds
-        WHERE
+        SELECT find_number FROM object.finds WHERE
         utm_hemisphere = %s AND
         utm_zone = %s AND
         area_utm_easting_meters = %s AND
@@ -438,3 +622,68 @@ class A3DModel:
         if len(result) > 1:
             logger.error("Found %d finds matched to %s! %s", len(result), self, result)
         return result
+
+    def measure(self, ply_window, cache):
+        a3dmodel_path = self.get_file()
+        if not a3dmodel_path:
+            logger.error("No model file found for %s", self)
+            return
+        logger.debug("Measuring %s", self)
+        cache_result = cache.get(self.cache_key)
+        if valid_measure_cache_result(cache_result):
+            logger.debug("Loading measurements for %s from cache", self)
+            self.width = cache_result["width"]
+            self.length = cache_result["length"]
+            self.area = cache_result["area"]
+            self.contour = cache_result["contour"]
+        try:
+            self.width, self.length, self.area, self.contour = (
+                three_d.get_3d_measurements(a3dmodel_path, ply_window)
+            )
+            logger.debug(
+                "In Model Measured %s: width=%f, length=%f, area=%f",
+                self,
+                self.width,
+                self.length,
+                self.area,
+            )
+            cache[self.cache_key] = {
+                "width": self.width,
+                "length": self.length,
+                "area": self.area,
+                "contour": self.contour,
+            }
+        except Exception as e:
+            logger.error("Failed to measure %s", self)
+            logger.error(e)
+
+    @property
+    def is_measured(self):
+        return all(
+            (x is not None for x in (self.width, self.length, self.area, self.contour))
+        )
+
+    def set_features(self, ply_window, cache):
+        logger.debug("Setting features for %s", self)
+        cache_result = cache.get(self.cache_key)
+        if valid_cv2_cache_result(cache_result):
+            logger.debug("Loading features for %s from cache", self)
+            self.keypoints = deserialize_keypoints(cache_result["keypoints"])
+            self.descriptors = cache_result["descriptors"]
+            return
+        logger.debug("Measuring features for %s", self)
+        a3dmodel_path = self.get_file()
+        if not a3dmodel_path:
+            logger.error("No model file found for %s", self.cache_key)
+            return
+        self.keypoints, self.descriptors = three_d.get_3d_features(
+            a3dmodel_path, ply_window
+        )
+        cache[self.cache_key] = {
+            "keypoints": serialize_keypoints(self.keypoints),
+            "descriptors": self.descriptors,
+        }
+
+    @property
+    def has_features(self):
+        return self.keypoints is not None and self.descriptors is not None

@@ -2,6 +2,12 @@
 import logging
 from operator import attrgetter
 from typing import List, Dict
+
+from diskcache import Cache
+import open3d as o3d
+import cv2
+
+
 from model.mixins.file_IO import FileIOMixin
 from model.mixins.database import DatabaseMixin
 from model.mixins.initial_load import InitialLoadMixin
@@ -9,6 +15,7 @@ from model.mixins.copy_file import CopyFileMixin
 from model.constants import BASE_DATA_DIR
 from model.models import SpatialContext, A3DModel, ObjectFind, year_batch_piece_str
 from model.measure.segmentation import MaskPredictor
+from model.measure.similarity import calculate_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +37,9 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
 
     def __init__(self):
         super().__init__()
+
+        self.cv2_cache = Cache("./cache/cache_models")
+        self.measure_cache = Cache("./cache/measure_cache")
 
         self.predictors = {
             "colorgrid": MaskPredictor(mask_type="colorgrid"),
@@ -56,6 +66,12 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         ## to get the available options and set default index to 0 for each
         self.hemisphere_list: List[str] = []
         self.selected_hemisphere_idx = None
+
+        # create an invisible o3d visualizer for measuring the 3d models
+        self.ply_window = o3d.visualization.Visualizer()
+        self.ply_window.create_window(visible=False)
+        self.ply_window.get_render_option().light_on = False
+        self.ply_window.get_render_option().point_size = 20
 
     def select_find(self, find_number: int):
         self.selected_find_number = find_number
@@ -188,7 +204,14 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
     def set_context_index(self, idx):
         self.selected_context_idx = idx
 
-    def load_finds(self):
+    def load_finds(self, color_grid: str):
+        if color_grid.lower() == "default":
+            cg = self.predictors["colorgrid"]
+        elif color_grid.lower() == "24colorcard":
+            cg = self.predictors["colorgrid_24"]
+        else:
+            raise ValueError(f"Invalid color grid type {color_grid}")
+
         self.finds_dict = {
             f.find_number: f
             for f in self.selected_context.list_finds(self.conn.cursor())
@@ -196,48 +219,21 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_find_number = (
             list(self.finds_dict.keys())[0] if self.finds_dict else None
         )
+        logger.info("In main_model - Measuring finds")
+        for f in self.finds_list:
+            # f.set_features(self.predictors["ceramics"], self.cv2_cache)
+            f.measure(self.predictors["ceramics"], cg, self.measure_cache)
 
     def load_a3dmodels(self):
         self.a3dmodels_dict = {str(m): m for m in self.selected_context.list_models()}
         self.selected_a3dmodel_str = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
+        logger.info("In main_model - Measuring 3d models")
         for m in self.a3dmodels_list:
             m.matched_finds = m.get_matches(self.conn.cursor())
-
-    def get_all_matches(self):
-        sc = self.selected_context
-        if sc is None:
-            return
-        query = """
-        SELECT "3d_batch_year", "3d_batch_number", "3d_batch_piece", "find_number"
-        FROM object.finds
-        WHERE utm_hemisphere = %s AND utm_zone = %s AND area_utm_easting_meters = %s AND area_utm_northing_meters = %s AND context_number = %s
-        AND "3d_batch_year" IS NOT NULL AND "3d_batch_number" IS NOT NULL AND "3d_batch_piece" IS NOT NULL;
-        """
-
-        try:
-            self.conn.cursor().execute(
-                query,
-                (
-                    sc.utm_hemisphere,
-                    sc.utm_zone,
-                    sc.area_utm_easting_meters,
-                    sc.area_utm_northing_meters,
-                    sc.context_number,
-                ),
-            )
-            rows = self.conn.cursor().fetchall()
-        except Exception as e:
-            logger.error("Error fetching matches: %s", e)
-            return
-        logger.info("Found %s matches", len(rows))
-        for row in rows:
-            a3dmodel_str = year_batch_piece_str(*row[:3])
-            find_number = row[3]
-            a3dmodel = self.a3dmodels_dict.get(a3dmodel_str, None)
-            if a3dmodel is not None:
-                a3dmodel.matched_finds.append(find_number)
+            # m.set_features(self.ply_window, self.cv2_cache)
+            m.measure(self.ply_window, self.measure_cache)
 
     def get_nested_a3dmodels(self):
         by_year = {}
@@ -280,3 +276,52 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         )
         a3dmodel.matched_finds = a3dmodel.get_matches(self.conn.cursor())
         return True
+
+    def list_a3dmodels_by_similarity_cv2(self, find_number):
+        """This is too slow for now. cv2 is not using the GPU. Need to fix
+
+        Args:
+            find_number (int): the number for the find in the selected context
+
+        Returns:
+            List[A3dmodels]: A list of the A3dmodels sorted by similarity to the find
+        """
+        find: ObjectFind = self.finds_dict.get(find_number, None)
+        if find is None:
+            logger.error("No find with number %s", find_number)
+            return []
+        result = []
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        if not find.has_features:
+            logger.warning("No features set for find %s.", find)
+            logger.warning(
+                "Check that the pictures are available at %s", find.photos_path()
+            )
+            return self.a3dmodels_list
+
+        for a3dmodel in self.a3dmodels_list:
+            if not a3dmodel.has_features:
+                result.append((0, a3dmodel))
+                continue
+            front_matches = bf.match(find.descriptors_front, a3dmodel.descriptors)
+            back_matches = bf.match(find.descriptors_back, a3dmodel.descriptors)
+            result.append((max(len(front_matches), len(back_matches)), a3dmodel))
+
+        result.sort(key=lambda x: x[0], reverse=True)
+        return [x[1] for x in result]
+
+    def list_a3dmodels_by_similarity(self, find_number):
+        find: ObjectFind = self.finds_dict.get(find_number, None)
+        if find is None:
+            logger.error("No find with number %s", find_number)
+            return []
+        result = []
+        for a3dmodel in self.a3dmodels_list:
+            if not a3dmodel.is_measured:
+                result.append((-1.0, a3dmodel))
+            else:
+                sim = calculate_similarity(a3dmodel, find)
+                result.append((sim, a3dmodel))
+
+        result.sort(key=lambda x: x[0], reverse=True)
+        return [x[1] for x in result]

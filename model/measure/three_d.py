@@ -52,36 +52,6 @@ def get_3d_measurements(a3dmodel_path: Path, ply_window):
 
     # _, _, bb_w, _ = cv2.boundingRect(bb_array)
     mm_per_pixel = width / bb_w
-    # middle_row = bb_array[int(bb_array.shape[0] / 2)]
-    # middle_red_locations = ~(
-    #     (middle_row[:, 0] == 255)
-    #     & (middle_row[:, 1] == 255)
-    #     & (middle_row[:, 2] == 255)
-    # )
-
-    # try:
-    #     red_locations = np.where(middle_red_locations)[0]
-    #     if len(red_locations) >= 4:
-    #         pixel_difference = red_locations[2] - red_locations[1]
-    #     else:
-    #         pixel_difference = red_locations[1] - red_locations[0]
-
-    #     mm_per_pixel = width / pixel_difference
-    # except IndexError as e:
-    #     logger.error(
-    #         "IndexError in finding the ratio of mm to pixels for model %s",
-    #         a3dmodel_path,
-    #     )
-    #     logger.error("The red locations are %s", red_locations)
-    #     logger.error("The middle row is %s", middle_row)
-    #     # logger.error("The bounding box image is %s", bb_array)
-    #     # save the image for debugging
-    #     year = a3dmodel_path.parent.parent.parent.parent.stem
-    #     batch = a3dmodel_path.parent.parent.parent.stem
-    #     Image.fromarray(bb_array).save(
-    #         f"{year}-{batch}-{a3dmodel_path.stem}_bb_error.png"
-    #     )
-    #     raise e
 
     # find the area of the 3d model
     ply_window.clear_geometries()

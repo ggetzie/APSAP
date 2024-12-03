@@ -1,12 +1,15 @@
 import logging
 import time
+from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
-from model.models import year_batch_piece_str
+from model.models import A3DModel
+
+# from model.models import year_batch_piece_str
 from view.main_view import MainView
 from presenter.mixins.load_data.main_load_data import LoadDataMixin
 
@@ -232,8 +235,10 @@ class MainPresenter(
         # models_sorted_by_similarity = (
         #     self.get_potential_3d_models_sorted_by_similarity()
         # )
-        models_sorted_by_similarity = self.main_model.list_a3dmodels_by_similarity(
-            self.main_model.selected_find.find_number
+        models_sorted_by_similarity: List[A3DModel] = (
+            self.main_model.list_a3dmodels_by_similarity(
+                self.main_model.selected_find.find_number
+            )
         )
         self.main_view.clear_sorted_models()
         self.main_view.clear_ply_window()
@@ -242,11 +247,11 @@ class MainPresenter(
         min_batch = self.main_view.batch_start.value()
         max_batch = self.main_view.batch_end.value()
         filtered_models = [
-            self.main_model.a3dmodels_dict.get(year_batch_piece_str(year, batch, piece))
-            for year, batch, piece in models_sorted_by_similarity
-            if (year == filter_year)
-            and (int(batch) >= int(min_batch))
-            and (int(batch) <= int(max_batch))
+            m
+            for m in models_sorted_by_similarity
+            if (m.batch_year == int(filter_year))
+            and (m.batch_number >= int(min_batch))
+            and (m.batch_number <= int(max_batch))
         ]
 
         self.main_view.list_sorted_models(filtered_models)

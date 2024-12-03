@@ -251,8 +251,9 @@ class ObjectFind:
         self.width_back: float = None
         self.length_back: float = None
         self.area_front: float = None
+        self.area_back: float = None
         self.contour_front: np.ndarray = None
-        self.countour_back: np.ndarray = None
+        self.contour_back: np.ndarray = None
         self.keypoints_front = None
         self.descriptors_front = None
         self.keypoints_back = None
@@ -398,7 +399,6 @@ class ObjectFind:
             self.length_back = cache_result_back["length"]
             self.area_back = cache_result_back["area"]
             self.contour_back = cache_result_back["contour"]
-
             return
         try:
             with Image.open(self.photo_path()) as front_image, Image.open(
@@ -471,6 +471,12 @@ class ObjectFind:
         )
 
     def set_features(self, ceramic_predictor: MaskPredictor, cache):
+        """Use openCV to measure features of the find. Not used right now, very slow.
+
+        Args:
+            ceramic_predictor (MaskPredictor): A MaskPredictor object to get the ceramic mask
+            cache (Cache): A diskcache object to store the results / retrieve from if available
+        """
         logger.debug("Setting features for %s", self)
         front_key = f"{self}-front"
         back_key = f"{self}-back"
@@ -636,6 +642,7 @@ class A3DModel:
             self.length = cache_result["length"]
             self.area = cache_result["area"]
             self.contour = cache_result["contour"]
+            return
         try:
             self.width, self.length, self.area, self.contour = (
                 three_d.get_3d_measurements(a3dmodel_path, ply_window)
@@ -664,6 +671,13 @@ class A3DModel:
         )
 
     def set_features(self, ply_window, cache):
+        """Use CV2 to measure features of the 3d model
+        This is very slow right now, not used.
+
+        Args:
+            ply_window (Visualizer): An open3d visualizer window to get a picture of the model
+            cache (Cache): A diskcache object to store the results / retrieve from if available
+        """
         logger.debug("Setting features for %s", self)
         cache_result = cache.get(self.cache_key)
         if valid_cv2_cache_result(cache_result):

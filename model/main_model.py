@@ -13,7 +13,7 @@ from model.mixins.database import DatabaseMixin
 from model.mixins.initial_load import InitialLoadMixin
 from model.mixins.copy_file import CopyFileMixin
 from model.constants import BASE_DATA_DIR
-from model.models import SpatialContext, A3DModel, ObjectFind, year_batch_piece_str
+from model.models import SpatialContext, A3DModel, ObjectFind
 from model.measure.segmentation import MaskPredictor
 from model.measure.similarity import calculate_similarity
 

@@ -1,7 +1,7 @@
 import cv2
 
 
-class CalculateIndividualSimilaritiesMixin:  
+class CalculateIndividualSimilaritiesMixin:
     # bridging the view(gui) and the model(data)
     def get_similarity_two_nums(self, a, b):  # a, b >
         """A similarity score between two numbers, 0 means exactly the same, 1 means
@@ -25,14 +25,13 @@ class CalculateIndividualSimilaritiesMixin:
         Returns:
             double: A similarity score representing how similar the 3d model and the find are.
         """
-        _, _, main_presenter = self.get_model_view_presenter()
 
         smaller_area = min(area_front, area_back)
         larger_area = max(area_front, area_back)
 
         return min(
-            main_presenter.get_similarity_two_nums(larger_area, area_3d),
-            main_presenter.get_similarity_two_nums(smaller_area, area_3d),
+            self.get_similarity_two_nums(larger_area, area_3d),
+            self.get_similarity_two_nums(smaller_area, area_3d),
         )
 
     def get_width_length_similarity(
@@ -58,15 +57,14 @@ class CalculateIndividualSimilaritiesMixin:
         Returns:
             double: A similarity score representing how similar the 3d model and the find are.
         """
-        _, _, main_presenter = self.get_model_view_presenter()
 
-        similarity_with_img_1 = main_presenter.get_similarity_two_nums(
+        similarity_with_img_1 = self.get_similarity_two_nums(
             length_front, length_3d
-        ) + main_presenter.get_similarity_two_nums(width_front, width_3d)
+        ) + self.get_similarity_two_nums(width_front, width_3d)
 
-        similarity_with_img_2 = main_presenter.get_similarity_two_nums(
+        similarity_with_img_2 = self.get_similarity_two_nums(
             length_back, length_3d
-        ) + main_presenter.get_similarity_two_nums(width_back, width_3d)
+        ) + self.get_similarity_two_nums(width_back, width_3d)
 
         return min(similarity_with_img_1, similarity_with_img_2)
 

@@ -38,9 +38,10 @@ class MainPresenter(
     item in a select, things change in the application.
     """
 
-    def __init__(self):
+    def __init__(self, debug: bool=False):
 
         # Bind both the model and view into the presenter
+        self.debug = debug
         now = time.time()
         logger.info("loading main model")
         self.main_model: MainModel = MainModel()
@@ -232,14 +233,21 @@ class MainPresenter(
         self.block_signals(False)
 
     def populate_sorted_models(self):
-        # models_sorted_by_similarity = (
+        # models_sorted_by_similarity: List[A3DModel] = (
         #     self.get_potential_3d_models_sorted_by_similarity()
         # )
-        models_sorted_by_similarity: List[A3DModel] = (
-            self.main_model.list_a3dmodels_by_similarity(
-                self.main_model.selected_find.find_number
+        selected_find = self.main_model.selected_find
+        if not selected_find.is_measured:
+            self.main_view.display_error(
+                "Couldn't measure this find. Models are not sorted by similarity"
             )
-        )
+            models_sorted_by_similarity = self.main_model.a3dmodels_list
+        else:
+            models_sorted_by_similarity: List[A3DModel] = (
+                self.main_model.list_a3dmodels_by_similarity(
+                    self.main_model.selected_find.find_number
+                )
+            )
         self.main_view.clear_sorted_models()
         self.main_view.clear_ply_window()
         self.block_signals(True)

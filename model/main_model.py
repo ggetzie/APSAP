@@ -35,7 +35,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         opens a 3d model, fixes it, then save it to another place.
     """
 
-    def __init__(self):
+    def __init__(self, skip_ply=False):
         super().__init__()
 
         self.cv2_cache = Cache("./cache/cache_models")
@@ -68,10 +68,13 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_hemisphere_idx = None
 
         # create an invisible o3d visualizer for measuring the 3d models
-        self.ply_window = o3d.visualization.Visualizer()
-        self.ply_window.create_window(visible=False)
-        self.ply_window.get_render_option().light_on = False
-        self.ply_window.get_render_option().point_size = 20
+        if not skip_ply:
+            self.ply_window = o3d.visualization.Visualizer()
+            self.ply_window.create_window(visible=False)
+            self.ply_window.get_render_option().light_on = False
+            self.ply_window.get_render_option().point_size = 20
+        else:
+            self.ply_window = None
 
     def select_find(self, find_number: int):
         self.selected_find_number = find_number
@@ -323,5 +326,5 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
                 sim = calculate_similarity(a3dmodel, find)
                 result.append((sim, a3dmodel))
 
-        result.sort(key=lambda x: x[0], reverse=True)
+        result.sort(key=lambda x: x[0])
         return [x[1] for x in result]

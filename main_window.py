@@ -56,7 +56,7 @@ def main():
     logger.info("Starting up...")
     now = time.time()
 
-    presenter = MainPresenter()
+    presenter = MainPresenter(debug=args.log_level == "debug")
     logger.info("Started up in %s seconds", f"{time.time() - now:0.4f}")
 
     # Show the GUI application

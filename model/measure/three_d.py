@@ -73,6 +73,7 @@ def get_3d_measurements(a3dmodel_path: Path, ply_window):
     contours, _ = cv2.findContours(thresh, 2, 1)
     contour = contours[0]
     ply_window.clear_geometries()
+    del ctr
     return width, length, area, contour
 
 

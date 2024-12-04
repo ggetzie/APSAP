@@ -12,7 +12,6 @@ from model.constants import BASE_DATA_DIR
 from model.measure.segmentation import MaskPredictor
 from model.measure.two_d import get_ceramic_mask, get_masked_image
 from model.measure.core import get_features, serialize_keypoints, deserialize_keypoints
-import model.measure.three_d as three_d
 
 logger = logging.getLogger(__name__)
 
@@ -440,21 +439,22 @@ class ObjectFind:
                     self.length_front,
                     self.area_front,
                 )
-                cache[front_key] = {
-                    "width": self.width_front,
-                    "length": self.length_front,
-                    "area": self.area_front,
-                    "contour": self.contour_front,
-                }
-                cache[back_key] = {
-                    "width": self.width_back,
-                    "length": self.length_back,
-                    "area": self.area_back,
-                    "contour": self.contour_back,
-                }
         except Exception as e:
             logger.error("Failed to measure %s", self)
             logger.error(e)
+
+        cache[front_key] = {
+            "width": self.width_front,
+            "length": self.length_front,
+            "area": self.area_front,
+            "contour": self.contour_front,
+        }
+        cache[back_key] = {
+            "width": self.width_back,
+            "length": self.length_back,
+            "area": self.area_back,
+            "contour": self.contour_back,
+        }
 
     @property
     def is_measured(self):
@@ -634,7 +634,6 @@ class A3DModel:
         if not a3dmodel_path:
             logger.error("No model file found for %s", self)
             return
-        logger.debug("Measuring %s", self)
         cache_result = cache.get(self.cache_key)
         if valid_measure_cache_result(cache_result):
             logger.debug("Loading measurements for %s from cache", self)
@@ -643,6 +642,7 @@ class A3DModel:
             self.area = cache_result["area"]
             self.contour = cache_result["contour"]
             return
+        logger.debug("Measuring %s", self)
         try:
             self.width, self.length, self.area, self.contour = (
                 three_d.get_3d_measurements(a3dmodel_path, ply_window)

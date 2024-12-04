@@ -51,9 +51,9 @@ class Get3dModelSortedBySimilarityMixin:
                 width_3d,
                 length_3d,
                 contour_3d,
-                year,
-                batch_num,
-                piece_num,
+                _,
+                _,
+                _,
             ) = main_presenter.measure_pixels_3d(a3dmodel)
 
             # We update the GUI to show which 3d model we are calculating the 3d model of
@@ -86,15 +86,8 @@ class Get3dModelSortedBySimilarityMixin:
                 + contour_similarity * 0.7
             )
             # We append the similarity and 3d model data to the list we defined
-            similarity_scores.append(
-                [
-                    similarity_mean,
-                    year,
-                    batch_num,
-                    piece_num,
-                ]
-            )
+            similarity_scores.append([similarity_mean, a3dmodel])
 
         # We return a list of 3d model sorted by their similarity_mean, we ignore similarity_mean
         # so we effectively are returning a list of [batch_num, piece_num, year]
-        return [items[1:] for items in sorted(similarity_scores)]
+        return [items[1] for items in sorted(similarity_scores)]

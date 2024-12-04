@@ -1,5 +1,4 @@
 import logging
-import pathlib
 import torch
 from PIL import Image
 import torchvision
@@ -8,6 +7,7 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
 import computation.transforms as T
+from model.constants import COMPUTATION_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,6 @@ class ModelNotAvailable(Exception):
     pass
 
 
-COMPUTATION_PATH = pathlib.Path(__file__).parent.parent.parent / "computation"
 MODEL_PATHS = {
     "ceramics": COMPUTATION_PATH / "updated_ceremicsmask.pt",
     "colorgrid": COMPUTATION_PATH / "colorgridmask.pt",

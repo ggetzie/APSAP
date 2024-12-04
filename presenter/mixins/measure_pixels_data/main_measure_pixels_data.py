@@ -1,14 +1,13 @@
-import sys
 import logging
 
+from PIL import Image
 from PyQt5.QtCore import QCoreApplication
 
 from presenter.mixins.measure_pixels_data.measure_2d import Measure2DMixin
 from presenter.mixins.measure_pixels_data.measure_3d import Measure3dMixin
 from computation.nn_segmentation import MaskPredictor
+from model.constants import REFERENCE_IMAGE_PATH, COMPUTATION_PATH
 
-
-sys.path.insert(0, "../../..")
 
 logger = logging.getLogger(__name__)
 
@@ -19,27 +18,26 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         for measuring the pixels. It also runs the networks for once so it loads faster for
         subsequent runs. Notice that we have two different neural networks for the two color grids.
         """
-        main_model, _, main_presenter = self.get_model_view_presenter()
 
-        main_presenter.ceramic_predictor = MaskPredictor(
-            r".\computation\updated_ceremicsmask.pt"
+        self.ceramic_predictor = MaskPredictor(
+            str(COMPUTATION_PATH / "updated_ceremicsmask.pt")
         )
-        main_presenter.colorgrid_predictor = MaskPredictor(
-            r".\computation\colorgridmask.pt"
+        self.colorgrid_predictor = MaskPredictor(
+            str(COMPUTATION_PATH / "colorgridmask.pt")
         )
 
-        main_presenter.colorgrid_predictor_24color = MaskPredictor(
-            r".\computation\Different_colro_grid.pt"
+        self.colorgrid_predictor_24color = MaskPredictor(
+            str(COMPUTATION_PATH / "Different_colro_grid.pt")
         )
-        main_presenter.ceramic_predictor.predict(
-            main_model.open_image(main_model.reference_place_holder_img)
+        self.reference_image: Image.Image = (
+            Image.open(REFERENCE_IMAGE_PATH)
+            .resize((450, 300), Image.LANCZOS)
+            .convert("RGB")
         )
-        main_presenter.colorgrid_predictor.predict(
-            main_model.open_image(main_model.reference_place_holder_img)
-        )
-        main_presenter.colorgrid_predictor_24color.predict(
-            main_model.open_image(main_model.reference_place_holder_img)
-        )
+
+        self.ceramic_predictor.predict(self.reference_image)
+        self.colorgrid_predictor.predict(self.reference_image)
+        self.colorgrid_predictor_24color.predict(self.reference_image)
 
     def measure_pixels_2d(self, path_front, path_back):
         """This function measures the front image and the back image and return
@@ -52,7 +50,6 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         Returns:
             tuple: Tuple of the measured values
         """
-        main_model, _, main_presenter = self.get_model_view_presenter()
         try:
 
             (
@@ -60,14 +57,14 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 width_front,
                 length_front,
                 contour_front,
-            ) = main_presenter.get_area_width_length_contour2d(path_front)
+            ) = self.get_area_width_length_contour2d(path_front)
 
             (
                 area_back,
                 width_back,
                 length_back,
                 contour_back,
-            ) = main_presenter.get_area_width_length_contour2d(path_back)
+            ) = self.get_area_width_length_contour2d(path_back)
 
         except Exception as e:
             logging.error(
@@ -85,7 +82,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 1,
                 1,
                 1,
-                main_presenter.get_contour_2d(main_model.reference_place_holder_img),
+                self.get_contour_2d(REFERENCE_IMAGE_PATH),
             )
             (
                 area_back,
@@ -96,7 +93,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 1,
                 1,
                 1,
-                main_presenter.get_contour_2d(main_model.reference_place_holder_img),
+                self.get_contour_2d(REFERENCE_IMAGE_PATH),
             )
 
         return (

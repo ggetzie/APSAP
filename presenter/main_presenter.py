@@ -38,7 +38,7 @@ class MainPresenter(
     item in a select, things change in the application.
     """
 
-    def __init__(self, debug: bool=False):
+    def __init__(self, debug: bool = False):
 
         # Bind both the model and view into the presenter
         self.debug = debug
@@ -58,7 +58,7 @@ class MainPresenter(
 
         # Loading the first context
         self.populate_hemispheres()
-        self.main_view.contextDisplay.setText(str(self.main_model.selected_context))
+        self.main_view.context_display.setText(str(self.main_model.selected_context))
 
         super().__init__()
 
@@ -100,13 +100,18 @@ class MainPresenter(
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(self.on_update_clicked)
-        main_view.remove_button.clicked.connect(self.on_remove_clicked)
+        main_view.unmatch_find_button.clicked.connect(
+            lambda: logger.info("Unmatch find")
+        )
+        main_view.unmatch_model_button.clicked.connect(
+            lambda: logger.info("Unmatch model")
+        )
 
         main_view.unsorted_model_list.selectionModel().currentChanged.connect(
-            self.change_3d_model
+            self.on_select_model
         )
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
-            self.change_3d_model
+            self.on_select_model
         )
 
         # Connect events for when the user selects a model
@@ -233,9 +238,7 @@ class MainPresenter(
         self.block_signals(False)
 
     def populate_sorted_models(self):
-        # models_sorted_by_similarity: List[A3DModel] = (
-        #     self.get_potential_3d_models_sorted_by_similarity()
-        # )
+
         selected_find = self.main_model.selected_find
         if not selected_find.is_measured:
             self.main_view.display_error(
@@ -243,10 +246,13 @@ class MainPresenter(
             )
             models_sorted_by_similarity = self.main_model.a3dmodels_list
         else:
+            # models_sorted_by_similarity: List[A3DModel] = (
+            #     self.main_model.list_a3dmodels_by_similarity(
+            #         self.main_model.selected_find.find_number
+            #     )
+            # )
             models_sorted_by_similarity: List[A3DModel] = (
-                self.main_model.list_a3dmodels_by_similarity(
-                    self.main_model.selected_find.find_number
-                )
+                self.get_potential_3d_models_sorted_by_similarity()
             )
         self.main_view.clear_sorted_models()
         self.main_view.clear_ply_window()
@@ -264,7 +270,7 @@ class MainPresenter(
 
         self.main_view.list_sorted_models(filtered_models)
         self.main_view.sorted_model_list.selectionModel().currentChanged.connect(
-            self.change_3d_model
+            self.on_select_model
         )
 
         self.block_signals(False)
@@ -313,12 +319,12 @@ class MainPresenter(
         if new_index != self.main_model.selected_context_idx:
             main_model.set_context_index(new_index)
             main_view.clear_interface()
-            main_view.contextDisplay.setText(str(main_model.selected_context))
+            main_view.context_display.setText(str(main_model.selected_context))
             self.set_filters()
 
     def on_select_find(self, selected_item):
-        """This function would try to load the two images into the GUI and after finishing its operations,
-        load the sorted 3d models.
+        """This function would try to load the two images into the GUI and after finishing its
+        operations, load the sorted 3d models.
 
         Args:
             selected_item (QListWidgetItem): The selected item in the finds_list
@@ -342,36 +348,21 @@ class MainPresenter(
 
         main_model.select_find(find_num)
         selected_find = main_model.selected_find
-        main_view.selected_find_widget = selected_item.text()
-
-        main_view.display_find_photo("front", selected_find.photo_path("front"))
-        main_view.display_find_photo("back", selected_find.photo_path("back"))
-
-        # Set up the selected_find's text
-        main_view.selected_find.setText(str(find_num))
-
-        if selected_find.is_matched:
-            batch_year, batch_number, batch_piece = selected_find.get_match()
-            main_view.current_year.setText(str(batch_year))
-            main_view.current_batch.setText(f"{batch_number:>03}")
-            main_view.current_piece.setText(f"{batch_piece:>02}")
-        else:
-            main_view.current_year.setText("NS")
-            main_view.current_batch.setText("NS")
-            main_view.current_piece.setText("NS")
-            self.clean_ply_window()
-        find_info = "\n".join(
-            [
-                f"Find: {find_num}",
-                f"Material: {selected_find.material}",
-                f"Category: {selected_find.category}",
-            ]
-        )
-        main_view.selected_find_info.setText(f"{find_info}")
+        main_view.display_find_details(selected_find)
+        main_view.display_model_details(None)
 
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
         self.populate_sorted_models()
+
+    def on_select_model(self, selected_item):
+        ply_str = selected_item.data(Qt.UserRole)
+        self.main_model.select_a3dmodel(ply_str)
+        a3dmodel = self.main_model.selected_a3dmodel
+        if a3dmodel is None:
+            logger.error("The 3d model %s is not found", ply_str)
+            return
+        self.main_view.display_model_details(a3dmodel)
 
     def clear_selected_find(self):
         self.main_model.selected_find_number = None
@@ -394,16 +385,24 @@ class MainPresenter(
             self.main_view.display_error("Please select a 3d model first")
             return
 
+        if selected_a3dmodel.is_matched:
+            msg = (
+                f"Model {selected_a3dmodel} is already matched to a find\n"
+                "Make sure model and find are unmatched before updating."
+            )
+            self.main_view.display_error(msg)
+            return
+
+        if selected_find.is_matched:
+            msg = (
+                f"Find {selected_find} is already matched to a model\n"
+                "Make sure model and find are unmatched before updating."
+            )
+            self.main_view.display_error(msg)
+            return
         message = (
             f"Update find ({selected_find}) to match 3d model ({selected_a3dmodel})?"
         )
-        if selected_a3dmodel.is_matched:
-            current_match = selected_a3dmodel.matched_finds[0]
-            message += (
-                f"\nModel {selected_a3dmodel} is already matched to find {current_match}"
-                f"\nAfter this operation, find {current_match} will be unmatched"
-            )
-
         self.main_view.confirm(message, self.on_update_confirmed)
 
     def on_update_confirmed(self, e):
@@ -422,21 +421,17 @@ class MainPresenter(
             logger.debug("The user did not confirm the match: %s", e.text())
             return
         selected_find = main_model.selected_find
-        old_a3dmodel = main_model.a3dmodels_dict.get(
-            selected_find.get_match_str(), None
-        )
         selected_a3dmodel = main_model.selected_a3dmodel
-        old_find_number = None
         if selected_find is None or selected_a3dmodel is None:
             logger.error("No find or 3d model selected")
             return
-
-        ##Updating the database
-        if selected_a3dmodel.is_matched:
-            old_find_number = selected_a3dmodel.matched_finds[0]
-            success = main_model.clear_match_for_find(old_find_number)
-            if not success:
-                logger.error("Failed to clear match for find %s", old_find_number)
+        # check again that model and find are not already matched
+        if selected_find.is_matched or selected_a3dmodel.is_matched:
+            logger.error("Find or model already matched")
+            main_view.display_error(
+                "Find or model already matched.\nMake sure they are unmatched before updating."
+            )
+            return
 
         success = main_model.match_selected_find_with_selected_a3dmodel()
         if not success:
@@ -460,9 +455,6 @@ class MainPresenter(
 
         # We update the GUI to show that the find is matched to the 3d model
         main_view.set_find_color(selected_find.find_number, "red")
-        if old_find_number is not None:
-            main_view.set_find_color(old_find_number, "black")
-
         main_view.set_unsorted_model_color(
             selected_a3dmodel.batch_year,
             selected_a3dmodel.batch_number,
@@ -474,23 +466,9 @@ class MainPresenter(
             str(selected_a3dmodel),
             "red",
         )
-        if old_a3dmodel is not None:
-            main_view.set_unsorted_model_color(
-                old_a3dmodel.batch_year,
-                old_a3dmodel.batch_number,
-                old_a3dmodel.batch_piece,
-                "black",
-            )
-            main_view.set_sorted_model_color(
-                str(old_a3dmodel),
-                "black",
-            )
 
         # Update on the GUI that the find has the new matched 3d model
-        new_year, new_batch, new_piece = str(selected_a3dmodel).split("-")
-        main_view.current_year.setText(new_year)
-        main_view.current_batch.setText(new_batch)
-        main_view.current_piece.setText(new_piece)
+        main_view.display_find_details(selected_find)
 
     def on_remove_clicked(self):
         """This function is called when the user clicks on the remove button.

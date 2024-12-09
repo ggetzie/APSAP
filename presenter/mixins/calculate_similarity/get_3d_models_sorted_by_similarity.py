@@ -57,8 +57,10 @@ class Get3dModelSortedBySimilarityMixin:
             ) = main_presenter.measure_pixels_3d(a3dmodel)
 
             # We update the GUI to show which 3d model we are calculating the 3d model of
-            main_view.status_label.setText(f"Calculate the similarity with {a3dmodel}")
-            main_view.status_label.repaint()
+            main_view.general_status.setText(
+                f"Calculate the similarity with {a3dmodel}"
+            )
+            main_view.general_status.repaint()
 
             # Then we calculate the similarity with respect to different criteria
             area_similarity = main_presenter.get_area_similarity(

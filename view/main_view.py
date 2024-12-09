@@ -15,10 +15,11 @@ from PyQt5.QtWidgets import (
     QListWidget,
     QTreeView,
     QSpinBox,
-    QToolButton,
     QLabel,
     QComboBox,
     QWidget,
+    QPushButton,
+    QProgressBar,
 )
 
 from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel, QWindow, QStandardItem
@@ -29,7 +30,7 @@ from PIL.ImageQt import ImageQt
 import win32gui
 
 from view.mixins.image_window import OpenImageMixin
-from model.models import A3DModel
+from model.models import A3DModel, ObjectFind
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,8 @@ class MainView(QMainWindow, OpenImageMixin):
         """
         super().__init__()
 
-        # declare the widgets that will be used. These will be filled in when MainWindow.ui is loaded
+        # declare the widgets that will be used.
+        # These will be filled in when MainWindow.ui is loaded
         self.finds_list: QListWidget = None
         self.unsorted_model_list: QTreeView = None
         self.sorted_model_list: QTreeView = None
@@ -62,11 +64,24 @@ class MainView(QMainWindow, OpenImageMixin):
         self.year: QSpinBox = None
         self.batch_start: QSpinBox = None
         self.batch_end: QSpinBox = None
-        self.load_all: QToolButton = None
-        self.selected_find: QLabel = None
-        self.status_label: QLabel = None
+        self.load_all: QPushButton = None
+
+        self.context_display: QLabel = None
+
+        self.findFrontPhoto_l: QLabel = None
+        self.findBackPhoto_l: QLabel = None
+
+        self.selected_find_info: QLabel = None
         self.color_grid_select: QComboBox = None
         self.model: QLabel = None
+        self.find_match_info: QLabel = None
+        self.model_match_info: QLabel = None
+        self.update_button: QPushButton = None
+        self.unmatch_find_button: QPushButton = None
+        self.unmatch_model_button: QPushButton = None
+        self.general_status: QLabel = None
+        self.task_status: QLabel = None
+        self.task_progress: QProgressBar = None
 
         self.current_pcd = None
         logger.info("Loading MainWindow.ui")
@@ -148,13 +163,93 @@ class MainView(QMainWindow, OpenImageMixin):
         self.current_image_front = ""
         self.current_image_back = ""
 
+    def display_find_details(self, find: ObjectFind):
+        """This function displays the details of the selected find on the GUI
+
+        Args:
+            find (ObjectFind): The find object to display
+        """
+        if find is None:
+            self.clear_find_info()
+            return
+        self.selected_find_info.setText(
+            f"Find: {find.find_number}\nMaterial: {find.material}\nCategory: {find.category}"
+        )
+        if find.is_matched:
+            self.find_match_info.setText(
+                f"Find {find.find_number} is matched with model {find.get_match_str()}"
+            )
+            self.update_button.setEnabled(False)
+            self.update_button.setToolTip(
+                "Make sure find and model are both unmatched before updating."
+            )
+            self.unmatch_find_button.setEnabled(True)
+        else:
+            self.find_match_info.setText(f"Find {find.find_number} is NOT MATCHED")
+            self.update_button.setEnabled(True)
+            self.unmatch_find_button.setEnabled(False)
+
+        self.display_find_photo("front", find.photo_path("front"))
+        self.display_find_photo("back", find.photo_path("back"))
+
+    def display_model_details(self, model: A3DModel):
+        self.model_match_info.styleSheet = "color: black"
+        if model is None:
+            self.clear_model_info()
+            return
+        if model.is_matched:
+            msg = ""
+            multiple_models = len(model.matched_finds) > 1
+            if multiple_models:
+                msg = "MODEL IS MATCHED TO MORE THAN 1 FIND!!!\n"
+                self.model_match_info.styleSheet = "color: red"
+            finds = ", ".join(str(f) for f in model.matched_finds)
+            msg += f"Model {model} is matched with find{'s' if multiple_models else ''} {finds}"
+            self.model_match_info.setText(msg)
+            self.unmatch_model_button.setEnabled(True)
+            self.update_button.setEnabled(False)
+            self.update_button.setToolTip(
+                "Make sure find and model are both unmatched before updating."
+            )
+            self.model_match_info.setText(msg)
+
+        else:
+            self.model_match_info.setText(f"Model {model} is NOT MATCHED")
+            self.unmatch_model_button.setEnabled(False)
+            self.update_button.setEnabled(True)
+        model_path = model.get_file("full")
+        self.clear_ply_window()
+        self.current_pcd = o3d.io.read_point_cloud(str(model_path))
+        self.ply_window.get_render_option().point_size = 5
+        self.ply_window.add_geometry(self.current_pcd)
+        self.ply_window.update_geometry(self.current_pcd)
+
     def clear_find_info(self):
         self.clear_find_photos()
         self.selected_find_info.setText("")
-        self.selected_find.setText("")
-        self.current_batch.setText("")
-        self.current_year.setText("")
-        self.current_piece.setText("")
+        self.find_match_info.setText("No find selected")
+        self.update_button.setEnabled(False)
+        self.update_button.setToolTip("Select a find and a model to update.")
+
+    def clear_model_info(self):
+        self.model_match_info.setText("No model selected")
+        self.unmatch_model_button.setEnabled(False)
+        self.update_button.setEnabled(False)
+        self.update_button.setToolTip("Select a find and a model to update.")
+        self.clear_ply_window()
+
+    def clear_interface(self):
+        """Clear all the texts, and selects, images displayed and 3d models from the interface."""
+
+        self.context_display.setText("")
+        self.clear_find_info()
+        self.clear_model_info()
+
+        self.clear_sorted_models()
+        self.clear_unsorted_models()
+        # self.reset_ply_selection_model()
+        self.finds_list.setCurrentItem(None)
+        self.finds_list.clear()
 
     def confirm(self, message: str, on_confirm):
         msg = QMessageBox()
@@ -194,31 +289,6 @@ class MainView(QMainWindow, OpenImageMixin):
             if q_model.item(i).text() == model_str:
                 q_model.item(i).setForeground(QColor(color))
 
-    def clear_interface(self):
-        """Clear all the texts, and selects, images displayed and 3d models from the interface."""
-
-        self.findFrontPhoto_l.clear()
-        self.findBackPhoto_l.clear()
-        self.status_label.setText("")
-        self.selected_find.setText("")
-        self.current_batch.setText("")
-        self.current_year.setText("")
-        self.current_piece.setText("")
-        self.new_batch.setText("")
-        self.new_piece.setText("")
-        self.new_year.setText("")
-        self.contextDisplay.setText("")
-        if hasattr(self, "current_pcd"):
-            self.ply_window.remove_geometry(getattr(self, "current_pcd"))
-            setattr(self, "current_pcd", None)
-
-        model = QStandardItemModel(self)
-        self.sorted_model_list.setModel(model)
-        self.clear_unsorted_models()
-        # self.reset_ply_selection_model()
-        self.finds_list.setCurrentItem(None)
-        self.finds_list.clear()
-
     def initialize_unsorted_models(self):
         model = QStandardItemModel(self)
         model.setHorizontalHeaderLabels(["Models"])
@@ -255,7 +325,7 @@ class MainView(QMainWindow, OpenImageMixin):
         self.finds_list.clear()
 
     def set_status(self, text: str):
-        self.status_label.setText(text)
+        self.general_status.setText(text)
 
     def set_find_year_filters(
         self, min_year: int, max_year: int, min_find: int, max_find: int

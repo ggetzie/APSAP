@@ -21,7 +21,8 @@
     "maskthres",
     "plys",
     "psycopg2",
-    "qtcreator"
+    "qtcreator",
+    "unmatch"
   ],
   "cSpell.words": ["keypoints", "threed"],
   "python.formatting.provider": "black",

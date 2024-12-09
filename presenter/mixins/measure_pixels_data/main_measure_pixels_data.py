@@ -132,10 +132,10 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         logger.info(
             "Measuring 3d model: Year %s, Batch: %s, Piece: %s ", year, batch, piece
         )
-        main_view.status_label.setText(
+        main_view.general_status.setText(
             f"Measuring 3d model: Year {year}, Batch: {batch}, Piece: {piece} "
         )
-        main_view.status_label.repaint()
+        main_view.general_status.repaint()
         QCoreApplication.processEvents()
 
         # Try to get the measurements. If there is an error, return the value

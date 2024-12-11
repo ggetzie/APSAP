@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
-from model.models import A3DModel
+from model.models import A3DModel, ObjectFind
 
 # from model.models import year_batch_piece_str
 from view.main_view import MainView
@@ -100,12 +100,8 @@ class MainPresenter(
 
         # Connecting the buttons that remove and update match to their handlers
         main_view.update_button.clicked.connect(self.on_update_clicked)
-        main_view.unmatch_find_button.clicked.connect(
-            lambda: logger.info("Unmatch find")
-        )
-        main_view.unmatch_model_button.clicked.connect(
-            lambda: logger.info("Unmatch model")
-        )
+        main_view.unmatch_find_button.clicked.connect(self.on_unmatch_find_clicked)
+        main_view.unmatch_model_button.clicked.connect(self.on_unmatch_model_clicked)
 
         main_view.unsorted_model_list.selectionModel().currentChanged.connect(
             self.on_select_model
@@ -113,11 +109,6 @@ class MainPresenter(
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             self.on_select_model
         )
-
-        # Connect events for when the user selects a model
-        # main_view.sorted_model_list.selectionModel().currentChanged.connect(
-        #     main_presenter.change_3d_model
-        # )
 
     def block_signals(self, boolean):
         """This function disables or enables all the interactive elements from the
@@ -373,8 +364,24 @@ class MainPresenter(
     #  button.                                                               #
     ##########################################################################
 
+    def on_load_all_clicked(self):
+        selected_context = self.main_model.selected_context
+        if not selected_context:
+            logger.error("Tried to load finds and models without context selected")
+            return
+
+        self.main_model.load_finds(
+            color_grid=self.main_view.color_grid_select.currentText()
+        )
+        self.main_model.load_a3dmodels()
+        self.populate_finds()
+        self.populate_unsorted_models()
+
     def on_update_clicked(self):
-        """This function is called when the user clicks on the update button"""
+        """This function is called when the user clicks on the update button.
+        In order to update a match, a find must be selected and a 3d model must be selected.
+        The selected find and model must also not be matched to anything else.
+        """
         selected_find = self.main_model.selected_find
         selected_a3dmodel = self.main_model.selected_a3dmodel
 
@@ -470,50 +477,86 @@ class MainPresenter(
         # Update on the GUI that the find has the new matched 3d model
         main_view.display_find_details(selected_find)
 
-    def on_remove_clicked(self):
-        """This function is called when the user clicks on the remove button.
-        Confirm that they really want to remove the match"""
+    def on_unmatch_find_clicked(self):
+        """This function is called when the user clicks on the unmatch find button.
+        Confirm that they really want to unmatch the find"""
         selected_find = self.main_model.selected_find
-        selected_a3dmodel = self.main_model.selected_a3dmodel
 
         if selected_find is None:
             self.main_view.display_error("Please select a find first")
             return
-        if selected_a3dmodel is None:
-            self.main_view.display_error("Please select a 3d model first")
-            return
 
-        message = f"Remove match between find ({selected_find}) and 3d model ({selected_a3dmodel})?"
+        message = f"Unmatch find ({selected_find}) from 3d model ({selected_find.get_match_str()})?"
 
-        self.main_view.confirm(message, self.on_remove_confirmed)
+        self.main_view.confirm(message, self.on_unmatch_find_confirmed)
 
-    def on_remove_confirmed(self, e):
+    def on_unmatch_find_confirmed(self, e):
         if not e.text() == "OK":
             logger.debug("The user did not confirm the match: %s", e.text())
             return
         selected_find = self.main_model.selected_find
-        selected_a3dmodel = self.main_model.selected_a3dmodel
         if not selected_find:
             logger.error("No find selected")
             return
+        old_match: A3DModel = self.main_model.a3dmodels_dict[
+            selected_find.get_match_str()
+        ]
         # remove the match in the model, updating the database
         self.main_model.clear_match_for_find(selected_find.find_number)
 
         # update the GUI
         self.main_view.set_find_color(selected_find.find_number, "black")
         self.main_view.set_unsorted_model_color(
+            old_match.batch_year,
+            old_match.batch_number,
+            old_match.batch_piece,
+            "black",
+        )
+        self.main_view.set_sorted_model_color(str(old_match), "black")
+        self.main_view.update_find_match_info(selected_find)
+        self.main_view.update_model_match_info(self.main_model.selected_a3dmodel)
+
+    def on_unmatch_model_clicked(self):
+        """This function is called when the user clicks on the unmatch model button.
+        Confirm that they really want to unmatch the model"""
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+
+        if selected_a3dmodel is None:
+            self.main_view.display_error("Please select a 3d model first")
+            return
+        plural = "s" if len(selected_a3dmodel.matched_finds) > 1 else ""
+        find_nums = ",".join(str(f) for f in selected_a3dmodel.matched_finds)
+        message = (
+            f"Unmatch 3d model ({selected_a3dmodel}) from find{plural} ({find_nums})?"
+        )
+
+        self.main_view.confirm(message, self.on_unmatch_model_confirmed)
+
+    def on_unmatch_model_confirmed(self, e):
+        if not e.text() == "OK":
+            logger.debug("The user did not confirm the match: %s", e.text())
+            return
+        selected_a3dmodel = self.main_model.selected_a3dmodel
+        if not selected_a3dmodel:
+            logger.error("No 3d model selected")
+            return
+        matched_finds: List[ObjectFind] = [
+            self.main_model.finds_dict[f] for f in selected_a3dmodel.matched_finds
+        ]
+        for find in matched_finds:
+            self.main_model.clear_match_for_find(find.find_number)
+            self.main_view.set_find_color(find.find_number, "black")
+
+        # update the GUI
+        self.main_view.set_unsorted_model_color(
             selected_a3dmodel.batch_year,
             selected_a3dmodel.batch_number,
             selected_a3dmodel.batch_piece,
             "black",
         )
-        self.main_view.set_sorted_model_color(
-            str(selected_a3dmodel),
-            "black",
-        )
-        self.main_view.current_year.setText("NS")
-        self.main_view.current_batch.setText("NS")
-        self.main_view.current_piece.setText("NS")
+        self.main_view.set_sorted_model_color(str(selected_a3dmodel), "black")
+        self.main_view.update_model_match_info(selected_a3dmodel)
+        self.main_view.update_find_match_info(self.main_model.selected_find)
 
     def set_filters(self):
         selected_context = self.main_model.selected_context
@@ -547,16 +590,3 @@ class MainPresenter(
 
     def on_find_end_change(self):
         self.main_view.find_start.setMaximum(self.main_view.find_end.value())
-
-    def on_load_all_clicked(self):
-        selected_context = self.main_model.selected_context
-        if not selected_context:
-            logger.error("Tried to load finds and models without context selected")
-            return
-
-        self.main_model.load_finds(
-            color_grid=self.main_view.color_grid_select.currentText()
-        )
-        self.main_model.load_a3dmodels()
-        self.populate_finds()
-        self.populate_unsorted_models()

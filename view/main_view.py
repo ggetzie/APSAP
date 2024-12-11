@@ -175,6 +175,15 @@ class MainView(QMainWindow, OpenImageMixin):
         self.selected_find_info.setText(
             f"Find: {find.find_number}\nMaterial: {find.material}\nCategory: {find.category}"
         )
+        self.update_find_match_info(find)
+
+        self.display_find_photo("front", find.photo_path("front"))
+        self.display_find_photo("back", find.photo_path("back"))
+
+    def update_find_match_info(self, find: ObjectFind):
+        if find is None:
+            self.clear_find_info()
+            return
         if find.is_matched:
             self.find_match_info.setText(
                 f"Find {find.find_number} is matched with model {find.get_match_str()}"
@@ -189,11 +198,20 @@ class MainView(QMainWindow, OpenImageMixin):
             self.update_button.setEnabled(True)
             self.unmatch_find_button.setEnabled(False)
 
-        self.display_find_photo("front", find.photo_path("front"))
-        self.display_find_photo("back", find.photo_path("back"))
-
     def display_model_details(self, model: A3DModel):
         self.model_match_info.styleSheet = "color: black"
+        if model is None:
+            self.clear_model_info()
+            return
+        self.update_model_match_info(model)
+        model_path = model.get_file("full")
+        self.clear_ply_window()
+        self.current_pcd = o3d.io.read_point_cloud(str(model_path))
+        self.ply_window.get_render_option().point_size = 5
+        self.ply_window.add_geometry(self.current_pcd)
+        self.ply_window.update_geometry(self.current_pcd)
+
+    def update_model_match_info(self, model: A3DModel):
         if model is None:
             self.clear_model_info()
             return
@@ -212,17 +230,10 @@ class MainView(QMainWindow, OpenImageMixin):
                 "Make sure find and model are both unmatched before updating."
             )
             self.model_match_info.setText(msg)
-
         else:
             self.model_match_info.setText(f"Model {model} is NOT MATCHED")
             self.unmatch_model_button.setEnabled(False)
             self.update_button.setEnabled(True)
-        model_path = model.get_file("full")
-        self.clear_ply_window()
-        self.current_pcd = o3d.io.read_point_cloud(str(model_path))
-        self.ply_window.get_render_option().point_size = 5
-        self.ply_window.add_geometry(self.current_pcd)
-        self.ply_window.update_geometry(self.current_pcd)
 
     def clear_find_info(self):
         self.clear_find_photos()

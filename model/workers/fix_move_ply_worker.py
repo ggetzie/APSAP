@@ -64,3 +64,6 @@ class FixMovePlyWorker(QRunnable):
         self.signals.progress.emit(f"Writing fixed ply data to {self.destination}...")
         ply_data.write(self.destination)
         self.signals.finished.emit()
+
+    def fix_and_move(self, src, dest):
+        pass

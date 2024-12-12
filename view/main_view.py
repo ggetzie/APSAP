@@ -3,7 +3,7 @@ import logging
 import pathlib
 import subprocess
 import time
-from typing import List
+from typing import List, Tuple
 
 # opengl_path = r".\computation\opengl32.dll"
 # ctypes.cdll.LoadLibrary(opengl_path)
@@ -81,6 +81,7 @@ class MainView(QMainWindow, OpenImageMixin):
         self.unmatch_model_button: QPushButton = None
         self.general_status: QLabel = None
         self.task_status: QLabel = None
+        self.test_task_button: QPushButton = None
         self.task_progress: QProgressBar = None
 
         self.current_pcd = None
@@ -389,3 +390,7 @@ class MainView(QMainWindow, OpenImageMixin):
     def clear_ply_window(self):
         self.current_pcd = None
         self.ply_window.clear_geometries()
+
+    def display_progress(self, progress: Tuple[str, int]):
+        self.task_status.setText(progress[0])
+        self.task_progress.setValue(progress[1])

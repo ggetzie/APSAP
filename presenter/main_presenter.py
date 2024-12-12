@@ -1,13 +1,14 @@
 import logging
 import time
-from typing import List
+from typing import List, Tuple
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
 from model.models import A3DModel, ObjectFind
+from model.workers.test import TestWorker
 
 # from model.models import year_batch_piece_str
 from view.main_view import MainView
@@ -42,6 +43,7 @@ class MainPresenter(
 
         # Bind both the model and view into the presenter
         self.debug = debug
+        self.threadpool = QThreadPool()
         now = time.time()
         logger.info("loading main model")
         self.main_model: MainModel = MainModel()
@@ -109,6 +111,9 @@ class MainPresenter(
         main_view.sorted_model_list.selectionModel().currentChanged.connect(
             self.on_select_model
         )
+
+        # testing background tasks
+        main_view.test_task_button.clicked.connect(self.on_test_clicked)
 
     def block_signals(self, boolean):
         """This function disables or enables all the interactive elements from the
@@ -558,6 +563,13 @@ class MainPresenter(
         self.main_view.update_model_match_info(selected_a3dmodel)
         self.main_view.update_find_match_info(self.main_model.selected_find)
 
+    # testing background tasks
+    def on_test_clicked(self):
+        worker = TestWorker()
+        worker.signals.progress.connect(self.on_task_progress)
+        worker.signals.finished.connect(self.on_task_finished)
+        self.threadpool.start(worker)
+
     def set_filters(self):
         selected_context = self.main_model.selected_context
         if not selected_context:
@@ -590,3 +602,9 @@ class MainPresenter(
 
     def on_find_end_change(self):
         self.main_view.find_start.setMaximum(self.main_view.find_end.value())
+
+    def on_task_progress(self, progress: Tuple[str, int]):
+        self.main_view.display_progress(progress)
+
+    def on_task_finished(self):
+        self.main_view.display_progress(("Task finished", 0))

@@ -252,7 +252,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_a3dmodel_str = (
             list(self.a3dmodels_dict.keys())[0] if self.a3dmodels_dict else None
         )
-        logger.info("In main_model - Measuring 3d models")
+        # logger.info("In main_model - Measuring 3d models")
         for m in self.a3dmodels_list:
             m.matched_finds = m.get_matches(self.conn.cursor())
             # m.set_features(self.ply_window, self.cv2_cache)

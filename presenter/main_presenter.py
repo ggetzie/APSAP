@@ -3,7 +3,6 @@ import time
 from typing import List, Tuple
 
 from PyQt5.QtCore import Qt, QThreadPool
-from PyQt5.QtWidgets import QListWidgetItem
 from PyQt5.QtGui import QColor, QStandardItem
 
 from model.main_model import MainModel
@@ -336,7 +335,7 @@ class MainPresenter(
         self.main_model.select_a3dmodel(ply_str)
         a3dmodel = self.main_model.selected_a3dmodel
         if a3dmodel is None:
-            logger.error("The 3d model %s is not found", ply_str)
+            logger.warning("The 3d model %s is not found", ply_str)
             return
         self.main_view.display_model_details(a3dmodel)
 
@@ -356,13 +355,13 @@ class MainPresenter(
             logger.error("Tried to load finds and models without context selected")
             return
 
-        self.main_view.general_status.setText("Measuring finds in background")
-        w = self.main_model.load_finds(color_grid=self.main_view.current_color_grid())
+        # self.main_view.general_status.setText("Measuring finds in background")
+        _ = self.main_model.load_finds(color_grid=self.main_view.current_color_grid())
 
-        w.signals.progress.connect(self.on_task_progress)
-        w.signals.finished.connect(self.on_measure_finds_finished)
-        w.signals.error.connect(self.on_task_error)
-        self.threadpool.start(w)
+        # w.signals.progress.connect(self.on_task_progress)
+        # w.signals.finished.connect(self.on_measure_finds_finished)
+        # w.signals.error.connect(self.on_task_error)
+        # self.threadpool.start(w)
         self.main_model.load_a3dmodels()
         self.populate_finds()
         self.populate_unsorted_models()
@@ -443,11 +442,6 @@ class MainPresenter(
         mesh_destination = models_dir / "a_0_3_mesh.ply"
         pairs = [(orig_path, original_destination), (mesh_path, mesh_destination)]
 
-        # We copy the files to the destination
-        # logger.info("Copying file from %s to %s", orig_path, original_destination)
-        # main_model.fix_and_copy_ply(str(orig_path), str(original_destination))
-        # logger.info("Copying file from %s to %s", mesh_path, mesh_destination)
-        # main_model.fix_and_copy_ply(str(mesh_path), str(mesh_destination))
         # Copy the files in the background
         worker = FixMovePlyWorker(
             pairs, str(selected_a3dmodel), selected_find.find_number

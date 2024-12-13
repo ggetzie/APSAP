@@ -1,8 +1,9 @@
 # from glob import glob
+from model.models import ObjectFind
 
 
 class Get3dModelSortedBySimilarityMixin:
-    def get_potential_3d_models_sorted_by_similarity(self):
+    def get_potential_3d_models_sorted_by_similarity(self, selected_find: ObjectFind):
         """Given a certain path of a find, we have two images, 1.jpg and 2.jpg.
         By comparing them with the 3d model, we can have a list of 3d models sorted
         by how similar that find is with respect to the 3d models. This function
@@ -13,7 +14,6 @@ class Get3dModelSortedBySimilarityMixin:
              which uniquely define a 3d model.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
-        selected_find = main_model.selected_find
         find_path = selected_find.photos_path()
         # Getting the path to the front and back images
         path_front = find_path / "1.jpg"

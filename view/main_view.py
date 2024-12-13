@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QPushButton,
     QProgressBar,
+    QListWidgetItem,
 )
 
 from PyQt5.QtGui import QPixmap, QColor, QStandardItemModel, QWindow, QStandardItem
@@ -81,7 +82,7 @@ class MainView(QMainWindow, OpenImageMixin):
         self.unmatch_model_button: QPushButton = None
         self.general_status: QLabel = None
         self.task_status: QLabel = None
-        self.test_task_button: QPushButton = None
+        # self.test_task_button: QPushButton = None
         self.task_progress: QProgressBar = None
 
         self.current_pcd = None
@@ -343,6 +344,14 @@ class MainView(QMainWindow, OpenImageMixin):
             model.appendRow(item)
         self.sorted_model_list.setModel(model)
 
+    def list_finds(self, finds: List[ObjectFind]):
+        self.finds_list.clear()
+        for find in finds:
+            item = QListWidgetItem(str(find.find_number))
+            if find.is_matched:
+                item.setForeground(QColor("red"))
+            self.finds_list.addItem(item)
+
     def clear_finds_list(self):
         self.finds_list.clear()
 
@@ -377,12 +386,14 @@ class MainView(QMainWindow, OpenImageMixin):
         widget = self.model
 
         # 1. Setting up a window of Open3d to display the 3d model
+        logger.debug("Creating Open3D visualizer")
         self.ply_window = o3d.visualization.Visualizer()
         self.ply_window.create_window(visible=False)
         self.ply_window.get_render_option().light_on = False
         self.ply_window.get_render_option().point_size = 20
 
         # 2.Attaching the open3d window we just created to our application
+        logger.debug("Attaching Open3D visualizer to the application")
         hwnd = win32gui.FindWindowEx(0, 0, None, "Open3D")
         window = QWindow.fromWinId(hwnd)
         window_container = QWidget.createWindowContainer(window, widget)
@@ -404,3 +415,6 @@ class MainView(QMainWindow, OpenImageMixin):
     def display_progress(self, progress: Tuple[str, int]):
         self.task_status.setText(progress[0])
         self.task_progress.setValue(progress[1])
+
+    def current_color_grid(self):
+        return self.color_grid_select.currentText()

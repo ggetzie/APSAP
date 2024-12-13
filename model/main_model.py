@@ -16,6 +16,7 @@ from model.constants import BASE_DATA_DIR
 from model.models import SpatialContext, A3DModel, ObjectFind
 from model.measure.segmentation import MaskPredictor
 from model.measure.similarity import calculate_similarity
+from model.workers.measure_find_worker import MeasureFindWorker
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
     def set_context_index(self, idx):
         self.selected_context_idx = idx
 
-    def load_finds(self, color_grid: str):
+    def load_finds(self, color_grid: str) -> List[MeasureFindWorker]:
         if color_grid.lower() == "default":
             cg = self.predictors["colorgrid"]
         elif color_grid.lower() == "24colorcard":
@@ -222,10 +223,29 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         self.selected_find_number = (
             list(self.finds_dict.keys())[0] if self.finds_dict else None
         )
-        logger.info("In main_model - Measuring finds")
-        for f in self.finds_list:
-            # f.set_features(self.predictors["ceramics"], self.cv2_cache)
-            f.measure(self.predictors["ceramics"], cg, self.measure_cache)
+        worker = MeasureFindWorker(
+            self.finds_dict.values(),
+            self.predictors["ceramics"],
+            cg,
+            self.measure_cache,
+        )
+        return worker
+        # logger.info("In main_model - Measuring finds")
+        # for f in self.finds_list:
+        #     # f.set_features(self.predictors["ceramics"], self.cv2_cache)
+        #     f.measure(self.predictors["ceramics"], cg, self.measure_cache)
+
+    def list_finds(self, min_find=0, max_find=99999):
+        if not self.finds_dict:
+            return []
+        return sorted(
+            [
+                f
+                for f in self.finds_dict.values()
+                if min_find <= f.find_number <= max_find
+            ],
+            key=attrgetter("find_number"),
+        )
 
     def load_a3dmodels(self):
         self.a3dmodels_dict = {str(m): m for m in self.selected_context.list_models()}
@@ -236,7 +256,7 @@ class MainModel(InitialLoadMixin, FileIOMixin, DatabaseMixin, CopyFileMixin):
         for m in self.a3dmodels_list:
             m.matched_finds = m.get_matches(self.conn.cursor())
             # m.set_features(self.ply_window, self.cv2_cache)
-            m.measure(self.ply_window, self.measure_cache)
+            # m.measure(self.ply_window, self.measure_cache)
 
     def get_nested_a3dmodels(self):
         by_year = {}

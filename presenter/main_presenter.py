@@ -45,7 +45,7 @@ class MainPresenter(
         self.threadpool = QThreadPool()
         now = time.time()
         logger.info("loading main model")
-        self.main_model: MainModel = MainModel()
+        self.main_model: MainModel = MainModel(skip_ply=True)
         logger.info("loaded main model in %s seconds", f"{time.time() - now:0.4f}")
         now = time.time()
         logger.info("loading main view")
@@ -111,7 +111,7 @@ class MainPresenter(
         )
 
         # testing background tasks
-        main_view.test_task_button.clicked.connect(self.on_test_clicked)
+        # main_view.test_task_button.clicked.connect(self.on_test_clicked)
 
     def block_signals(self, boolean):
         """This function disables or enables all the interactive elements from the
@@ -177,25 +177,12 @@ class MainPresenter(
         self.main_view.context_cb.setEnabled(len(options) > 1)
 
     def populate_finds(self):
-        main_model, main_view = self.main_model, self.main_view
         self.clear_selected_find()
-        main_view.clear_finds_list()
-
-        self.block_signals(True)
-        min_find = int(main_view.find_start.value())
-        max_find = int(main_view.find_end.value())
-        finds_list = [
-            f
-            for f in main_model.finds_list
-            if (min_find <= f.find_number <= max_find) and f.has_photos()
-        ]
-
-        for find in finds_list:
-            item = QListWidgetItem(str(find.find_number))
-            if find.is_matched:
-                item.setForeground(QColor("red"))
-            main_view.finds_list.addItem(item)
-        self.block_signals(False)
+        self.main_view.clear_finds_list()
+        min_find = int(self.main_view.find_start.value())
+        max_find = int(self.main_view.find_end.value())
+        finds_list = self.main_model.list_finds(min_find=min_find, max_find=max_find)
+        self.main_view.list_finds(finds_list)
 
     def populate_unsorted_models(self):
         self.main_view.clear_unsorted_models()
@@ -234,20 +221,20 @@ class MainPresenter(
     def populate_sorted_models(self):
 
         selected_find = self.main_model.selected_find
-        if not selected_find.is_measured:
-            self.main_view.display_error(
-                "Couldn't measure this find. Models are not sorted by similarity"
-            )
-            models_sorted_by_similarity = self.main_model.a3dmodels_list
-        else:
-            # models_sorted_by_similarity: List[A3DModel] = (
-            #     self.main_model.list_a3dmodels_by_similarity(
-            #         self.main_model.selected_find.find_number
-            #     )
-            # )
-            models_sorted_by_similarity: List[A3DModel] = (
-                self.get_potential_3d_models_sorted_by_similarity()
-            )
+        # if not selected_find.is_measured:
+        #     self.main_view.display_error(
+        #         "Couldn't measure this find. Models are not sorted by similarity"
+        #     )
+        #     models_sorted_by_similarity = self.main_model.a3dmodels_list
+        # else:
+        #     # models_sorted_by_similarity: List[A3DModel] = (
+        #     #     self.main_model.list_a3dmodels_by_similarity(
+        #     #         self.main_model.selected_find.find_number
+        #     #     )
+        #     # )
+        models_sorted_by_similarity: List[A3DModel] = (
+            self.get_potential_3d_models_sorted_by_similarity(selected_find)
+        )
         self.main_view.clear_sorted_models()
         self.main_view.clear_ply_window()
         self.block_signals(True)
@@ -369,9 +356,13 @@ class MainPresenter(
             logger.error("Tried to load finds and models without context selected")
             return
 
-        self.main_model.load_finds(
-            color_grid=self.main_view.color_grid_select.currentText()
-        )
+        self.main_view.general_status.setText("Measuring finds in background")
+        w = self.main_model.load_finds(color_grid=self.main_view.current_color_grid())
+
+        w.signals.progress.connect(self.on_task_progress)
+        w.signals.finished.connect(self.on_measure_finds_finished)
+        w.signals.error.connect(self.on_task_error)
+        self.threadpool.start(w)
         self.main_model.load_a3dmodels()
         self.populate_finds()
         self.populate_unsorted_models()
@@ -601,6 +592,10 @@ class MainPresenter(
 
     def on_task_finished(self, message: str):
         self.main_view.display_progress((message, 0))
+
+    def on_measure_finds_finished(self, message: str):
+        self.main_view.display_progress((message, 0))
+        self.main_view.general_status.setText("")
 
     def on_task_error(self, message: str):
         self.main_view.display_progress((message, 0))

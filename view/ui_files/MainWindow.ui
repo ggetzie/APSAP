@@ -97,8 +97,19 @@
       </item>
       <item>
        <widget class="QPushButton" name="test_task_button">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Runs a test task in the background</string>
+        </property>
+        <property name="whatsThis">
+         <string/>
+        </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>Test</string>
         </property>
        </widget>
       </item>

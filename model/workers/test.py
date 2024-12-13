@@ -10,7 +10,7 @@ class TestWorkerSignals(QObject):
     """
 
     progress = pyqtSignal(tuple)  # send a tuple of (str, int) to show progress
-    finished = pyqtSignal()
+    finished = pyqtSignal(str)
     error = pyqtSignal(tuple)
     result = pyqtSignal(object)
 
@@ -27,4 +27,4 @@ class TestWorker(QRunnable):
         for i in range(1, 11):
             self.signals.progress.emit((f"Progress: {i * 10}%", i * 10))
             time.sleep(1)
-        self.signals.finished.emit()
+        self.signals.finished.emit("Finished testing worker")

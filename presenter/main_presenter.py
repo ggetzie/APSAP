@@ -9,6 +9,7 @@ from PyQt5.QtGui import QColor, QStandardItem
 from model.main_model import MainModel
 from model.models import A3DModel, ObjectFind
 from model.workers.test import TestWorker
+from model.workers.fix_move_ply_worker import FixMovePlyWorker
 
 # from model.models import year_batch_piece_str
 from view.main_view import MainView
@@ -419,26 +420,24 @@ class MainPresenter(
         Args:
             (button): The button that get clicked on.
         """
-        main_model, main_view = self.main_model, self.main_view
-
         # In case that the button clicked is "OK"(e.g. Cancel), we don't do anything
         if not e.text() == "OK":
             logger.debug("The user did not confirm the match: %s", e.text())
             return
-        selected_find = main_model.selected_find
-        selected_a3dmodel = main_model.selected_a3dmodel
+        selected_find = self.main_model.selected_find
+        selected_a3dmodel = self.main_model.selected_a3dmodel
         if selected_find is None or selected_a3dmodel is None:
             logger.error("No find or 3d model selected")
             return
         # check again that model and find are not already matched
         if selected_find.is_matched or selected_a3dmodel.is_matched:
             logger.error("Find or model already matched")
-            main_view.display_error(
+            self.main_view.display_error(
                 "Find or model already matched.\nMake sure they are unmatched before updating."
             )
             return
 
-        success = main_model.match_selected_find_with_selected_a3dmodel()
+        success = self.main_model.match_selected_find_with_selected_a3dmodel()
         if not success:
             logger.error("There was an error updating the database")
             return
@@ -451,29 +450,25 @@ class MainPresenter(
         orig_path = selected_a3dmodel.get_file("full")
         original_destination = models_dir / "a.ply"
         mesh_destination = models_dir / "a_0_3_mesh.ply"
+        pairs = [(orig_path, original_destination), (mesh_path, mesh_destination)]
 
         # We copy the files to the destination
-        logger.info("Copying file from %s to %s", orig_path, original_destination)
-        main_model.fix_and_copy_ply(str(orig_path), str(original_destination))
-        logger.info("Copying file from %s to %s", mesh_path, mesh_destination)
-        main_model.fix_and_copy_ply(str(mesh_path), str(mesh_destination))
-
-        # We update the GUI to show that the find is matched to the 3d model
-        main_view.set_find_color(selected_find.find_number, "red")
-        main_view.set_unsorted_model_color(
-            selected_a3dmodel.batch_year,
-            selected_a3dmodel.batch_number,
-            selected_a3dmodel.batch_piece,
-            "red",
+        # logger.info("Copying file from %s to %s", orig_path, original_destination)
+        # main_model.fix_and_copy_ply(str(orig_path), str(original_destination))
+        # logger.info("Copying file from %s to %s", mesh_path, mesh_destination)
+        # main_model.fix_and_copy_ply(str(mesh_path), str(mesh_destination))
+        # Copy the files in the background
+        worker = FixMovePlyWorker(
+            pairs, str(selected_a3dmodel), selected_find.find_number
         )
-
-        main_view.set_sorted_model_color(
-            str(selected_a3dmodel),
-            "red",
-        )
+        worker.signals.progress.connect(self.on_task_progress)
+        worker.signals.finished.connect(self.on_task_finished)
+        worker.signals.error.connect(self.on_task_error)
+        self.threadpool.start(worker)
 
         # Update on the GUI that the find has the new matched 3d model
-        main_view.display_find_details(selected_find)
+        self.main_view.update_find_match_info(selected_find)
+        self.main_view.update_model_match_info(selected_a3dmodel)
 
     def on_unmatch_find_clicked(self):
         """This function is called when the user clicks on the unmatch find button.
@@ -596,8 +591,16 @@ class MainPresenter(
     def on_find_end_change(self):
         self.main_view.find_start.setMaximum(self.main_view.find_end.value())
 
+    ##########################################################################
+    #  on_task: Functions called in response to the background tasks         #
+    #  These functions update the progress bar and display messages          #
+    ##########################################################################
+
     def on_task_progress(self, progress: Tuple[str, int]):
         self.main_view.display_progress(progress)
 
-    def on_task_finished(self):
-        self.main_view.display_progress(("Task finished", 0))
+    def on_task_finished(self, message: str):
+        self.main_view.display_progress((message, 0))
+
+    def on_task_error(self, message: str):
+        self.main_view.display_progress((message, 0))

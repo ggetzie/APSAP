@@ -194,10 +194,12 @@ class MainView(QMainWindow, OpenImageMixin):
                 "Make sure find and model are both unmatched before updating."
             )
             self.unmatch_find_button.setEnabled(True)
+            self.set_find_color(find.find_number, "red")
         else:
             self.find_match_info.setText(f"Find {find.find_number} is NOT MATCHED")
             self.update_button.setEnabled(True)
             self.unmatch_find_button.setEnabled(False)
+            self.set_find_color(find.find_number, "black")
 
     def display_model_details(self, model: A3DModel):
         self.model_match_info.styleSheet = "color: black"
@@ -231,10 +233,18 @@ class MainView(QMainWindow, OpenImageMixin):
                 "Make sure find and model are both unmatched before updating."
             )
             self.model_match_info.setText(msg)
+            self.set_sorted_model_color(str(model), "red")
+            self.set_unsorted_model_color(
+                model.batch_year, model.batch_number, model.batch_piece, "red"
+            )
         else:
             self.model_match_info.setText(f"Model {model} is NOT MATCHED")
             self.unmatch_model_button.setEnabled(False)
             self.update_button.setEnabled(True)
+            self.set_sorted_model_color(str(model), "black")
+            self.set_unsorted_model_color(
+                model.batch_year, model.batch_number, model.batch_piece, "black"
+            )
 
     def clear_find_info(self):
         self.clear_find_photos()

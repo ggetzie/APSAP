@@ -12,7 +12,6 @@ from model.workers.test import TestWorker
 
 # from model.models import year_batch_piece_str
 from view.main_view import MainView
-from presenter.mixins.load_data.main_load_data import LoadDataMixin
 
 from presenter.mixins.calculate_similarity.get_3d_models_sorted_by_similarity import (
     Get3dModelSortedBySimilarityMixin,
@@ -32,7 +31,6 @@ class MainPresenter(
     MeasurePixelsDataMixin,
     Get3dModelSortedBySimilarityMixin,
     CalculateIndividualSimilaritiesMixin,
-    LoadDataMixin,
 ):
     """This main_presenter inherits all the mixins' methods to handle the interactive
     behaviors of the applications, such that when you click on a button or choose an
@@ -85,7 +83,6 @@ class MainPresenter(
         main_view.zone_cb.currentIndexChanged.connect(self.on_zone_change)
         main_view.easting_cb.currentIndexChanged.connect(self.on_easting_change)
         main_view.northing_cb.currentIndexChanged.connect(self.on_northing_change)
-        # main_view.context_cb.currentIndexChanged.connect(main_presenter.set_filter)
         main_view.context_cb.currentIndexChanged.connect(self.on_context_change)
 
         # Connecting the select list of of finds with its handler
@@ -326,26 +323,21 @@ class MainPresenter(
             selected_item (QListWidgetItem): The selected item in the finds_list
         """
         # Set the currently selected item
-
-        # We test two things to see if we discard the subsequent operations of this function
-        # 1. We check of the current selected item has text
-        # 2. We check if the two supposedly existent pictures exist and are openable by the user
-        # according to her access rights.
-        main_view = self.main_view
-        main_model = self.main_model
         logger.debug("Selected item: %s type: %s", selected_item, type(selected_item))
         try:
             find_num = int(selected_item.text())
             logger.debug("Selected find: %s", find_num)
 
         except AttributeError:
-            main_view.clear_find_photos()
+            self.main_view.clear_find_photos()
+            logger.error(
+                "Could not get find number from selected item %s", selected_item
+            )
             return
 
-        main_model.select_find(find_num)
-        selected_find = main_model.selected_find
-        main_view.display_find_details(selected_find)
-        main_view.display_model_details(None)
+        self.main_model.select_find(find_num)
+        self.main_view.display_find_details(self.main_model.selected_find)
+        self.main_view.display_model_details(None)  # clear the model details
 
         # We immediately try to load all 3d models but sorted according to their
         # similarity with the current find
@@ -372,6 +364,7 @@ class MainPresenter(
     def on_load_all_clicked(self):
         selected_context = self.main_model.selected_context
         if not selected_context:
+            self.main_view.display_error("Please select a context first")
             logger.error("Tried to load finds and models without context selected")
             return
 

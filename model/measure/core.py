@@ -1,3 +1,4 @@
+from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image
@@ -31,3 +32,7 @@ def deserialize_keypoints(serialized_keypoints):
         )
         for pt in serialized_keypoints
     ]
+
+
+def open_image_for_measure(image_path: Path) -> Image.Image:
+    return Image.open(image_path).resize((450, 300), Image.LANCZOS).convert("RGB")

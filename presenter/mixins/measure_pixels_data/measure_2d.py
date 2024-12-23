@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 
+from model.measure.core import open_image_for_measure
+
 
 class Measure2DMixin:  # bridging the view(gui) and the model(data)
 
@@ -13,8 +15,8 @@ class Measure2DMixin:  # bridging the view(gui) and the model(data)
         Returns:
             tuple: All the measured values
         """
-        main_model, _, main_presenter = self.get_model_view_presenter()
-        image = main_model.open_image(path)
+        _, _, main_presenter = self.get_model_view_presenter()
+        image = open_image_for_measure(path)
 
         # The predicted pixels of the ceramic
         ceramic_mask = main_presenter.ceramic_predictor.predict(image)

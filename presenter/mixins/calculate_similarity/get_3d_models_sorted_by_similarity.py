@@ -1,17 +1,19 @@
 # from glob import glob
-from model.models import ObjectFind
+from typing import List
+from model.models import ObjectFind, A3DModel
 
 
 class Get3dModelSortedBySimilarityMixin:
-    def get_potential_3d_models_sorted_by_similarity(self, selected_find: ObjectFind):
+    def get_potential_3d_models_sorted_by_similarity(
+        self, selected_find: ObjectFind
+    ) -> List[A3DModel]:
         """Given a certain path of a find, we have two images, 1.jpg and 2.jpg.
         By comparing them with the 3d model, we can have a list of 3d models sorted
         by how similar that find is with respect to the 3d models. This function
         gets such a sorted list
 
         Returns:
-             list[batch_num, piece_num, year]: A list of batch_num piece_num, year,
-             which uniquely define a 3d model.
+             list[A3dModel]: A list of 3d model objects sorted by similarity to selected_find.
         """
         main_model, main_view, main_presenter = self.get_model_view_presenter()
         find_path = selected_find.photos_path()
@@ -30,30 +32,14 @@ class Get3dModelSortedBySimilarityMixin:
         # all 3d models we want to compare with
         similarity_scores = []
 
-        min_batch_number = int(main_view.batch_start.value())
-        max_batch_number = int(main_view.batch_end.value())
-        desired_year = int(main_view.year.value())
-
         # Iterating all 3d models
         for a3dmodel in main_model.a3dmodels_list:
-            # If the batch number is outside of the filter or the year doesn't match,
-            # we skip this 3d model!.
-            if (
-                a3dmodel.batch_number < min_batch_number
-                or a3dmodel.batch_number > max_batch_number
-                or a3dmodel.batch_year != desired_year
-            ):
-                continue
-
             # Measure all the relevant data of the 3d model
             (
                 area_3d,
                 width_3d,
                 length_3d,
                 contour_3d,
-                _,
-                _,
-                _,
             ) = main_presenter.measure_pixels_3d(a3dmodel)
 
             # We update the GUI to show which 3d model we are calculating the 3d model of

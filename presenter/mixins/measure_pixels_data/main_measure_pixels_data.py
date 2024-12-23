@@ -7,6 +7,7 @@ from presenter.mixins.measure_pixels_data.measure_2d import Measure2DMixin
 from presenter.mixins.measure_pixels_data.measure_3d import Measure3dMixin
 from computation.nn_segmentation import MaskPredictor
 from model.constants import REFERENCE_IMAGE_PATH, COMPUTATION_PATH
+from model.measure.core import open_image_for_measure
 
 
 logger = logging.getLogger(__name__)
@@ -29,11 +30,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         self.colorgrid_predictor_24color = MaskPredictor(
             str(COMPUTATION_PATH / "Different_colro_grid.pt")
         )
-        self.reference_image: Image.Image = (
-            Image.open(REFERENCE_IMAGE_PATH)
-            .resize((450, 300), Image.LANCZOS)
-            .convert("RGB")
-        )
+        self.reference_image: Image.Image = open_image_for_measure(REFERENCE_IMAGE_PATH)
 
         self.ceramic_predictor.predict(self.reference_image)
         self.colorgrid_predictor.predict(self.reference_image)
@@ -118,7 +115,7 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
         # cache_result = None
         if cache_result is not None and len(cache_result) == 7:
             # logger.info("Loading %s directly from library", a3dmodel)
-            return cache_result
+            return cache_result[:4]
 
         # In case it is not cached, we have to measure the pixels directly.
         # Get the year, batch and piece of the 3d model.
@@ -153,9 +150,6 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 width_3d,
                 length_3d,
                 contour_3d,
-                year,
-                batch,
-                piece,
             )
             # Caching the calculated values
             main_model.cache_3d.set(a3dmodel.cache_key, return_values)
@@ -178,8 +172,5 @@ class MeasurePixelsDataMixin(Measure2DMixin, Measure3dMixin):
                 width_3d,
                 length_3d,
                 contour_3d,
-                year,
-                batch,
-                piece,
             )
         return return_values

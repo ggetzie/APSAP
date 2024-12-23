@@ -184,6 +184,9 @@ class MainPresenter(
         self.main_view.list_finds(finds_list)
 
     def populate_unsorted_models(self):
+        # TODO move this to the view. Pass in a list of models and
+        # have the view sort and group them by year, batch, piece
+        # as it places them in the unsorted models widget
         self.main_view.clear_unsorted_models()
         self.block_signals(True)
         nested_a3dmodels = self.main_model.get_nested_a3dmodels()
